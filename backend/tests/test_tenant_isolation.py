@@ -58,3 +58,19 @@ class TestTenantIsolation:
 
         student_b.refresh_from_db()
         assert student_b.first_name == "Brenda"
+
+    def test_auto_generate_admission_number(self, api_client, school_a, admin_a):
+        api_client.force_authenticate(user=admin_a)
+        api_client.credentials(HTTP_X_SCHOOL_ID=str(school_a.id))
+
+        # Register student without providing admission_number
+        res = api_client.post('/api/v1/students/students/', {
+            'first_name': 'David',
+            'last_name': 'Mark',
+            'gender': 'MALE'
+        })
+        assert res.status_code == 201
+        assert 'admission_number' in res.data
+        adm_no = res.data['admission_number']
+        assert len(adm_no) > 0
+        assert '/' in adm_no

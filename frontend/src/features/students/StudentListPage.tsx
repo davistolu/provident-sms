@@ -230,9 +230,9 @@ export const StudentListPage: React.FC = () => {
           <div className="grid grid-cols-2 gap-3">
             <Input
               label="Admission Number"
-              required
-              placeholder="e.g. SMS/2024/009"
+              placeholder="Auto-generated if left blank"
               value={formData.admission_number}
+              helperText="Leave empty to auto-generate unique ID"
               onChange={(e) => setFormData({ ...formData, admission_number: e.target.value })}
             />
             <div>
