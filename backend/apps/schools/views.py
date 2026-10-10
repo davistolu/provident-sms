@@ -10,15 +10,17 @@ from apps.accounts.serializers import CreateSchoolSerializer, SchoolMembershipDe
 from apps.schools.services import SchoolProvisioningService
 
 def get_school_context(request):
+    if not request.user or not request.user.is_authenticated:
+        return None
     school = getattr(request, 'school', None)
     if not school:
         membership = resolve_membership_for_request(request)
         if membership:
             school = membership.school
-        elif request.user.is_authenticated and (request.user.is_superuser or request.user.is_staff):
+        elif request.user.is_superuser:
             school_id = request.headers.get('X-School-ID')
             if school_id:
-                school = School.objects.filter(id=school_id).first()
+                school = School.objects.filter(id=school_id, is_active=True).first()
             if not school:
                 school = School.objects.filter(is_active=True).first()
     return school

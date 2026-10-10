@@ -13,6 +13,7 @@ from apps.schools.services import SchoolProvisioningService
 
 class RegisterAndOnboardView(APIView):
     permission_classes = [permissions.AllowAny]
+    throttle_scope = 'auth'
 
     def post(self, request):
         serializer = RegisterAndOnboardSerializer(data=request.data)
@@ -72,6 +73,7 @@ class RegisterAndOnboardView(APIView):
 
 class LoginView(APIView):
     permission_classes = [permissions.AllowAny]
+    throttle_scope = 'auth'
 
     def post(self, request):
         serializer = LoginSerializer(data=request.data, context={'request': request})
@@ -119,10 +121,20 @@ class UserProfileView(APIView):
 
 class PasswordChangeView(APIView):
     permission_classes = [permissions.IsAuthenticated]
+    throttle_scope = 'auth'
 
     def post(self, request):
         serializer = PasswordChangeSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         request.user.set_password(serializer.validated_data['new_password'])
         request.user.save()
-        return Response({'status': 'success', 'message': 'Password updated successfully.'})
+
+        # Token rotation & session invalidation for defense-in-depth
+        Token.objects.filter(user=request.user).delete()
+        new_token = Token.objects.create(user=request.user)
+
+        return Response({
+            'status': 'success',
+            'message': 'Password updated successfully.',
+            'token': new_token.key
+        })

@@ -9,7 +9,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'email', 'first_name', 'last_name', 'full_name', 'phone', 'is_active', 'is_staff', 'date_joined']
-        read_only_fields = ['id', 'date_joined']
+        read_only_fields = ['id', 'email', 'is_staff', 'is_active', 'date_joined']
 
 class SchoolMembershipDetailSerializer(serializers.ModelSerializer):
     school_id = serializers.UUIDField(source='school.id', read_only=True)
@@ -39,7 +39,7 @@ class LoginSerializer(serializers.Serializer):
 
 class PasswordChangeSerializer(serializers.Serializer):
     old_password = serializers.CharField(write_only=True)
-    new_password = serializers.CharField(write_only=True, min_length=6)
+    new_password = serializers.CharField(write_only=True, min_length=8)
 
     def validate_old_password(self, value):
         user = self.context['request'].user
@@ -47,11 +47,17 @@ class PasswordChangeSerializer(serializers.Serializer):
             raise serializers.ValidationError('Current password is incorrect.')
         return value
 
+    def validate_new_password(self, value):
+        from django.contrib.auth.password_validation import validate_password
+        user = self.context['request'].user
+        validate_password(value, user=user)
+        return value
+
 class RegisterAndOnboardSerializer(serializers.Serializer):
     first_name = serializers.CharField(max_length=150)
     last_name = serializers.CharField(max_length=150)
     email = serializers.EmailField()
-    password = serializers.CharField(write_only=True, min_length=6)
+    password = serializers.CharField(write_only=True, min_length=8)
     phone = serializers.CharField(max_length=30, required=False, allow_blank=True, default='')
 
     school_name = serializers.CharField(max_length=255)
