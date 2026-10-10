@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Award, Plus, Layers, Edit3, Trash2, Sliders, CheckCircle2, Bookmark, BarChart3, Scale } from 'lucide-react';
 import { api } from '@/services/api';
+import { toast } from '@/context/ToastContext';
 import { AssessmentScheme, AssessmentComponent, GradingScale, GradeRule, PaginatedResponse } from '@/types';
 import { DataTable, Column } from '@/components/common/DataTable';
 import { Button } from '@/components/common/Button';
@@ -95,12 +96,24 @@ export const AssessmentSchemesPage: React.FC = () => {
   });
 
   // Queries
-  const { data: schemesData, isLoading: isSchemesLoading } = useQuery({
+  const {
+    data: schemesData,
+    isLoading: isSchemesLoading,
+    isError: isSchemesError,
+    error: schemesError,
+    refetch: refetchSchemes,
+  } = useQuery({
     queryKey: ['assessment-schemes'],
     queryFn: () => api.get<PaginatedResponse<AssessmentScheme>>('/assessments/schemes/'),
   });
 
-  const { data: gradingData, isLoading: isGradingLoading } = useQuery({
+  const {
+    data: gradingData,
+    isLoading: isGradingLoading,
+    isError: isGradingError,
+    error: gradingError,
+    refetch: refetchGrading,
+  } = useQuery({
     queryKey: ['grading-scales'],
     queryFn: () => api.get<PaginatedResponse<GradingScale>>('/assessments/grading-scales/'),
   });
@@ -112,6 +125,10 @@ export const AssessmentSchemesPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['assessment-schemes'] });
       setIsSchemeModalOpen(false);
       setSchemeForm({ name: '', max_total_score: 100, is_default: true });
+      toast.success('Assessment scheme created successfully');
+    },
+    onError: (err) => {
+      toast.error(err, 'Failed to create assessment scheme');
     },
   });
 
@@ -120,6 +137,10 @@ export const AssessmentSchemesPage: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['assessment-schemes'] });
       setEditSchemeTarget(null);
+      toast.success('Assessment scheme updated successfully');
+    },
+    onError: (err) => {
+      toast.error(err, 'Failed to update assessment scheme');
     },
   });
 
@@ -128,6 +149,10 @@ export const AssessmentSchemesPage: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['assessment-schemes'] });
       setDeleteSchemeTarget(null);
+      toast.success('Assessment scheme deleted successfully');
+    },
+    onError: (err) => {
+      toast.error(err, 'Failed to delete assessment scheme');
     },
   });
 
@@ -138,6 +163,10 @@ export const AssessmentSchemesPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['assessment-schemes'] });
       setIsAddComponentOpen(false);
       setComponentForm({ name: '', code: '', max_score: 20, order_index: 1 });
+      toast.success('Assessment component added successfully');
+    },
+    onError: (err) => {
+      toast.error(err, 'Failed to add component');
     },
   });
 
@@ -146,6 +175,10 @@ export const AssessmentSchemesPage: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['assessment-schemes'] });
       setEditComponentTarget(null);
+      toast.success('Assessment component updated successfully');
+    },
+    onError: (err) => {
+      toast.error(err, 'Failed to update component');
     },
   });
 
@@ -154,6 +187,10 @@ export const AssessmentSchemesPage: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['assessment-schemes'] });
       setDeleteComponentTarget(null);
+      toast.success('Assessment component deleted successfully');
+    },
+    onError: (err) => {
+      toast.error(err, 'Failed to delete component');
     },
   });
 
@@ -164,6 +201,10 @@ export const AssessmentSchemesPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['grading-scales'] });
       setIsScaleModalOpen(false);
       setScaleForm({ name: '', is_default: true });
+      toast.success('Grading scale created successfully');
+    },
+    onError: (err) => {
+      toast.error(err, 'Failed to create grading scale');
     },
   });
 
@@ -172,6 +213,10 @@ export const AssessmentSchemesPage: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['grading-scales'] });
       setEditScaleTarget(null);
+      toast.success('Grading scale updated successfully');
+    },
+    onError: (err) => {
+      toast.error(err, 'Failed to update grading scale');
     },
   });
 
@@ -180,6 +225,10 @@ export const AssessmentSchemesPage: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['grading-scales'] });
       setDeleteScaleTarget(null);
+      toast.success('Grading scale deleted successfully');
+    },
+    onError: (err) => {
+      toast.error(err, 'Failed to delete grading scale');
     },
   });
 
@@ -190,6 +239,10 @@ export const AssessmentSchemesPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['grading-scales'] });
       setIsAddRuleOpen(false);
       setRuleForm({ grade: '', min_score: 0, max_score: 100, grade_point: 0.0, remark: '', order_index: 1 });
+      toast.success('Grade rule added successfully');
+    },
+    onError: (err) => {
+      toast.error(err, 'Failed to add grade rule');
     },
   });
 
@@ -198,6 +251,10 @@ export const AssessmentSchemesPage: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['grading-scales'] });
       setEditRuleTarget(null);
+      toast.success('Grade rule updated successfully');
+    },
+    onError: (err) => {
+      toast.error(err, 'Failed to update grade rule');
     },
   });
 
@@ -206,6 +263,10 @@ export const AssessmentSchemesPage: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['grading-scales'] });
       setDeleteRuleTarget(null);
+      toast.success('Grade rule deleted successfully');
+    },
+    onError: (err) => {
+      toast.error(err, 'Failed to delete grade rule');
     },
   });
 
@@ -506,9 +567,23 @@ export const AssessmentSchemesPage: React.FC = () => {
       </div>
 
       {activeTab === 'schemes' ? (
-        <DataTable columns={schemeColumns} data={schemesData?.results || []} isLoading={isSchemesLoading} />
+        <DataTable
+          columns={schemeColumns}
+          data={schemesData?.results || []}
+          isLoading={isSchemesLoading}
+          isError={isSchemesError}
+          error={schemesError}
+          onRetry={() => refetchSchemes()}
+        />
       ) : (
-        <DataTable columns={gradingColumns} data={gradingData?.results || []} isLoading={isGradingLoading} />
+        <DataTable
+          columns={gradingColumns}
+          data={gradingData?.results || []}
+          isLoading={isGradingLoading}
+          isError={isGradingError}
+          error={gradingError}
+          onRetry={() => refetchGrading()}
+        />
       )}
 
       {/* ========================================================================= */}
@@ -559,7 +634,7 @@ export const AssessmentSchemesPage: React.FC = () => {
             <Button type="button" variant="ghost" onClick={() => setIsSchemeModalOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary" isLoading={createSchemeMutation.isPending}>
+            <Button type="submit" variant="primary" isLoading={createSchemeMutation.isPending} loadingText="Creating...">
               Create Scheme
             </Button>
           </div>
@@ -604,7 +679,7 @@ export const AssessmentSchemesPage: React.FC = () => {
             <Button type="button" variant="ghost" onClick={() => setEditSchemeTarget(null)}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary" isLoading={updateSchemeMutation.isPending}>
+            <Button type="submit" variant="primary" isLoading={updateSchemeMutation.isPending} loadingText="Saving...">
               Save Scheme Changes
             </Button>
           </div>
@@ -621,6 +696,7 @@ export const AssessmentSchemesPage: React.FC = () => {
         title="Delete Assessment Scheme"
         message={`Are you sure you want to delete scheme "${deleteSchemeTarget?.name}"? All associated components will also be deleted.`}
         isLoading={deleteSchemeMutation.isPending}
+        loadingText="Deleting..."
       />
 
       {/* Manage Components Modal */}
@@ -696,7 +772,7 @@ export const AssessmentSchemesPage: React.FC = () => {
                 <Button type="button" variant="ghost" size="sm" onClick={() => setIsAddComponentOpen(false)}>
                   Cancel
                 </Button>
-                <Button type="submit" variant="primary" size="sm" isLoading={createComponentMutation.isPending}>
+                <Button type="submit" variant="primary" size="sm" isLoading={createComponentMutation.isPending} loadingText="Saving...">
                   Save Component
                 </Button>
               </div>
@@ -740,7 +816,7 @@ export const AssessmentSchemesPage: React.FC = () => {
                 <Button type="button" variant="ghost" size="sm" onClick={() => setEditComponentTarget(null)}>
                   Cancel
                 </Button>
-                <Button type="submit" variant="primary" size="sm" isLoading={updateComponentMutation.isPending}>
+                <Button type="submit" variant="primary" size="sm" isLoading={updateComponentMutation.isPending} loadingText="Updating...">
                   Update Component
                 </Button>
               </div>
@@ -817,6 +893,7 @@ export const AssessmentSchemesPage: React.FC = () => {
         title="Delete Component"
         message={`Are you sure you want to delete component "${deleteComponentTarget?.name}" (${deleteComponentTarget?.code})?`}
         isLoading={deleteComponentMutation.isPending}
+        loadingText="Deleting..."
       />
 
       {/* ========================================================================= */}
@@ -860,7 +937,7 @@ export const AssessmentSchemesPage: React.FC = () => {
             <Button type="button" variant="ghost" onClick={() => setIsScaleModalOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary" isLoading={createScaleMutation.isPending}>
+            <Button type="submit" variant="primary" isLoading={createScaleMutation.isPending} loadingText="Creating...">
               Create Grading Scale
             </Button>
           </div>
@@ -897,7 +974,7 @@ export const AssessmentSchemesPage: React.FC = () => {
             <Button type="button" variant="ghost" onClick={() => setEditScaleTarget(null)}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary" isLoading={updateScaleMutation.isPending}>
+            <Button type="submit" variant="primary" isLoading={updateScaleMutation.isPending} loadingText="Saving...">
               Save Changes
             </Button>
           </div>
@@ -914,6 +991,7 @@ export const AssessmentSchemesPage: React.FC = () => {
         title="Delete Grading Scale"
         message={`Are you sure you want to delete grading scale "${deleteScaleTarget?.name}"? All associated grade rules will also be deleted.`}
         isLoading={deleteScaleMutation.isPending}
+        loadingText="Deleting..."
       />
 
       {/* Manage Grade Rules Modal */}
@@ -999,7 +1077,7 @@ export const AssessmentSchemesPage: React.FC = () => {
                 <Button type="button" variant="ghost" size="sm" onClick={() => setIsAddRuleOpen(false)}>
                   Cancel
                 </Button>
-                <Button type="submit" variant="primary" size="sm" isLoading={createRuleMutation.isPending}>
+                <Button type="submit" variant="primary" size="sm" isLoading={createRuleMutation.isPending} loadingText="Saving...">
                   Save Rule
                 </Button>
               </div>
@@ -1051,7 +1129,7 @@ export const AssessmentSchemesPage: React.FC = () => {
                 <Button type="button" variant="ghost" size="sm" onClick={() => setEditRuleTarget(null)}>
                   Cancel
                 </Button>
-                <Button type="submit" variant="primary" size="sm" isLoading={updateRuleMutation.isPending}>
+                <Button type="submit" variant="primary" size="sm" isLoading={updateRuleMutation.isPending} loadingText="Updating...">
                   Update Rule
                 </Button>
               </div>
@@ -1130,6 +1208,7 @@ export const AssessmentSchemesPage: React.FC = () => {
         title="Delete Grade Rule"
         message={`Are you sure you want to delete grade rule "${deleteRuleTarget?.grade}" (${deleteRuleTarget?.min_score}-${deleteRuleTarget?.max_score}%)?`}
         isLoading={deleteRuleMutation.isPending}
+        loadingText="Deleting..."
       />
     </div>
   );

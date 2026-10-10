@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, CreditCard, Trash2, Edit3, Banknote, Sparkles, Layers } from 'lucide-react';
 import { api } from '@/services/api';
+import { toast } from '@/context/ToastContext';
 import { FeeStructure, FeeCategory, ClassLevel, AcademicSession, AcademicTerm, PaginatedResponse } from '@/types';
 import { DataTable, Column } from '@/components/common/DataTable';
 import { Button } from '@/components/common/Button';
@@ -32,7 +33,13 @@ export const FeeStructuresPage: React.FC = () => {
     amount: '',
   });
 
-  const { data: structuresData, isLoading } = useQuery({
+  const {
+    data: structuresData,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ['fee-structures'],
     queryFn: () => api.get<PaginatedResponse<FeeStructure>>('/finance/fee-structures/'),
   });
@@ -58,6 +65,10 @@ export const FeeStructuresPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['fee-structures'] });
       setIsModalOpen(false);
       setFeeForm({ fee_category: '', academic_session: '', academic_term: '', class_level: '', amount: '' });
+      toast.success('Fee structure created successfully');
+    },
+    onError: (err) => {
+      toast.error(err, 'Failed to create fee structure');
     },
   });
 
@@ -66,6 +77,10 @@ export const FeeStructuresPage: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['fee-structures'] });
       setEditTarget(null);
+      toast.success('Fee structure updated successfully');
+    },
+    onError: (err) => {
+      toast.error(err, 'Failed to update fee structure');
     },
   });
 
@@ -74,6 +89,10 @@ export const FeeStructuresPage: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['fee-structures'] });
       setDeleteTarget(null);
+      toast.success('Fee structure deleted successfully');
+    },
+    onError: (err) => {
+      toast.error(err, 'Failed to delete fee structure');
     },
   });
 
@@ -190,6 +209,9 @@ export const FeeStructuresPage: React.FC = () => {
         columns={columns}
         data={structuresData?.results || []}
         isLoading={isLoading}
+        isError={isError}
+        error={error}
+        onRetry={() => refetch()}
       />
 
       {/* Add Modal */}
@@ -291,7 +313,7 @@ export const FeeStructuresPage: React.FC = () => {
             <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary" isLoading={createFeeMutation.isPending}>
+            <Button type="submit" variant="primary" isLoading={createFeeMutation.isPending} loadingText="Saving...">
               Save Fee Tariff
             </Button>
           </div>
@@ -387,7 +409,7 @@ export const FeeStructuresPage: React.FC = () => {
             <Button type="button" variant="ghost" onClick={() => setEditTarget(null)}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary" isLoading={updateFeeMutation.isPending}>
+            <Button type="submit" variant="primary" isLoading={updateFeeMutation.isPending} loadingText="Saving...">
               Save Tariff Changes
             </Button>
           </div>
@@ -403,6 +425,7 @@ export const FeeStructuresPage: React.FC = () => {
         title="Delete Fee Structure"
         message={`Are you sure you want to delete the fee structure "${deleteTarget?.fee_category_name}" for ₦${deleteTarget?.amount}?`}
         isLoading={deleteFeeMutation.isPending}
+        loadingText="Deleting..."
       />
     </div>
   );

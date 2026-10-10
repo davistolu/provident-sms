@@ -6,6 +6,7 @@ import {
   Trash2, Edit, AlertCircle, Users, GraduationCap
 } from 'lucide-react';
 import { api } from '@/services/api';
+import { toast } from '@/context/ToastContext';
 import { useAuth } from '@/context/AuthContext';
 import { Student, ClassArm, AcademicSession, PaginatedResponse } from '@/types';
 import { DataTable, Column } from '@/components/common/DataTable';
@@ -25,6 +26,7 @@ export const StudentListPage: React.FC = () => {
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Student | null>(null);
   const [editTarget, setEditTarget] = useState<Student | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
   const [editForm, setEditForm] = useState({
     first_name: '',
     middle_name: '',
@@ -67,7 +69,13 @@ export const StudentListPage: React.FC = () => {
   });
 
   // Fetch students
-  const { data: studentsData, isLoading } = useQuery({
+  const {
+    data: studentsData,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ['students', page, search, selectedClass],
     queryFn: () =>
       api.get<PaginatedResponse<Student>>('/students/students/', {
@@ -93,9 +101,12 @@ export const StudentListPage: React.FC = () => {
         class_arm_id: '',
         academic_session_id: '',
       });
+      toast.success('Student enrolled successfully');
     },
     onError: (err: any) => {
-      setFormError(err.message || 'Failed to create student.');
+      const msg = err.message || 'Failed to create student.';
+      setFormError(msg);
+      toast.error(err, 'Failed to create student');
     },
   });
 
@@ -106,9 +117,12 @@ export const StudentListPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['students'] });
       setEditTarget(null);
       setEditError(null);
+      toast.success('Student details updated successfully');
     },
     onError: (err: any) => {
-      setEditError(err.message || 'Failed to update student.');
+      const msg = err.message || 'Failed to update student.';
+      setEditError(msg);
+      toast.error(err, 'Failed to update student');
     },
   });
 
@@ -118,6 +132,10 @@ export const StudentListPage: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['students'] });
       setDeleteTarget(null);
+      toast.success('Student record deleted successfully');
+    },
+    onError: (err) => {
+      toast.error(err, 'Failed to delete student');
     },
   });
 
@@ -127,11 +145,26 @@ export const StudentListPage: React.FC = () => {
     onSuccess: (res: any) => {
       queryClient.invalidateQueries({ queryKey: ['students'] });
       setImportResult(res);
+      toast.success(`Successfully imported ${res.imported_count || 'all'} students`);
     },
     onError: (err: any) => {
-      setImportResult({ error: err.message });
+      const msg = err.message || 'Failed to import CSV file.';
+      setImportResult({ error: msg });
+      toast.error(err, 'Failed to import students');
     },
   });
+
+  const handleExportCsv = async () => {
+    try {
+      setIsExporting(true);
+      await api.downloadFile('/students/students/export_csv/', 'Student_Registry.csv');
+      toast.success('Student registry downloaded');
+    } catch (err) {
+      toast.error(err, 'Failed to export CSV');
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const handleRegisterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -265,7 +298,9 @@ export const StudentListPage: React.FC = () => {
               variant="outline"
               size="sm"
               icon={Download}
-              onClick={() => api.downloadFile('/students/students/export_csv/', 'Student_Registry.csv')}
+              onClick={handleExportCsv}
+              isLoading={isExporting}
+              loadingText="Exporting..."
             >
               Export CSV
             </Button>
@@ -284,6 +319,9 @@ export const StudentListPage: React.FC = () => {
         columns={columns}
         data={studentsData?.results || []}
         isLoading={isLoading}
+        isError={isError}
+        error={error}
+        onRetry={() => refetch()}
         searchPlaceholder="Filter student by name or admission number..."
         searchValue={search}
         onSearchChange={(val) => {
@@ -421,7 +459,7 @@ export const StudentListPage: React.FC = () => {
             <Button type="button" variant="ghost" onClick={() => setIsRegisterOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary" isLoading={createStudentMutation.isPending}>
+            <Button type="submit" variant="primary" isLoading={createStudentMutation.isPending} loadingText="Saving...">
               Save Student Record
             </Button>
           </div>
@@ -516,7 +554,7 @@ export const StudentListPage: React.FC = () => {
             >
               Close
             </Button>
-            <Button type="submit" variant="primary" isLoading={importMutation.isPending}>
+            <Button type="submit" variant="primary" isLoading={importMutation.isPending} loadingText="Importing...">
               Upload & Process
             </Button>
           </div>
@@ -617,7 +655,7 @@ export const StudentListPage: React.FC = () => {
             <Button type="button" variant="ghost" onClick={() => setEditTarget(null)}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary" isLoading={updateStudentMutation.isPending}>
+            <Button type="submit" variant="primary" isLoading={updateStudentMutation.isPending} loadingText="Saving...">
               Save Changes
             </Button>
           </div>
@@ -634,6 +672,7 @@ export const StudentListPage: React.FC = () => {
         title="Delete Student Record"
         message={`Are you sure you want to delete ${deleteTarget?.full_name} (${deleteTarget?.admission_number})? This action will remove their active enrollment.`}
         isLoading={deleteStudentMutation.isPending}
+        loadingText="Deleting..."
       />
     </div>
   );

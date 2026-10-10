@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { AppLayout } from '@/components/common/AppLayout';
 import { LoginPage } from '@/features/auth/LoginPage';
+import { RegisterOnboardingPage } from '@/features/auth/RegisterOnboardingPage';
 import { AdminDashboardPage } from '@/features/dashboard/AdminDashboardPage';
 import { TeacherDashboardPage } from '@/features/dashboard/TeacherDashboardPage';
 import { StudentListPage } from '@/features/students/StudentListPage';
@@ -71,6 +72,8 @@ export const AppRoutes: React.FC = () => {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterOnboardingPage />} />
+      <Route path="/onboarding" element={<RegisterOnboardingPage />} />
 
       <Route
         path="/"

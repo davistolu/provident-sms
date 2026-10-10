@@ -1,6 +1,7 @@
 import React from 'react';
-import { ChevronLeft, ChevronRight, Inbox, Search } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Inbox, Search, AlertCircle, RefreshCw } from 'lucide-react';
 import { Button } from './Button';
+import { normalizeApiError } from '@/services/errorService';
 
 export interface Column<T> {
   header: string;
@@ -13,6 +14,9 @@ export interface DataTableProps<T> {
   columns: Column<T>[];
   data: T[];
   isLoading?: boolean;
+  isError?: boolean;
+  error?: any;
+  onRetry?: () => void;
   totalCount?: number;
   currentPage?: number;
   totalPages?: number;
@@ -28,6 +32,9 @@ export function DataTable<T extends { id?: string | number }>({
   columns,
   data,
   isLoading = false,
+  isError = false,
+  error = null,
+  onRetry,
   totalCount,
   currentPage = 1,
   totalPages = 1,
@@ -38,6 +45,8 @@ export function DataTable<T extends { id?: string | number }>({
   searchValue,
   emptyMessage = 'No records found matching your selection.',
 }: DataTableProps<T>) {
+  const normalizedErr = isError && error ? normalizeApiError(error) : null;
+
   return (
     <div className="bg-white rounded-xl border border-[#e6e4dc] shadow-2xs overflow-hidden">
       {/* Header Toolbar */}
@@ -85,6 +94,35 @@ export function DataTable<T extends { id?: string | number }>({
                   ))}
                 </tr>
               ))
+            ) : isError ? (
+              <tr>
+                <td colSpan={columns.length} className="py-12 px-4 text-center">
+                  <div className="flex flex-col items-center justify-center space-y-3 max-w-md mx-auto">
+                    <div className="w-10 h-10 rounded-full bg-[#fff1f2] border border-[#fecdd3] flex items-center justify-center text-[#e11d48]">
+                      <AlertCircle className="w-5 h-5" />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-xs font-bold text-[#141d24]">
+                        {normalizedErr?.title || 'Unable to Load Records'}
+                      </p>
+                      <p className="text-xs text-[#52606d]">
+                        {normalizedErr?.message || 'A network or server error occurred while retrieving data.'}
+                      </p>
+                    </div>
+                    {onRetry && (
+                      <Button
+                        variant="outline"
+                        size="xs"
+                        icon={RefreshCw}
+                        onClick={onRetry}
+                        className="mt-1"
+                      >
+                        Retry Query
+                      </Button>
+                    )}
+                  </div>
+                </td>
+              </tr>
             ) : data.length > 0 ? (
               data.map((row, rIdx) => (
                 <tr

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { DollarSign, Plus, Trash2, Edit3, Receipt, Sparkles } from 'lucide-react';
 import { api } from '@/services/api';
+import { toast } from '@/context/ToastContext';
 import { Expense, PaginatedResponse } from '@/types';
 import { DataTable, Column } from '@/components/common/DataTable';
 import { Button } from '@/components/common/Button';
@@ -34,7 +35,13 @@ export const ExpensesPage: React.FC = () => {
     notes: '',
   });
 
-  const { data: expensesData, isLoading } = useQuery({
+  const {
+    data: expensesData,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ['expenses'],
     queryFn: () => api.get<PaginatedResponse<Expense>>('/finance/expenses/'),
   });
@@ -52,6 +59,10 @@ export const ExpensesPage: React.FC = () => {
         receipt_voucher_no: '',
         notes: '',
       });
+      toast.success('Expense recorded successfully');
+    },
+    onError: (err) => {
+      toast.error(err, 'Failed to record expense');
     },
   });
 
@@ -60,6 +71,10 @@ export const ExpensesPage: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['expenses'] });
       setEditTarget(null);
+      toast.success('Expense updated successfully');
+    },
+    onError: (err) => {
+      toast.error(err, 'Failed to update expense');
     },
   });
 
@@ -68,6 +83,10 @@ export const ExpensesPage: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['expenses'] });
       setDeleteTarget(null);
+      toast.success('Expense record deleted successfully');
+    },
+    onError: (err) => {
+      toast.error(err, 'Failed to delete expense');
     },
   });
 
@@ -186,6 +205,9 @@ export const ExpensesPage: React.FC = () => {
         columns={columns}
         data={expensesData?.results || []}
         isLoading={isLoading}
+        isError={isError}
+        error={error}
+        onRetry={() => refetch()}
       />
 
       <Modal
@@ -257,7 +279,7 @@ export const ExpensesPage: React.FC = () => {
             <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary" isLoading={createExpenseMutation.isPending}>
+            <Button type="submit" variant="primary" isLoading={createExpenseMutation.isPending} loadingText="Saving...">
               Save Expense Record
             </Button>
           </div>
@@ -323,7 +345,7 @@ export const ExpensesPage: React.FC = () => {
             <Button type="button" variant="ghost" onClick={() => setEditTarget(null)}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary" isLoading={updateExpenseMutation.isPending}>
+            <Button type="submit" variant="primary" isLoading={updateExpenseMutation.isPending} loadingText="Saving...">
               Save Expense Changes
             </Button>
           </div>
@@ -339,6 +361,7 @@ export const ExpensesPage: React.FC = () => {
         title="Delete Expense Record"
         message={`Are you sure you want to delete the expense "${deleteTarget?.title}" for ₦${deleteTarget?.amount}?`}
         isLoading={deleteExpenseMutation.isPending}
+        loadingText="Deleting..."
       />
     </div>
   );

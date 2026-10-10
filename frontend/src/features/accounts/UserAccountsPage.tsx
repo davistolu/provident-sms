@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { UserPlus, Users, Trash2, Shield, Mail, CheckCircle2, Edit, ShieldCheck } from 'lucide-react';
 import { api } from '@/services/api';
+import { toast } from '@/context/ToastContext';
 import { SchoolMembership, PaginatedResponse, Role } from '@/types';
 import { DataTable, Column } from '@/components/common/DataTable';
 import { Button } from '@/components/common/Button';
@@ -36,7 +37,13 @@ export const UserAccountsPage: React.FC = () => {
   const [formError, setFormError] = useState<string | null>(null);
   const [editError, setEditError] = useState<string | null>(null);
 
-  const { data: usersData, isLoading } = useQuery({
+  const {
+    data: usersData,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ['school-memberships', search, roleFilter],
     queryFn: () =>
       api.get<PaginatedResponse<SchoolMembership>>('/memberships/', {
@@ -51,9 +58,12 @@ export const UserAccountsPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['school-memberships'] });
       setIsModalOpen(false);
       setUserForm({ email: '', first_name: '', last_name: '', password: '', role: 'TEACHER' });
+      toast.success('User account created successfully');
     },
     onError: (err: any) => {
-      setFormError(err.message || 'Failed to create user account.');
+      const msg = err.message || 'Failed to create user account.';
+      setFormError(msg);
+      toast.error(err, 'Failed to create user account');
     },
   });
 
@@ -63,9 +73,12 @@ export const UserAccountsPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['school-memberships'] });
       setEditTarget(null);
       setEditError(null);
+      toast.success('User account updated successfully');
     },
     onError: (err: any) => {
-      setEditError(err.message || 'Failed to update user account.');
+      const msg = err.message || 'Failed to update user account.';
+      setEditError(msg);
+      toast.error(err, 'Failed to update user account');
     },
   });
 
@@ -74,6 +87,10 @@ export const UserAccountsPage: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['school-memberships'] });
       setDeleteTarget(null);
+      toast.success('User membership removed successfully');
+    },
+    onError: (err) => {
+      toast.error(err, 'Failed to remove user membership');
     },
   });
 
@@ -183,6 +200,9 @@ export const UserAccountsPage: React.FC = () => {
         columns={columns}
         data={usersData?.results || []}
         isLoading={isLoading}
+        isError={isError}
+        error={error}
+        onRetry={() => refetch()}
         searchPlaceholder="Search staff by name or email..."
         searchValue={search}
         onSearchChange={setSearch}
@@ -277,7 +297,7 @@ export const UserAccountsPage: React.FC = () => {
             <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary" isLoading={createMembershipMutation.isPending}>
+            <Button type="submit" variant="primary" isLoading={createMembershipMutation.isPending} loadingText="Creating...">
               Create User Account
             </Button>
           </div>
@@ -348,7 +368,7 @@ export const UserAccountsPage: React.FC = () => {
             <Button type="button" variant="ghost" onClick={() => setEditTarget(null)}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary" isLoading={updateMembershipMutation.isPending}>
+            <Button type="submit" variant="primary" isLoading={updateMembershipMutation.isPending} loadingText="Saving...">
               Save User Changes
             </Button>
           </div>
@@ -365,6 +385,7 @@ export const UserAccountsPage: React.FC = () => {
         title="Remove User Membership"
         message={`Are you sure you want to remove ${deleteTarget?.user?.full_name} (${deleteTarget?.user?.email}) from this school? They will lose access to school operations.`}
         isLoading={deleteMembershipMutation.isPending}
+        loadingText="Removing..."
       />
     </div>
   );

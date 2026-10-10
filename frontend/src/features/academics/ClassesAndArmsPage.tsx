@@ -9,6 +9,7 @@ import { Badge } from '@/components/common/Badge';
 import { Modal } from '@/components/common/Modal';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { Input } from '@/components/common/Input';
+import { toast } from '@/context/ToastContext';
 
 export const ClassesAndArmsPage: React.FC = () => {
   const queryClient = useQueryClient();
@@ -50,12 +51,24 @@ export const ClassesAndArmsPage: React.FC = () => {
     order_index: 1,
   });
 
-  const { data: armsData, isLoading: isArmsLoading } = useQuery({
+  const {
+    data: armsData,
+    isLoading: isArmsLoading,
+    isError: isArmsError,
+    error: armsError,
+    refetch: refetchArms,
+  } = useQuery({
     queryKey: ['class-arms'],
     queryFn: () => api.get<PaginatedResponse<ClassArm>>('/academics/class-arms/'),
   });
 
-  const { data: levelsData, isLoading: isLevelsLoading } = useQuery({
+  const {
+    data: levelsData,
+    isLoading: isLevelsLoading,
+    isError: isLevelsError,
+    error: levelsError,
+    refetch: refetchLevels,
+  } = useQuery({
     queryKey: ['class-levels'],
     queryFn: () => api.get<PaginatedResponse<ClassLevel>>('/academics/class-levels/'),
   });
@@ -73,6 +86,10 @@ export const ClassesAndArmsPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['class-levels'] });
       setIsArmModalOpen(false);
       setArmForm({ class_level: '', name: '', class_teacher: '' });
+      toast.success('Class stream created successfully.');
+    },
+    onError: (err) => {
+      toast.error(err);
     },
   });
 
@@ -82,6 +99,10 @@ export const ClassesAndArmsPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['class-arms'] });
       queryClient.invalidateQueries({ queryKey: ['class-levels'] });
       setEditArmTarget(null);
+      toast.success('Class stream updated successfully.');
+    },
+    onError: (err) => {
+      toast.error(err);
     },
   });
 
@@ -91,6 +112,10 @@ export const ClassesAndArmsPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['class-arms'] });
       queryClient.invalidateQueries({ queryKey: ['class-levels'] });
       setDeleteArmTarget(null);
+      toast.success('Class stream removed successfully.');
+    },
+    onError: (err) => {
+      toast.error(err);
     },
   });
 
@@ -101,6 +126,10 @@ export const ClassesAndArmsPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['class-levels'] });
       setIsLevelModalOpen(false);
       setLevelForm({ name: '', code: '', category: 'PRIMARY', order_index: (levelsData?.results?.length || 0) + 1 });
+      toast.success('Class level created successfully.');
+    },
+    onError: (err) => {
+      toast.error(err);
     },
   });
 
@@ -110,6 +139,10 @@ export const ClassesAndArmsPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['class-levels'] });
       queryClient.invalidateQueries({ queryKey: ['class-arms'] });
       setEditLevelTarget(null);
+      toast.success('Class level updated successfully.');
+    },
+    onError: (err) => {
+      toast.error(err);
     },
   });
 
@@ -119,6 +152,10 @@ export const ClassesAndArmsPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['class-levels'] });
       queryClient.invalidateQueries({ queryKey: ['class-arms'] });
       setDeleteLevelTarget(null);
+      toast.success('Class level removed successfully.');
+    },
+    onError: (err) => {
+      toast.error(err);
     },
   });
 
@@ -321,9 +358,23 @@ export const ClassesAndArmsPage: React.FC = () => {
       </div>
 
       {activeTab === 'arms' ? (
-        <DataTable columns={armColumns} data={armsData?.results || []} isLoading={isArmsLoading} />
+        <DataTable
+          columns={armColumns}
+          data={armsData?.results || []}
+          isLoading={isArmsLoading}
+          isError={isArmsError}
+          error={armsError}
+          onRetry={() => refetchArms()}
+        />
       ) : (
-        <DataTable columns={levelColumns} data={levelsData?.results || []} isLoading={isLevelsLoading} />
+        <DataTable
+          columns={levelColumns}
+          data={levelsData?.results || []}
+          isLoading={isLevelsLoading}
+          isError={isLevelsError}
+          error={levelsError}
+          onRetry={() => refetchLevels()}
+        />
       )}
 
       {/* Create Class Arm Modal */}
@@ -388,7 +439,12 @@ export const ClassesAndArmsPage: React.FC = () => {
             <Button type="button" variant="ghost" onClick={() => setIsArmModalOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary" isLoading={createArmMutation.isPending}>
+            <Button
+              type="submit"
+              variant="primary"
+              isLoading={createArmMutation.isPending}
+              loadingText="Creating Stream..."
+            >
               Create Stream
             </Button>
           </div>
@@ -451,7 +507,12 @@ export const ClassesAndArmsPage: React.FC = () => {
             <Button type="button" variant="ghost" onClick={() => setEditArmTarget(null)}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary" isLoading={updateArmMutation.isPending}>
+            <Button
+              type="submit"
+              variant="primary"
+              isLoading={updateArmMutation.isPending}
+              loadingText="Saving Changes..."
+            >
               Save Changes
             </Button>
           </div>
@@ -515,7 +576,12 @@ export const ClassesAndArmsPage: React.FC = () => {
             <Button type="button" variant="ghost" onClick={() => setIsLevelModalOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary" isLoading={createLevelMutation.isPending}>
+            <Button
+              type="submit"
+              variant="primary"
+              isLoading={createLevelMutation.isPending}
+              loadingText="Creating Level..."
+            >
               Create Grade Level
             </Button>
           </div>
@@ -578,7 +644,12 @@ export const ClassesAndArmsPage: React.FC = () => {
             <Button type="button" variant="ghost" onClick={() => setEditLevelTarget(null)}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary" isLoading={updateLevelMutation.isPending}>
+            <Button
+              type="submit"
+              variant="primary"
+              isLoading={updateLevelMutation.isPending}
+              loadingText="Saving Changes..."
+            >
               Save Changes
             </Button>
           </div>
@@ -595,6 +666,7 @@ export const ClassesAndArmsPage: React.FC = () => {
         title="Delete Class Stream"
         message={`Are you sure you want to delete the stream "${deleteArmTarget?.display_name}"?`}
         isLoading={deleteArmMutation.isPending}
+        loadingText="Deleting Stream..."
       />
 
       {/* Delete Level Confirmation */}
@@ -607,6 +679,7 @@ export const ClassesAndArmsPage: React.FC = () => {
         title="Delete Grade Level"
         message={`Are you sure you want to delete grade level "${deleteLevelTarget?.name}"? All associated streams should be removed first.`}
         isLoading={deleteLevelMutation.isPending}
+        loadingText="Deleting Grade Level..."
       />
     </div>
   );

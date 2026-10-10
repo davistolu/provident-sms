@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { GraduationCap, UserPlus, Mail, Phone, Edit, Trash2, ShieldCheck, Award } from 'lucide-react';
 import { api } from '@/services/api';
+import { toast } from '@/context/ToastContext';
 import { TeacherProfile, PaginatedResponse } from '@/types';
 import { DataTable, Column } from '@/components/common/DataTable';
 import { Button } from '@/components/common/Button';
@@ -42,7 +43,13 @@ export const TeachersPage: React.FC = () => {
   const [formError, setFormError] = useState<string | null>(null);
   const [editError, setEditError] = useState<string | null>(null);
 
-  const { data: teachersData, isLoading } = useQuery({
+  const {
+    data: teachersData,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ['teachers'],
     queryFn: () => api.get<PaginatedResponse<TeacherProfile>>('/academics/teachers/'),
   });
@@ -63,9 +70,12 @@ export const TeachersPage: React.FC = () => {
         phone: '',
         gender: 'MALE',
       });
+      toast.success('Faculty member registered successfully');
     },
     onError: (err: any) => {
-      setFormError(err.message || 'Failed to create teacher.');
+      const msg = err.message || 'Failed to create teacher profile.';
+      setFormError(msg);
+      toast.error(err, 'Failed to create teacher profile');
     },
   });
 
@@ -75,9 +85,12 @@ export const TeachersPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['teachers'] });
       setEditTarget(null);
       setEditError(null);
+      toast.success('Teacher profile updated successfully');
     },
     onError: (err: any) => {
-      setEditError(err.message || 'Failed to update teacher.');
+      const msg = err.message || 'Failed to update teacher profile.';
+      setEditError(msg);
+      toast.error(err, 'Failed to update teacher profile');
     },
   });
 
@@ -86,6 +99,10 @@ export const TeachersPage: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['teachers'] });
       setDeleteTarget(null);
+      toast.success('Teacher profile deleted successfully');
+    },
+    onError: (err: any) => {
+      toast.error(err, 'Failed to delete teacher');
     },
   });
 
@@ -199,6 +216,9 @@ export const TeachersPage: React.FC = () => {
         columns={columns}
         data={teachersData?.results || []}
         isLoading={isLoading}
+        isError={isError}
+        error={error}
+        onRetry={() => refetch()}
       />
 
       {/* Create Teacher Modal */}
@@ -300,7 +320,7 @@ export const TeachersPage: React.FC = () => {
             <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary" isLoading={createTeacherMutation.isPending}>
+            <Button type="submit" variant="primary" isLoading={createTeacherMutation.isPending} loadingText="Creating...">
               Create Faculty Account
             </Button>
           </div>
@@ -397,7 +417,7 @@ export const TeachersPage: React.FC = () => {
             <Button type="button" variant="ghost" onClick={() => setEditTarget(null)}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary" isLoading={updateTeacherMutation.isPending}>
+            <Button type="submit" variant="primary" isLoading={updateTeacherMutation.isPending} loadingText="Saving...">
               Save Changes
             </Button>
           </div>
@@ -414,6 +434,7 @@ export const TeachersPage: React.FC = () => {
         title="Delete Teacher Profile"
         message={`Are you sure you want to delete ${deleteTarget?.user.full_name} (${deleteTarget?.staff_id})?`}
         isLoading={deleteTeacherMutation.isPending}
+        loadingText="Deleting..."
       />
     </div>
   );

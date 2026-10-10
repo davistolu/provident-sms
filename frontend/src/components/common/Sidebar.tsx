@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, Users, GraduationCap, School,
   BookOpen, Calendar, CheckSquare, Award, FileText,
   CreditCard, DollarSign, ShieldAlert, BookMarked,
-  Layers, CheckCheck, UserCheck, Settings, LogOut
+  Layers, CheckCheck, UserCheck, Settings, LogOut, Plus
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { CreateSchoolModal } from '@/components/common/CreateSchoolModal';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -23,7 +24,8 @@ interface NavSection {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
-  const { user, activeMembership, isAdmin, isTeacher, logout } = useAuth();
+  const { user, activeMembership, memberships, isAdmin, isTeacher, logout } = useAuth();
+  const [isCreateSchoolOpen, setIsCreateSchoolOpen] = useState(false);
 
   const adminSections: NavSection[] = [
     {
@@ -101,18 +103,36 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         }`}
       >
         {/* Brand Header */}
-        <div className="h-16 flex items-center gap-3 px-5 border-b border-[#e8e6df]">
-          <div className="w-8 h-8 rounded-lg bg-[#064e3b] text-white flex items-center justify-center font-bold text-sm shadow-xs font-display">
-            P
+        <div className="h-16 flex items-center justify-between px-4 border-b border-[#e8e6df]">
+          <div className="flex items-center gap-2.5 overflow-hidden">
+            {activeMembership?.school_logo ? (
+              <img
+                src={activeMembership.school_logo}
+                alt={activeMembership?.school_name || 'School Crest'}
+                className="w-8 h-8 rounded-lg object-contain bg-white border border-[#e8e6df] p-0.5 shadow-xs shrink-0"
+              />
+            ) : (
+              <div className="w-8 h-8 rounded-lg bg-[#064e3b] text-white flex items-center justify-center font-bold text-sm shadow-xs font-serif shrink-0">
+                {activeMembership?.school_name?.[0] || 'P'}
+              </div>
+            )}
+            <div className="overflow-hidden">
+              <h2 className="text-xs font-bold text-[#141d24] tracking-wide truncate uppercase font-serif">
+                {activeMembership?.school_name || 'Providence SMS'}
+              </h2>
+              <p className="text-[10px] text-[#064e3b] font-semibold">
+                {memberships.length > 1 ? `${memberships.length} Schools Active` : 'School Management'}
+              </p>
+            </div>
           </div>
-          <div className="overflow-hidden">
-            <h2 className="text-xs font-bold text-[#141d24] tracking-wide truncate uppercase font-display">
-              {activeMembership?.school_name || 'Providence SMS'}
-            </h2>
-            <p className="text-[10px] text-[#064e3b] font-semibold">
-              School Management
-            </p>
-          </div>
+
+          <button
+            onClick={() => setIsCreateSchoolOpen(true)}
+            title="Add Another School"
+            className="p-1 rounded-md hover:bg-[#ecfdf5] text-[#064e3b] transition-colors shrink-0 cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+          </button>
         </div>
 
         {/* Navigation Sections */}
@@ -173,6 +193,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           </div>
         </div>
       </aside>
+
+      {/* In-app School Creation Modal */}
+      <CreateSchoolModal
+        isOpen={isCreateSchoolOpen}
+        onClose={() => setIsCreateSchoolOpen(false)}
+      />
     </>
   );
 };

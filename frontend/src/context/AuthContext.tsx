@@ -13,6 +13,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   switchSchool: (schoolId: string) => void;
+  setAuthData: (token: string, user: User, memberships: SchoolMembership[], activeMembership: SchoolMembership) => void;
   refreshProfile: () => Promise<void>;
 }
 
@@ -62,6 +63,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     fetchProfile();
   }, []);
+
+  const setAuthData = (
+    authToken: string,
+    authUser: User,
+    authMemberships: SchoolMembership[],
+    activeMem: SchoolMembership
+  ) => {
+    localStorage.setItem('auth_token', authToken);
+    if (activeMem?.school_id) {
+      localStorage.setItem('active_school_id', activeMem.school_id);
+    }
+    setToken(authToken);
+    setUser(authUser);
+    setMemberships(authMemberships);
+    setActiveMembership(activeMem);
+  };
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
@@ -131,6 +148,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         login,
         logout,
         switchSchool,
+        setAuthData,
         refreshProfile: fetchProfile,
       }}
     >

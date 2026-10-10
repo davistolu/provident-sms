@@ -7,6 +7,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   icon?: LucideIcon;
   iconPosition?: 'left' | 'right';
   isLoading?: boolean;
+  loadingText?: string;
 }
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -18,6 +19,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       icon: Icon,
       iconPosition = 'left',
       isLoading = false,
+      loadingText,
       disabled,
       className = '',
       ...props
@@ -49,15 +51,18 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         'bg-[#d97706] text-white hover:bg-[#b45309] border border-[#92400e] shadow-xs',
     };
 
+    const isActionDisabled = disabled || isLoading;
+
     return (
       <button
         ref={ref}
-        disabled={disabled || isLoading}
+        disabled={isActionDisabled}
+        aria-busy={isLoading}
         className={`${baseStyles} ${sizeStyles[size]} ${variantStyles[variant]} ${className}`}
         {...props}
       >
         {isLoading && (
-          <svg className="animate-spin -ml-0.5 h-3.5 w-3.5 text-current" fill="none" viewBox="0 0 24 24">
+          <svg className="animate-spin -ml-0.5 h-3.5 w-3.5 text-current shrink-0" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path
               className="opacity-75"
@@ -67,7 +72,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           </svg>
         )}
         {!isLoading && Icon && iconPosition === 'left' && <Icon className="w-3.5 h-3.5 shrink-0" />}
-        <span>{children}</span>
+        <span className="truncate">{isLoading && loadingText ? loadingText : children}</span>
         {!isLoading && Icon && iconPosition === 'right' && <Icon className="w-3.5 h-3.5 shrink-0" />}
       </button>
     );

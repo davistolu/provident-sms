@@ -22,6 +22,7 @@ class AssessmentSubmissionSerializer(serializers.ModelSerializer):
     session_name = serializers.CharField(source='academic_session.name', read_only=True)
     term_name = serializers.CharField(source='academic_term.name', read_only=True)
     submitted_by_name = serializers.CharField(source='submitted_by.full_name', read_only=True)
+    reviewed_by_name = serializers.CharField(source='reviewed_by.full_name', read_only=True)
     status_display = serializers.CharField(source='get_status_display', read_only=True)
     scores = StudentScoreSerializer(many=True, read_only=True)
     scores_count = serializers.IntegerField(source='scores.count', read_only=True)
@@ -32,7 +33,7 @@ class AssessmentSubmissionSerializer(serializers.ModelSerializer):
             'id', 'class_arm', 'class_arm_name', 'subject', 'subject_name', 'subject_code',
             'academic_session', 'session_name', 'academic_term', 'term_name',
             'assessment_scheme', 'grading_scale', 'submitted_by', 'submitted_by_name',
-            'status', 'status_display', 'feedback_notes', 'reviewed_by', 'reviewed_at',
+            'status', 'status_display', 'feedback_notes', 'reviewed_by', 'reviewed_by_name', 'reviewed_at',
             'published_at', 'scores', 'scores_count', 'updated_at'
         ]
         read_only_fields = ['id', 'status_display', 'updated_at']

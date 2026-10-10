@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Calendar, Plus, CheckCircle2, Edit3, Trash2, Clock, Sparkles } from 'lucide-react';
 import { api } from '@/services/api';
+import { toast } from '@/context/ToastContext';
 import { AcademicSession, AcademicTerm, PaginatedResponse } from '@/types';
 import { DataTable, Column } from '@/components/common/DataTable';
 import { Button } from '@/components/common/Button';
@@ -30,7 +31,13 @@ export const AcademicSessionsPage: React.FC = () => {
     is_current: false,
   });
 
-  const { data: sessionsData, isLoading } = useQuery({
+  const {
+    data: sessionsData,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ['academic-sessions'],
     queryFn: () => api.get<PaginatedResponse<AcademicSession>>('/academics/sessions/'),
   });
@@ -41,6 +48,10 @@ export const AcademicSessionsPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['academic-sessions'] });
       setIsModalOpen(false);
       setSessionForm({ name: '', start_date: '', end_date: '', is_current: false });
+      toast.success('Academic session created successfully');
+    },
+    onError: (err) => {
+      toast.error(err, 'Failed to create academic session');
     },
   });
 
@@ -49,6 +60,10 @@ export const AcademicSessionsPage: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['academic-sessions'] });
       setEditTarget(null);
+      toast.success('Academic session updated successfully');
+    },
+    onError: (err) => {
+      toast.error(err, 'Failed to update academic session');
     },
   });
 
@@ -57,6 +72,10 @@ export const AcademicSessionsPage: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['academic-sessions'] });
       setDeleteTarget(null);
+      toast.success('Academic session deleted successfully');
+    },
+    onError: (err) => {
+      toast.error(err, 'Failed to delete academic session');
     },
   });
 
@@ -179,6 +198,9 @@ export const AcademicSessionsPage: React.FC = () => {
         columns={columns}
         data={sessionsData?.results || []}
         isLoading={isLoading}
+        isError={isError}
+        error={error}
+        onRetry={() => refetch()}
       />
 
       {/* Create Modal */}
@@ -234,7 +256,7 @@ export const AcademicSessionsPage: React.FC = () => {
             <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary" isLoading={createSessionMutation.isPending}>
+            <Button type="submit" variant="primary" isLoading={createSessionMutation.isPending} loadingText="Creating...">
               Create Session
             </Button>
           </div>
@@ -288,7 +310,7 @@ export const AcademicSessionsPage: React.FC = () => {
             <Button type="button" variant="ghost" onClick={() => setEditTarget(null)}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary" isLoading={updateSessionMutation.isPending}>
+            <Button type="submit" variant="primary" isLoading={updateSessionMutation.isPending} loadingText="Saving...">
               Save Session Changes
             </Button>
           </div>
@@ -305,6 +327,7 @@ export const AcademicSessionsPage: React.FC = () => {
         title="Delete Academic Session"
         message={`Are you sure you want to delete session "${deleteTarget?.name}"? Any attached records will need to be re-assigned.`}
         isLoading={deleteSessionMutation.isPending}
+        loadingText="Deleting..."
       />
     </div>
   );

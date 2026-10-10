@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { CreditCard, DollarSign, Download, Plus, CheckCircle2, FileText, Printer, User, Wallet, Sparkles } from 'lucide-react';
 import { api } from '@/services/api';
+import { toast } from '@/context/ToastContext';
 import { StudentInvoice, ClassArm, Student, PaginatedResponse } from '@/types';
 import { DataTable, Column } from '@/components/common/DataTable';
 import { Button } from '@/components/common/Button';
@@ -32,7 +33,13 @@ export const InvoicesListPage: React.FC = () => {
     notes: '',
   });
 
-  const { data: invoicesData, isLoading } = useQuery({
+  const {
+    data: invoicesData,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ['invoices', page, statusFilter],
     queryFn: () =>
       api.get<PaginatedResponse<StudentInvoice>>('/finance/invoices/', {
@@ -58,12 +65,16 @@ export const InvoicesListPage: React.FC = () => {
     onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
       setIsGenerateModalOpen(false);
-      setGenMessage(res.message || 'Invoices generated successfully!');
+      const msg = res.message || 'Invoices generated successfully!';
+      setGenMessage(msg);
+      toast.success(msg);
       setGenError(null);
       setTimeout(() => setGenMessage(null), 4000);
     },
     onError: (err: any) => {
-      setGenError(err.message || 'Failed to generate class invoices.');
+      const msg = err.message || 'Failed to generate class invoices.';
+      setGenError(msg);
+      toast.error(err, 'Failed to generate class invoices');
     },
   });
 
@@ -74,12 +85,16 @@ export const InvoicesListPage: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
       setIsStudentInvoiceModalOpen(false);
-      setGenMessage('Student invoice generated successfully!');
+      const msg = 'Student invoice generated successfully!';
+      setGenMessage(msg);
+      toast.success(msg);
       setGenError(null);
       setTimeout(() => setGenMessage(null), 4000);
     },
     onError: (err: any) => {
-      setGenError(err.message || 'Failed to generate student invoice.');
+      const msg = err.message || 'Failed to generate student invoice.';
+      setGenError(msg);
+      toast.error(err, 'Failed to generate student invoice');
     },
   });
 
@@ -92,8 +107,13 @@ export const InvoicesListPage: React.FC = () => {
       setIsPaymentModalOpen(false);
       setPaymentForm({ amount: '', payment_method: 'BANK_TRANSFER', notes: '' });
       setSelectedInvoice(null);
-      setGenMessage('Payment recorded successfully!');
+      const msg = 'Payment recorded successfully!';
+      setGenMessage(msg);
+      toast.success(msg);
       setTimeout(() => setGenMessage(null), 4000);
+    },
+    onError: (err) => {
+      toast.error(err, 'Failed to record payment');
     },
   });
 
@@ -102,8 +122,9 @@ export const InvoicesListPage: React.FC = () => {
     try {
       setDownloadingId(`inv-${inv.id}`);
       await api.downloadFile(`/finance/invoices/${inv.id}/invoice-pdf/`, `Invoice_${inv.invoice_number}.pdf`);
+      toast.success(`Invoice ${inv.invoice_number} downloaded`);
     } catch (err: any) {
-      alert(err.message || 'Failed to download invoice PDF.');
+      toast.error(err, 'Failed to download invoice PDF');
     } finally {
       setDownloadingId(null);
     }
@@ -113,8 +134,9 @@ export const InvoicesListPage: React.FC = () => {
     try {
       setDownloadingId(`rec-${paymentId}`);
       await api.downloadFile(`/finance/payments/${paymentId}/receipt-pdf/`, `Receipt_${refNo}.pdf`);
+      toast.success(`Receipt ${refNo} downloaded`);
     } catch (err: any) {
-      alert(err.message || 'Failed to download receipt PDF.');
+      toast.error(err, 'Failed to download receipt PDF');
     } finally {
       setDownloadingId(null);
     }
@@ -261,6 +283,9 @@ export const InvoicesListPage: React.FC = () => {
         columns={columns}
         data={invoicesData?.results || []}
         isLoading={isLoading}
+        isError={isError}
+        error={error}
+        onRetry={() => refetch()}
         filterComponent={
           <select
             value={statusFilter}
@@ -324,7 +349,7 @@ export const InvoicesListPage: React.FC = () => {
             <Button type="button" variant="ghost" onClick={() => setIsGenerateModalOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary" isLoading={generateMutation.isPending}>
+            <Button type="submit" variant="primary" isLoading={generateMutation.isPending} loadingText="Generating...">
               Issue Invoices
             </Button>
           </div>
@@ -366,7 +391,7 @@ export const InvoicesListPage: React.FC = () => {
             <Button type="button" variant="ghost" onClick={() => setIsStudentInvoiceModalOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary" isLoading={generateStudentInvoiceMutation.isPending}>
+            <Button type="submit" variant="primary" isLoading={generateStudentInvoiceMutation.isPending} loadingText="Generating...">
               Generate Invoice
             </Button>
           </div>
@@ -428,7 +453,7 @@ export const InvoicesListPage: React.FC = () => {
             <Button type="button" variant="ghost" onClick={() => setIsPaymentModalOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary" isLoading={recordPaymentMutation.isPending}>
+            <Button type="submit" variant="primary" isLoading={recordPaymentMutation.isPending} loadingText="Recording...">
               Confirm Payment
             </Button>
           </div>
