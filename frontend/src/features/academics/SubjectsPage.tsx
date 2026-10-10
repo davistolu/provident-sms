@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { BookOpen, Plus, UserCheck, Trash2, Edit } from 'lucide-react';
 import { api } from '@/services/api';
+import { toast } from '@/context/ToastContext';
 import { Subject, TeacherSubjectAssignment, ClassArm, TeacherProfile, AcademicSession, PaginatedResponse } from '@/types';
 import { DataTable, Column } from '@/components/common/DataTable';
 import { Button } from '@/components/common/Button';
@@ -42,12 +43,24 @@ export const SubjectsPage: React.FC = () => {
   });
 
   // Queries
-  const { data: subjectsData, isLoading: isSubjectsLoading } = useQuery({
+  const {
+    data: subjectsData,
+    isLoading: isSubjectsLoading,
+    isError: isSubjectsError,
+    error: subjectsError,
+    refetch: refetchSubjects,
+  } = useQuery({
     queryKey: ['subjects'],
     queryFn: () => api.get<PaginatedResponse<Subject>>('/academics/subjects/'),
   });
 
-  const { data: assignmentsData, isLoading: isAssignmentsLoading } = useQuery({
+  const {
+    data: assignmentsData,
+    isLoading: isAssignmentsLoading,
+    isError: isAssignmentsError,
+    error: assignmentsError,
+    refetch: refetchAssignments,
+  } = useQuery({
     queryKey: ['teacher-assignments'],
     queryFn: () => api.get<PaginatedResponse<TeacherSubjectAssignment>>('/academics/assignments/'),
   });
@@ -74,6 +87,10 @@ export const SubjectsPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['subjects'] });
       setIsSubjectModalOpen(false);
       setSubjectForm({ name: '', code: '', category: 'GENERAL' });
+      toast.success('Subject created successfully');
+    },
+    onError: (err) => {
+      toast.error(err, 'Failed to create subject');
     },
   });
 
@@ -82,6 +99,10 @@ export const SubjectsPage: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['subjects'] });
       setEditSubjectTarget(null);
+      toast.success('Subject updated successfully');
+    },
+    onError: (err) => {
+      toast.error(err, 'Failed to update subject');
     },
   });
 
@@ -90,6 +111,10 @@ export const SubjectsPage: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['subjects'] });
       setDeleteSubjectTarget(null);
+      toast.success('Subject deleted successfully');
+    },
+    onError: (err) => {
+      toast.error(err, 'Failed to delete subject');
     },
   });
 
@@ -99,6 +124,10 @@ export const SubjectsPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['teacher-assignments'] });
       setIsAssignModalOpen(false);
       setAssignForm({ teacher: '', subject: '', class_arm: '', academic_session: '' });
+      toast.success('Teacher assigned successfully');
+    },
+    onError: (err) => {
+      toast.error(err, 'Failed to assign teacher');
     },
   });
 
@@ -107,6 +136,10 @@ export const SubjectsPage: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['teacher-assignments'] });
       setDeleteAssignTarget(null);
+      toast.success('Teacher assignment removed');
+    },
+    onError: (err) => {
+      toast.error(err, 'Failed to remove assignment');
     },
   });
 
@@ -270,12 +303,18 @@ export const SubjectsPage: React.FC = () => {
           columns={subjectColumns}
           data={subjectsData?.results || []}
           isLoading={isSubjectsLoading}
+          isError={isSubjectsError}
+          error={subjectsError}
+          onRetry={() => refetchSubjects()}
         />
       ) : (
         <DataTable
           columns={assignmentColumns}
           data={assignmentsData?.results || []}
           isLoading={isAssignmentsLoading}
+          isError={isAssignmentsError}
+          error={assignmentsError}
+          onRetry={() => refetchAssignments()}
         />
       )}
 
@@ -325,7 +364,7 @@ export const SubjectsPage: React.FC = () => {
             <Button type="button" variant="ghost" onClick={() => setIsSubjectModalOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary" isLoading={createSubjectMutation.isPending}>
+            <Button type="submit" variant="primary" isLoading={createSubjectMutation.isPending} loadingText="Creating...">
               Save Subject
             </Button>
           </div>
@@ -419,7 +458,7 @@ export const SubjectsPage: React.FC = () => {
             <Button type="button" variant="ghost" onClick={() => setIsAssignModalOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary" isLoading={createAssignMutation.isPending}>
+            <Button type="submit" variant="primary" isLoading={createAssignMutation.isPending} loadingText="Assigning...">
               Assign Responsibility
             </Button>
           </div>
@@ -481,7 +520,7 @@ export const SubjectsPage: React.FC = () => {
             <Button type="button" variant="ghost" onClick={() => setEditSubjectTarget(null)}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary" isLoading={updateSubjectMutation.isPending}>
+            <Button type="submit" variant="primary" isLoading={updateSubjectMutation.isPending} loadingText="Saving...">
               Save Subject Changes
             </Button>
           </div>
@@ -498,6 +537,7 @@ export const SubjectsPage: React.FC = () => {
         title="Delete Subject"
         message={`Are you sure you want to delete the subject "${deleteSubjectTarget?.name}"?`}
         isLoading={deleteSubjectMutation.isPending}
+        loadingText="Deleting..."
       />
 
       {/* Delete Assignment Confirm */}
@@ -510,6 +550,7 @@ export const SubjectsPage: React.FC = () => {
         title="Remove Teacher Assignment"
         message={`Are you sure you want to unassign ${deleteAssignTarget?.teacher_name} from ${deleteAssignTarget?.subject_name} (${deleteAssignTarget?.class_arm_name})?`}
         isLoading={deleteAssignMutation.isPending}
+        loadingText="Removing..."
       />
     </div>
   );

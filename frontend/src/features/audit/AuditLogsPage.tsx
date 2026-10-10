@@ -14,7 +14,7 @@ export const AuditLogsPage: React.FC = () => {
   const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
   const [copied, setCopied] = useState(false);
 
-  const { data: logsData, isLoading } = useQuery({
+  const { data: logsData, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['audit-logs', actionFilter],
     queryFn: () =>
       api.get<PaginatedResponse<AuditLog>>('/audit/logs/', {
@@ -146,6 +146,9 @@ export const AuditLogsPage: React.FC = () => {
         columns={columns}
         data={filteredLogs}
         isLoading={isLoading}
+        isError={isError}
+        error={error}
+        onRetry={() => refetch()}
         searchPlaceholder="Filter events by entity, actor, or details..."
         searchValue={search}
         onSearchChange={setSearch}

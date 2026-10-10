@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { CheckSquare, Save, Send, Users, Calendar, CheckCheck, Clock, XCircle, AlertCircle, Sparkles } from 'lucide-react';
 import { api } from '@/services/api';
+import { toast } from '@/context/ToastContext';
 import { ClassArm, AttendanceSession, AttendanceRecord, PaginatedResponse } from '@/types';
 import { Button } from '@/components/common/Button';
 import { Badge } from '@/components/common/Badge';
@@ -35,6 +36,9 @@ export const AttendanceRegisterPage: React.FC = () => {
       setRecords(data.records || []);
       setSavedSuccess(null);
     },
+    onError: (err) => {
+      toast.error(err, 'Failed to load attendance roster');
+    },
   });
 
   useEffect(() => {
@@ -47,10 +51,17 @@ export const AttendanceRegisterPage: React.FC = () => {
   const saveRegisterMutation = useMutation({
     mutationFn: (payload: { session_id: string; records: any[]; status: string }) =>
       api.post<any>('/attendance/sessions/save-register/', payload),
-    onSuccess: (res) => {
+    onSuccess: (res, variables) => {
       setSessionData(res.session);
-      setSavedSuccess('Attendance register saved successfully!');
+      const msg = variables.status === 'SUBMITTED'
+        ? 'Attendance register submitted successfully!'
+        : 'Attendance register draft saved!';
+      setSavedSuccess(msg);
+      toast.success(msg);
       setTimeout(() => setSavedSuccess(null), 3500);
+    },
+    onError: (err) => {
+      toast.error(err, 'Failed to save attendance register');
     },
   });
 
@@ -107,6 +118,7 @@ export const AttendanceRegisterPage: React.FC = () => {
               size="sm"
               icon={Save}
               isLoading={saveRegisterMutation.isPending}
+              loadingText="Saving..."
               onClick={() => handleSave('DRAFT')}
             >
               Save Draft
@@ -116,6 +128,7 @@ export const AttendanceRegisterPage: React.FC = () => {
               size="sm"
               icon={Send}
               isLoading={saveRegisterMutation.isPending}
+              loadingText="Submitting..."
               onClick={() => handleSave('SUBMITTED')}
             >
               Submit Register

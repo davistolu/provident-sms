@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { School, Save, CheckCircle2, ShieldCheck, Sliders, Globe, Building2, Hash, Sparkles } from 'lucide-react';
+import { School, Save, CheckCircle2, ShieldCheck, Sliders, Globe, Building2, Hash, Sparkles, Upload, Image as ImageIcon, Trash2 } from 'lucide-react';
 import { api } from '@/services/api';
+import { toast } from '@/context/ToastContext';
 import { School as SchoolType, SchoolSettings } from '@/types';
 import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
@@ -9,6 +10,7 @@ import { Badge } from '@/components/common/Badge';
 
 export const SchoolSettingsPage: React.FC = () => {
   const queryClient = useQueryClient();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: schoolData, isLoading: isSchoolLoading } = useQuery({
     queryKey: ['current-school'],
@@ -40,6 +42,9 @@ export const SchoolSettingsPage: React.FC = () => {
     enable_positions: true,
   });
 
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
 
   useEffect(() => {
@@ -56,6 +61,9 @@ export const SchoolSettingsPage: React.FC = () => {
         currency_symbol: schoolData.currency_symbol || '₦',
         timezone: schoolData.timezone || 'Africa/Lagos',
       });
+      if (schoolData.logo) {
+        setLogoPreview(schoolData.logo);
+      }
     }
     if (settingsData) {
       setSettingsForm({
@@ -75,19 +83,43 @@ export const SchoolSettingsPage: React.FC = () => {
     mutationFn: (data: any) => api.patch('/settings/current/', data),
   });
 
-  const handleSaveAll = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await Promise.all([
-      updateSchoolMutation.mutateAsync(schoolForm),
-      updateSettingsMutation.mutateAsync(settingsForm),
-    ]);
-    queryClient.invalidateQueries({ queryKey: ['current-school'] });
-    queryClient.invalidateQueries({ queryKey: ['current-settings'] });
-    setSaveSuccess('Institutional configuration and numbering sequences updated successfully!');
-    setTimeout(() => setSaveSuccess(null), 4000);
+  const handleLogoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setLogoFile(file);
+      setLogoPreview(URL.createObjectURL(file));
+    }
   };
 
-  const isSaving = updateSchoolMutation.isPending || updateSettingsMutation.isPending;
+  const handleSaveAll = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setIsUploadingLogo(true);
+      if (logoFile) {
+        const formData = new FormData();
+        formData.append('logo', logoFile);
+        await api.uploadPatch('/schools/current/', formData);
+      }
+      await Promise.all([
+        updateSchoolMutation.mutateAsync(schoolForm),
+        updateSettingsMutation.mutateAsync(settingsForm),
+      ]);
+      queryClient.invalidateQueries({ queryKey: ['current-school'] });
+      queryClient.invalidateQueries({ queryKey: ['current-settings'] });
+      queryClient.invalidateQueries({ queryKey: ['school-memberships'] });
+      setLogoFile(null);
+      const msg = 'Institutional profile, crest logo, and configuration updated successfully!';
+      setSaveSuccess(msg);
+      toast.success(msg);
+      setTimeout(() => setSaveSuccess(null), 4000);
+    } catch (err) {
+      toast.error(err, 'Failed to update school settings');
+    } finally {
+      setIsUploadingLogo(false);
+    }
+  };
+
+  const isSaving = updateSchoolMutation.isPending || updateSettingsMutation.isPending || isUploadingLogo;
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
@@ -97,7 +129,7 @@ export const SchoolSettingsPage: React.FC = () => {
             Institutional & School Governance
           </h1>
           <p className="text-xs sm:text-sm text-[#52606d] mt-1 font-sans">
-            Configure school identity, crest branding, automated numbering sequences, and grading protocols
+            Configure school identity, official crest logo, automated numbering sequences, and grading protocols
           </p>
         </div>
       </div>
@@ -110,6 +142,82 @@ export const SchoolSettingsPage: React.FC = () => {
       )}
 
       <form onSubmit={handleSaveAll} className="space-y-6">
+        {/* School Branding Crest & Logo */}
+        <div className="bg-[#ffffff] p-6 rounded-lg border border-[#e5e3dc] shadow-[0_1px_3px_rgba(0,0,0,0.03)] space-y-5">
+          <div className="flex items-center gap-3 border-b border-[#e5e3dc] pb-4">
+            <div className="w-9 h-9 rounded-md bg-[#f4f3ef] border border-[#e5e3dc] flex items-center justify-center text-[#064e3b]">
+              <ImageIcon className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="font-serif text-base font-bold text-[#141d24]">School Logo & Official Crest</h3>
+              <p className="text-xs text-[#52606d]">
+                Appears on all official PDF report cards, fee invoices, receipts, and system navigation
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center gap-6 p-4 bg-[#fbfbfa] border border-[#e5e3dc] rounded-xl">
+            <div className="w-24 h-24 rounded-xl border border-[#d8d5cb] bg-white flex items-center justify-center overflow-hidden shadow-xs shrink-0">
+              {logoPreview ? (
+                <img
+                  src={logoPreview}
+                  alt="School Logo"
+                  className="w-full h-full object-contain p-1"
+                />
+              ) : (
+                <div className="w-full h-full bg-[#064e3b] text-white flex items-center justify-center font-bold text-2xl font-display">
+                  {schoolForm.name?.[0] || 'S'}
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2 text-center sm:text-left flex-1">
+              <p className="text-xs font-bold text-[#141d24]">Official School Emblem / Crest</p>
+              <p className="text-[11px] text-[#52606d]">
+                Supported formats: PNG, JPG, WEBP. Maximum file size: 5MB. Clear transparent background recommended.
+              </p>
+              <div className="flex flex-wrap items-center gap-2 pt-1 justify-center sm:justify-start">
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleLogoSelect}
+                  accept="image/png,image/jpeg,image/webp"
+                  className="hidden"
+                />
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="xs"
+                  icon={Upload}
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  Choose Logo Image
+                </Button>
+                {logoPreview && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="xs"
+                    className="text-[#991b1b] hover:bg-[#fef2f2]"
+                    icon={Trash2}
+                    onClick={() => {
+                      setLogoFile(null);
+                      setLogoPreview(null);
+                    }}
+                  >
+                    Clear Preview
+                  </Button>
+                )}
+                {logoFile && (
+                  <Badge variant="evergreen" size="sm">
+                    New logo selected: {logoFile.name}
+                  </Badge>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* School Branding & Profile */}
         <div className="bg-[#ffffff] p-6 rounded-lg border border-[#e5e3dc] shadow-[0_1px_3px_rgba(0,0,0,0.03)] space-y-5">
           <div className="flex items-center gap-3 border-b border-[#e5e3dc] pb-4">
@@ -241,7 +349,7 @@ export const SchoolSettingsPage: React.FC = () => {
         </div>
 
         <div className="flex justify-end gap-3 pt-2">
-          <Button type="submit" variant="primary" size="md" icon={Save} isLoading={isSaving}>
+          <Button type="submit" variant="primary" size="md" icon={Save} isLoading={isSaving} loadingText="Saving Settings...">
             Save All Settings
           </Button>
         </div>

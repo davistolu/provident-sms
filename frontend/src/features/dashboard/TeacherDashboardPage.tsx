@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import {
   Users, CheckSquare, Award, BookOpen, Clock,
-  ArrowRight, CheckCircle2, AlertCircle, FileSpreadsheet
+  ArrowRight, CheckCircle2, AlertCircle, FileSpreadsheet, RefreshCw
 } from 'lucide-react';
 import { api } from '@/services/api';
 import { StatCard } from '@/components/common/StatCard';
@@ -11,7 +11,7 @@ import { Button } from '@/components/common/Button';
 import { Badge } from '@/components/common/Badge';
 
 export const TeacherDashboardPage: React.FC = () => {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['teacher-dashboard-stats'],
     queryFn: () => api.get<any>('/dashboard/teacher/'),
   });
@@ -24,6 +24,17 @@ export const TeacherDashboardPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {isError && (
+        <div className="p-4 bg-[#fff1f2] border border-[#fecdd3] rounded-xl flex items-center justify-between text-xs text-[#be123c]">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-[#e11d48] shrink-0" />
+            <span>Failed to load educator dashboard metrics: {(error as any)?.message || 'Server error'}</span>
+          </div>
+          <Button variant="secondary" size="xs" icon={RefreshCw} onClick={() => refetch()}>
+            Retry Query
+          </Button>
+        </div>
+      )}
       {/* Teacher Welcome Header */}
       <div className="bg-[#064e3b] text-white p-6 sm:p-8 rounded-2xl shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 border border-[#043326]">
         <div>

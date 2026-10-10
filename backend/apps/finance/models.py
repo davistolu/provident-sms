@@ -54,16 +54,17 @@ class StudentInvoice(TenantModel):
         return f"{self.invoice_number} - {self.student.full_name} ({self.status})"
 
     def recalculate_totals(self):
-        """Authoritative backend balance recalculation."""
+        """Authoritative backend balance recalculation with Decimal precision."""
         from django.db.models import Sum
-        items_total = self.items.aggregate(total=Sum('amount'))['total'] or 0.00
-        paid_total = self.payments.aggregate(total=Sum('amount'))['total'] or 0.00
-        self.total_amount = items_total
-        self.amount_paid = paid_total
-        self.balance = max(0.00, float(items_total) - float(paid_total))
-        if self.balance == 0 and self.total_amount > 0:
+        from decimal import Decimal
+        items_total = self.items.aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+        paid_total = self.payments.aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+        self.total_amount = Decimal(str(items_total))
+        self.amount_paid = Decimal(str(paid_total))
+        self.balance = max(Decimal('0.00'), self.total_amount - self.amount_paid)
+        if self.balance == Decimal('0.00') and self.total_amount > Decimal('0.00'):
             self.status = self.StatusChoices.PAID
-        elif self.amount_paid > 0:
+        elif self.amount_paid > Decimal('0.00'):
             self.status = self.StatusChoices.PARTIALLY_PAID
         else:
             self.status = self.StatusChoices.UNPAID

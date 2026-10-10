@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { FileText, Download, Award, Search, Filter, RefreshCw, CheckCircle2, AlertCircle, Sparkles, BookOpen } from 'lucide-react';
 import { api } from '@/services/api';
+import { toast } from '@/context/ToastContext';
 import { StudentTermResult, ClassArm, AcademicSession, AcademicTerm, PaginatedResponse } from '@/types';
 import { DataTable, Column } from '@/components/common/DataTable';
 import { Button } from '@/components/common/Button';
@@ -27,7 +28,13 @@ export const ReportCardsPage: React.FC = () => {
     queryFn: () => api.get<PaginatedResponse<AcademicSession>>('/academics/sessions/'),
   });
 
-  const { data: resultsData, isLoading } = useQuery({
+  const {
+    data: resultsData,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ['term-results', selectedClass],
     queryFn: () =>
       api.get<PaginatedResponse<StudentTermResult>>('/results/term-results/', {
@@ -42,12 +49,16 @@ export const ReportCardsPage: React.FC = () => {
     onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: ['term-results'] });
       setIsPublishModalOpen(false);
-      setStatusMessage(res.message || 'Results computed and published successfully!');
+      const msg = res.message || 'Results computed and published successfully!';
+      setStatusMessage(msg);
+      toast.success(msg);
       setErrorMessage(null);
       setTimeout(() => setStatusMessage(null), 5000);
     },
     onError: (err: any) => {
-      setErrorMessage(err.message || 'Failed to compute class results. Ensure subject scores are approved.');
+      const msg = err.message || 'Failed to compute class results. Ensure subject scores are approved.';
+      setErrorMessage(msg);
+      toast.error(err, 'Failed to compute class results');
       setTimeout(() => setErrorMessage(null), 6000);
     },
   });
@@ -60,8 +71,9 @@ export const ReportCardsPage: React.FC = () => {
         `/results/term-results/${result.id}/report-card-pdf/`,
         `ReportCard_${result.admission_number}_${result.term_name || 'Term'}.pdf`
       );
+      toast.success(`Report card downloaded for ${result.student_name}`);
     } catch (err: any) {
-      alert(err.message || 'Failed to download report card PDF.');
+      toast.error(err, 'Failed to download report card PDF');
     } finally {
       setDownloadingId(null);
     }
@@ -185,6 +197,9 @@ export const ReportCardsPage: React.FC = () => {
         columns={columns}
         data={resultsData?.results || []}
         isLoading={isLoading}
+        isError={isError}
+        error={error}
+        onRetry={() => refetch()}
         filterComponent={
           <select
             value={selectedClass}
@@ -243,7 +258,7 @@ export const ReportCardsPage: React.FC = () => {
             <Button type="button" variant="ghost" onClick={() => setIsPublishModalOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary" isLoading={publishMutation.isPending}>
+            <Button type="submit" variant="primary" isLoading={publishMutation.isPending} loadingText="Publishing...">
               Compute & Publish
             </Button>
           </div>

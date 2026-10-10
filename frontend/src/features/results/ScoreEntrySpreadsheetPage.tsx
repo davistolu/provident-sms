@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
-import { Award, Save, Send, CheckCheck, AlertCircle, RefreshCw, BookOpen, Sparkles, CheckCircle } from 'lucide-react';
+import { Award, Save, Send, CheckCheck, AlertCircle, RefreshCw, BookOpen, Sparkles, CheckCircle, MessageSquareQuote, ShieldAlert } from 'lucide-react';
 import { api } from '@/services/api';
+import { toast } from '@/context/ToastContext';
 import { ClassArm, Subject, AssessmentSubmission, StudentScore, PaginatedResponse } from '@/types';
 import { Button } from '@/components/common/Button';
 import { Badge } from '@/components/common/Badge';
@@ -46,6 +47,11 @@ export const ScoreEntrySpreadsheetPage: React.FC = () => {
       setSaveSuccess(null);
       setValidationError(null);
     },
+    onError: (err: any) => {
+      const msg = err.message || 'Failed to open scoresheet.';
+      setValidationError(msg);
+      toast.error(err, 'Failed to open scoresheet');
+    },
   });
 
   useEffect(() => {
@@ -61,15 +67,18 @@ export const ScoreEntrySpreadsheetPage: React.FC = () => {
     onSuccess: (res) => {
       setSubmission(res.submission);
       setScores(res.submission.scores || []);
-      setSaveSuccess(
+      const msg =
         res.submission.status === 'SUBMITTED'
           ? 'Continuous assessment and exam scores submitted for administrative moderation!'
-          : 'Scores saved successfully in draft!'
-      );
+          : 'Scores saved successfully in draft!';
+      setSaveSuccess(msg);
+      toast.success(msg);
       setTimeout(() => setSaveSuccess(null), 4000);
     },
     onError: (err: any) => {
-      setValidationError(err.message || 'Failed to save scores.');
+      const msg = err.message || 'Failed to save scores.';
+      setValidationError(msg);
+      toast.error(err, 'Failed to save scores');
     },
   });
 
@@ -130,6 +139,7 @@ export const ScoreEntrySpreadsheetPage: React.FC = () => {
               size="sm"
               icon={Save}
               isLoading={saveScoresMutation.isPending}
+              loadingText="Saving..."
               onClick={() => handleSaveScores('save_draft')}
             >
               Save Draft
@@ -139,6 +149,7 @@ export const ScoreEntrySpreadsheetPage: React.FC = () => {
               size="sm"
               icon={Send}
               isLoading={saveScoresMutation.isPending}
+              loadingText="Submitting..."
               onClick={() => handleSaveScores('submit')}
             >
               Submit for Review
@@ -158,6 +169,39 @@ export const ScoreEntrySpreadsheetPage: React.FC = () => {
         <div className="p-3 bg-[#fff1f2] border border-[#fecdd3] text-[#be123c] text-xs font-semibold rounded-md flex items-center gap-2">
           <AlertCircle className="w-4 h-4 text-[#e11d48]" />
           {validationError}
+        </div>
+      )}
+
+      {/* Administrative Review / Moderation Feedback Notice */}
+      {submission?.feedback_notes && (
+        <div
+          className={`p-4 rounded-lg border flex items-start gap-3 shadow-[0_1px_3px_rgba(0,0,0,0.03)] ${
+            submission.status === 'REJECTED'
+              ? 'bg-[#fff1f2] border-[#fecdd3] text-[#9f1239]'
+              : 'bg-[#f0fdf4] border-[#bbf7d0] text-[#166534]'
+          }`}
+        >
+          {submission.status === 'REJECTED' ? (
+            <ShieldAlert className="w-5 h-5 flex-shrink-0 text-[#e11d48] mt-0.5" />
+          ) : (
+            <MessageSquareQuote className="w-5 h-5 flex-shrink-0 text-[#059669] mt-0.5" />
+          )}
+          <div className="flex-1 text-xs space-y-1">
+            <div className="flex items-center justify-between font-bold">
+              <span className="uppercase tracking-wider text-[11px]">
+                {submission.status === 'REJECTED'
+                  ? 'Administrative Moderation Feedback (Returned for Corrections)'
+                  : 'Administrative Moderation Feedback'}
+              </span>
+              {submission.reviewed_by_name && (
+                <span className="text-[11px] font-medium opacity-80">
+                  Reviewed by {submission.reviewed_by_name}
+                  {submission.reviewed_at ? ` on ${new Date(submission.reviewed_at).toLocaleDateString()}` : ''}
+                </span>
+              )}
+            </div>
+            <p className="font-sans leading-relaxed text-xs whitespace-pre-wrap">{submission.feedback_notes}</p>
+          </div>
         </div>
       )}
 
@@ -239,8 +283,8 @@ export const ScoreEntrySpreadsheetPage: React.FC = () => {
                   <th className="px-3 py-3 w-28 text-center">CA 2 (15m)</th>
                   <th className="px-3 py-3 w-28 text-center">Exam (70m)</th>
                   <th className="px-3 py-3 w-24 text-center font-bold text-[#064e3b]">Total (100)</th>
-                  <th className="px-3 py-3 w-20 text-center">Grade</th>
-                  <th className="px-4 py-3">Teacher Comment</th>
+                  <th className="px-3 py-3 w-32 text-center">Grade & Remark</th>
+                  <th className="px-4 py-3">Teacher Remarks / Feedback</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#e5e3dc] text-xs">
@@ -262,7 +306,7 @@ export const ScoreEntrySpreadsheetPage: React.FC = () => {
                           max="15"
                           value={ca1}
                           onChange={(e) => handleScoreChange(s.student, 'CA1', e.target.value)}
-                          className="w-full text-center px-2 py-1 font-mono text-xs bg-[#fbfbfa] border border-[#cbd2d9] rounded-md focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#064e3b] focus:border-[#064e3b]"
+                          className="w-full text-center px-2 py-1.5 font-mono text-xs bg-[#fbfbfa] border border-[#cbd2d9] rounded-md focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#064e3b] focus:border-[#064e3b]"
                         />
                       </td>
                       <td className="px-3 py-2.5">
@@ -273,7 +317,7 @@ export const ScoreEntrySpreadsheetPage: React.FC = () => {
                           max="15"
                           value={ca2}
                           onChange={(e) => handleScoreChange(s.student, 'CA2', e.target.value)}
-                          className="w-full text-center px-2 py-1 font-mono text-xs bg-[#fbfbfa] border border-[#cbd2d9] rounded-md focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#064e3b] focus:border-[#064e3b]"
+                          className="w-full text-center px-2 py-1.5 font-mono text-xs bg-[#fbfbfa] border border-[#cbd2d9] rounded-md focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#064e3b] focus:border-[#064e3b]"
                         />
                       </td>
                       <td className="px-3 py-2.5">
@@ -284,24 +328,31 @@ export const ScoreEntrySpreadsheetPage: React.FC = () => {
                           max="70"
                           value={exam}
                           onChange={(e) => handleScoreChange(s.student, 'EXAM', e.target.value)}
-                          className="w-full text-center px-2 py-1 font-mono text-xs bg-[#fbfbfa] border border-[#cbd2d9] rounded-md focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#064e3b] focus:border-[#064e3b]"
+                          className="w-full text-center px-2 py-1.5 font-mono text-xs bg-[#fbfbfa] border border-[#cbd2d9] rounded-md focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#064e3b] focus:border-[#064e3b]"
                         />
                       </td>
                       <td className="px-3 py-2.5 text-center font-mono font-bold text-sm text-[#064e3b]">
                         {s.total_score}
                       </td>
-                      <td className="px-3 py-2.5 text-center font-mono">
-                        <span className="font-bold text-xs px-2 py-0.5 rounded bg-[#ecfdf5] text-[#064e3b] border border-[#a7f3d0]">
-                          {s.grade || '-'}
-                        </span>
+                      <td className="px-3 py-2.5 text-center">
+                        <div className="flex flex-col items-center gap-1">
+                          <span className="font-mono font-bold text-xs px-2 py-0.5 rounded bg-[#ecfdf5] text-[#064e3b] border border-[#a7f3d0]">
+                            {s.grade || '-'}
+                          </span>
+                          {s.remark && (
+                            <span className="text-[10px] font-semibold text-[#52606d]">
+                              {s.remark}
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-4 py-2.5">
                         <input
                           type="text"
-                          placeholder="Optional performance remarks..."
+                          placeholder="Feedback or remarks for student/parent..."
                           value={s.teacher_comment || ''}
                           onChange={(e) => handleCommentChange(s.student, e.target.value)}
-                          className="w-full px-3 py-1 text-xs bg-[#fbfbfa] border border-[#cbd2d9] rounded-md focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#064e3b] focus:border-[#064e3b] placeholder:text-[#8c9ba5]"
+                          className="w-full px-3 py-1.5 text-xs bg-[#fbfbfa] border border-[#cbd2d9] rounded-md focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#064e3b] focus:border-[#064e3b] placeholder:text-[#8c9ba5]"
                         />
                       </td>
                     </tr>

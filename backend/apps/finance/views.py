@@ -206,28 +206,38 @@ class StudentInvoiceViewSet(TenantScopedModelViewSet):
     @action(detail=True, methods=['post'], url_path='record-payment')
     def record_payment(self, request, pk=None):
         """
-        Records a manual payment against this invoice and recalculates balances.
+        Records a manual payment against this invoice with atomic row-locking,
+        Decimal precision, balance validation, and security audit logging.
         """
+        from decimal import Decimal, InvalidOperation
         invoice = self.get_object()
-        amount = request.data.get('amount')
+        amount_raw = request.data.get('amount')
         method = request.data.get('payment_method', 'BANK_TRANSFER')
         notes = request.data.get('notes', '')
         payment_date = request.data.get('payment_date') or timezone.now().date().isoformat()
 
         try:
-            amount_val = float(amount)
-            if amount_val <= 0:
-                raise ValueError()
-        except (ValueError, TypeError):
-            return Response({'error': 'Valid positive payment amount is required'}, status=status.HTTP_400_BAD_REQUEST)
-
-        ref_no = f"REC-{timezone.now().strftime('%Y%m%d%H%M%S')}-{invoice.payments.count() + 1}"
+            amount_val = Decimal(str(amount_raw)).quantize(Decimal('0.01'))
+            if amount_val <= Decimal('0.00'):
+                return Response({'error': 'Payment amount must be a positive number greater than zero.'}, status=status.HTTP_400_BAD_REQUEST)
+        except (InvalidOperation, TypeError, ValueError):
+            return Response({'error': 'Valid numerical payment amount is required.'}, status=status.HTTP_400_BAD_REQUEST)
 
         with transaction.atomic():
+            # Concurrency row-locking to prevent race conditions & double allocation
+            locked_invoice = StudentInvoice.objects.select_for_update().get(id=invoice.id)
+            
+            if locked_invoice.status == 'PAID' and locked_invoice.balance <= Decimal('0.00'):
+                return Response(
+                    {'error': f'Invoice {locked_invoice.invoice_number} is already fully settled.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            ref_no = f"REC-{timezone.now().strftime('%Y%m%d%H%M%S')}-{locked_invoice.payments.count() + 1}"
             payment = Payment.objects.create(
-                school=invoice.school,
-                student=invoice.student,
-                invoice=invoice,
+                school=locked_invoice.school,
+                student=locked_invoice.student,
+                invoice=locked_invoice,
                 reference_number=ref_no,
                 payment_date=payment_date,
                 amount=amount_val,
@@ -235,12 +245,28 @@ class StudentInvoiceViewSet(TenantScopedModelViewSet):
                 recorded_by=request.user,
                 notes=notes
             )
-            invoice.recalculate_totals()
+            locked_invoice.recalculate_totals()
 
+            # Security Audit Trail
+            self._log_audit(
+                action='PAYMENT',
+                model_name='Payment',
+                entity_id=payment.id,
+                details={
+                    'reference_number': ref_no,
+                    'amount': str(amount_val),
+                    'invoice_id': str(locked_invoice.id),
+                    'invoice_number': locked_invoice.invoice_number,
+                    'payment_method': method,
+                    'student_id': str(locked_invoice.student_id),
+                }
+            )
+
+        locked_invoice.refresh_from_db()
         return Response({
             'status': 'success',
             'payment': PaymentSerializer(payment).data,
-            'invoice': StudentInvoiceSerializer(invoice).data
+            'invoice': StudentInvoiceSerializer(locked_invoice).data
         })
 
 class PaymentViewSet(TenantScopedModelViewSet):

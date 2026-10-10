@@ -156,7 +156,7 @@ class AssessmentSubmissionViewSet(TenantScopedModelViewSet):
     @action(detail=True, methods=['post'], permission_classes=[IsSchoolAdmin], url_path='review')
     def review(self, request, pk=None):
         """
-        Admin reviews and approves or returns score submissions.
+        Admin reviews and approves or returns score submissions with audit logging.
         """
         submission = self.get_object()
         decision = request.data.get('decision')  # 'APPROVE' or 'REJECT'
@@ -168,6 +168,18 @@ class AssessmentSubmissionViewSet(TenantScopedModelViewSet):
             submission.reviewed_at = timezone.now()
             submission.feedback_notes = feedback
             submission.save()
+
+            self._log_audit(
+                action='APPROVE',
+                model_name='AssessmentSubmission',
+                entity_id=str(submission.id),
+                details={
+                    'message': f'Approved score submission for {submission.class_arm.name} - {submission.subject.name}',
+                    'class_arm_id': str(submission.class_arm_id),
+                    'subject_id': str(submission.subject_id),
+                    'feedback': feedback
+                }
+            )
             return Response({'status': 'success', 'message': 'Submission approved successfully.'})
         elif decision == 'REJECT':
             submission.status = AssessmentSubmission.StatusChoices.REJECTED
@@ -175,6 +187,18 @@ class AssessmentSubmissionViewSet(TenantScopedModelViewSet):
             submission.reviewed_at = timezone.now()
             submission.feedback_notes = feedback
             submission.save()
+
+            self._log_audit(
+                action='REJECT',
+                model_name='AssessmentSubmission',
+                entity_id=str(submission.id),
+                details={
+                    'message': f'Rejected score submission for {submission.class_arm.name} - {submission.subject.name}',
+                    'class_arm_id': str(submission.class_arm_id),
+                    'subject_id': str(submission.subject_id),
+                    'feedback': feedback
+                }
+            )
             return Response({'status': 'success', 'message': 'Submission returned for corrections.'})
         else:
             return Response({'error': 'Invalid decision. Must be APPROVE or REJECT.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -183,7 +207,7 @@ class AssessmentSubmissionViewSet(TenantScopedModelViewSet):
     def publish_class_results(self, request):
         """
         Publishes all approved assessment results for a class in a term,
-        computes class averages, and updates student rankings.
+        computes class averages, and updates student rankings with audit logging.
         """
         school = self.get_school()
         class_arm_id = request.data.get('class_arm_id')
@@ -219,6 +243,20 @@ class AssessmentSubmissionViewSet(TenantScopedModelViewSet):
             academic_session=session,
             academic_term=term
         ).update(is_published=True, published_at=timezone.now())
+
+        # Security Audit Log
+        self._log_audit(
+            action='PUBLISH',
+            model_name='StudentTermResult',
+            entity_id=str(class_arm.id),
+            details={
+                'message': f'Published term results for class {class_arm.display_name} ({session.name} - {term.name})',
+                'class_arm_id': str(class_arm.id),
+                'session_id': str(session.id),
+                'term_id': str(term.id),
+                'results_count': len(term_results)
+            }
+        )
 
         return Response({
             'status': 'success',
