@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { CheckCheck, XCircle, Eye, Globe, Award, CheckCircle2 } from 'lucide-react';
+import { CheckCheck, XCircle, Eye, Globe, Award, CheckCircle2, ShieldCheck, Sparkles, BookOpen } from 'lucide-react';
 import { api } from '@/services/api';
 import { AssessmentSubmission, ClassArm, PaginatedResponse } from '@/types';
 import { DataTable, Column } from '@/components/common/DataTable';
@@ -56,38 +56,42 @@ export const ResultReviewPage: React.FC = () => {
     {
       header: 'Class / Arm',
       accessorKey: 'class_arm_name',
-      cell: (row) => <span className="font-bold text-slate-900">{row.class_arm_name}</span>,
-    },
-    {
-      header: 'Subject',
-      accessorKey: 'subject_name',
-      cell: (row) => <span className="font-semibold text-indigo-700">{row.subject_name}</span>,
-    },
-    {
-      header: 'Session & Term',
       cell: (row) => (
-        <span className="text-xs text-slate-600">
-          {row.term_name} ({row.session_name})
-        </span>
+        <div>
+          <span className="font-semibold text-sm text-[#141d24]">{row.class_arm_name}</span>
+          <div className="text-xs text-[#52606d] font-mono mt-0.5">
+            {row.term_name} • {row.session_name}
+          </div>
+        </div>
+      ),
+    },
+    {
+      header: 'Subject Curriculum',
+      accessorKey: 'subject_name',
+      cell: (row) => (
+        <div className="flex items-center gap-2">
+          <BookOpen className="w-3.5 h-3.5 text-[#064e3b]" />
+          <span className="font-semibold text-xs text-[#141d24]">{row.subject_name}</span>
+        </div>
       ),
     },
     {
       header: 'Submitted By',
       cell: (row) => (
         <div>
-          <p className="font-semibold text-slate-800 text-xs">{row.submitted_by_name || 'Teacher'}</p>
-          <p className="text-[10px] text-slate-400">{row.scores_count} Students graded</p>
+          <p className="font-medium text-[#141d24] text-xs">{row.submitted_by_name || 'Assigned Educator'}</p>
+          <p className="text-[11px] text-[#52606d] font-mono">{row.scores_count} students graded</p>
         </div>
       ),
     },
     {
-      header: 'Status',
+      header: 'Moderation Status',
       cell: (row) => {
         const variant =
           row.status === 'PUBLISHED' || row.status === 'APPROVED'
-            ? 'success'
+            ? 'evergreen'
             : row.status === 'SUBMITTED'
-            ? 'indigo'
+            ? 'gold'
             : row.status === 'REJECTED'
             ? 'danger'
             : 'neutral';
@@ -100,7 +104,7 @@ export const ResultReviewPage: React.FC = () => {
       cell: (row) => (
         <div className="flex items-center justify-end gap-2">
           <Button variant="outline" size="sm" icon={Eye} onClick={() => setSelectedSub(row)}>
-            Review Marks
+            Review Scores
           </Button>
         </div>
       ),
@@ -110,11 +114,13 @@ export const ResultReviewPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#e5e3dc]">
         <div>
-          <h1 className="text-xl font-bold text-slate-900">Assessment Result Reviews & Publication</h1>
-          <p className="text-xs text-slate-500">
-            Inspect teacher score submissions, approve grades, and publish official term results
+          <h1 className="font-serif text-2xl lg:text-3xl font-bold tracking-tight text-[#141d24]">
+            Assessment Result Reviews & Publication
+          </h1>
+          <p className="text-xs sm:text-sm text-[#52606d] mt-1 font-sans">
+            Moderate teacher score entries, review grade distributions, and publish institutional term results
           </p>
         </div>
         <Button
@@ -128,8 +134,8 @@ export const ResultReviewPage: React.FC = () => {
       </div>
 
       {publishMessage && (
-        <div className="p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold rounded-xl flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+        <div className="p-3 bg-[#ecfdf5] border border-[#a7f3d0] text-[#064e3b] text-xs font-semibold rounded-md flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 text-[#059669]" />
           {publishMessage}
         </div>
       )}
@@ -145,33 +151,33 @@ export const ResultReviewPage: React.FC = () => {
         isOpen={!!selectedSub}
         onClose={() => setSelectedSub(null)}
         title={`Review Marks: ${selectedSub?.subject_name} (${selectedSub?.class_arm_name})`}
-        subtitle={`Submitted by ${selectedSub?.submitted_by_name} &bull; ${selectedSub?.scores?.length ?? 0} students`}
+        subtitle={`Submitted by ${selectedSub?.submitted_by_name} • ${selectedSub?.scores?.length ?? 0} students evaluated`}
         maxWidth="3xl"
       >
         <div className="space-y-4">
-          <div className="max-h-80 overflow-y-auto border border-slate-200 rounded-xl">
+          <div className="max-h-80 overflow-y-auto border border-[#e5e3dc] rounded-md">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200 font-bold text-slate-600">
-                  <th className="px-3 py-2">Admission No</th>
-                  <th className="px-3 py-2">Student Name</th>
-                  <th className="px-3 py-2 text-center">Total (100)</th>
-                  <th className="px-3 py-2 text-center">Grade</th>
-                  <th className="px-3 py-2">Remark</th>
+                <tr className="bg-[#f4f3ef] border-b border-[#e5e3dc] font-bold text-[#52606d] text-[10px] uppercase tracking-wider">
+                  <th className="px-3 py-2.5">Admission No</th>
+                  <th className="px-3 py-2.5">Student Name</th>
+                  <th className="px-3 py-2.5 text-center">Total (100)</th>
+                  <th className="px-3 py-2.5 text-center">Grade</th>
+                  <th className="px-3 py-2.5">Remark</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-[#e5e3dc]">
                 {selectedSub?.scores?.map((sc) => (
-                  <tr key={sc.id} className="hover:bg-slate-50/70">
-                    <td className="px-3 py-2 font-mono font-bold text-indigo-600">{sc.admission_number}</td>
-                    <td className="px-3 py-2 font-bold text-slate-900">{sc.student_name}</td>
-                    <td className="px-3 py-2 text-center font-bold text-slate-800">{sc.total_score}</td>
-                    <td className="px-3 py-2 text-center">
-                      <span className="px-2 py-0.5 rounded bg-indigo-50 font-bold text-indigo-700">
+                  <tr key={sc.id} className="hover:bg-[#fbfbfa]">
+                    <td className="px-3 py-2 font-mono font-bold text-[#064e3b]">{sc.admission_number}</td>
+                    <td className="px-3 py-2 font-semibold text-[#141d24]">{sc.student_name}</td>
+                    <td className="px-3 py-2 text-center font-mono font-bold text-[#141d24]">{sc.total_score}</td>
+                    <td className="px-3 py-2 text-center font-mono">
+                      <span className="px-2 py-0.5 rounded bg-[#ecfdf5] font-bold text-[#064e3b] border border-[#a7f3d0]">
                         {sc.grade}
                       </span>
                     </td>
-                    <td className="px-3 py-2 text-slate-600">{sc.remark}</td>
+                    <td className="px-3 py-2 text-[#52606d]">{sc.remark}</td>
                   </tr>
                 ))}
               </tbody>
@@ -179,19 +185,19 @@ export const ResultReviewPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
-              Feedback / Review Notes (Optional)
+            <label className="block text-xs font-semibold text-[#141d24] mb-1">
+              Feedback / Moderation Notes (Optional)
             </label>
             <textarea
               rows={2}
-              placeholder="Add feedback for teacher or approval notes..."
+              placeholder="Add feedback for educator or moderation comments..."
               value={feedbackNotes}
               onChange={(e) => setFeedbackNotes(e.target.value)}
-              className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-lg focus:outline-hidden focus:border-indigo-600"
+              className="w-full px-3 py-2 text-xs bg-[#fbfbfa] border border-[#cbd2d9] rounded-md focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#064e3b] focus:border-[#064e3b] placeholder:text-[#8c9ba5]"
             />
           </div>
 
-          <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+          <div className="pt-3 border-t border-[#e5e3dc] flex items-center justify-between">
             <Button
               type="button"
               variant="danger"
@@ -213,7 +219,7 @@ export const ResultReviewPage: React.FC = () => {
               </Button>
               <Button
                 type="button"
-                variant="success"
+                variant="primary"
                 size="sm"
                 icon={CheckCheck}
                 isLoading={reviewMutation.isPending}
@@ -235,7 +241,7 @@ export const ResultReviewPage: React.FC = () => {
         isOpen={isPublishModalOpen}
         onClose={() => setIsPublishModalOpen(false)}
         title="Publish Class Term Results"
-        subtitle="This action computes overall averages, positions, and publishes report cards"
+        subtitle="This action computes overall averages, positions, and generates official report cards"
       >
         <form
           onSubmit={(e) => {
@@ -245,12 +251,12 @@ export const ResultReviewPage: React.FC = () => {
           className="space-y-4"
         >
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">Select Class Arm</label>
+            <label className="block text-xs font-semibold text-[#141d24] mb-1">Select Class Section / Arm</label>
             <select
               required
               value={publishClassId}
               onChange={(e) => setPublishClassId(e.target.value)}
-              className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-hidden focus:border-indigo-600"
+              className="w-full px-3 py-2 text-xs font-medium bg-[#fbfbfa] border border-[#cbd2d9] rounded-md text-[#141d24] focus:outline-none focus:ring-1 focus:ring-[#064e3b] focus:border-[#064e3b]"
             >
               <option value="">Select Class to Publish</option>
               {classesData?.results?.map((c) => (
@@ -261,11 +267,14 @@ export const ResultReviewPage: React.FC = () => {
             </select>
           </div>
 
-          <p className="text-xs text-slate-500 bg-slate-50 p-3 rounded-lg border border-slate-200">
-            Publishing marks all approved subjects as official, recalculates weighted student averages, and produces updated rankings.
-          </p>
+          <div className="text-xs text-[#52606d] bg-[#fbfbfa] p-3 rounded-md border border-[#e5e3dc] space-y-1">
+            <p className="font-semibold text-[#141d24]">What happens upon publication?</p>
+            <p>
+              Marks all approved subject score sheets as official, recalculates class averages, positions, and unlocks report cards for download.
+            </p>
+          </div>
 
-          <div className="pt-3 border-t border-slate-100 flex justify-end gap-2">
+          <div className="pt-3 border-t border-[#e5e3dc] flex justify-end gap-2">
             <Button type="button" variant="ghost" onClick={() => setIsPublishModalOpen(false)}>
               Cancel
             </Button>
@@ -278,3 +287,4 @@ export const ResultReviewPage: React.FC = () => {
     </div>
   );
 };
+

@@ -112,38 +112,64 @@ class ReportCardPDFGenerator:
         elements.append(bio_table)
         elements.append(Spacer(1, 12))
 
-        # 3. Academic Performance Table
-        score_headers = [
-            Paragraph("Subject", table_header),
-            Paragraph("CA 1", table_header),
-            Paragraph("CA 2", table_header),
-            Paragraph("Exam", table_header),
+        # 3. Academic Performance Table with dynamic component breakdown
+        comp_codes = []
+        for s in student_scores:
+            if s.submission and s.submission.assessment_scheme:
+                scheme = s.submission.assessment_scheme
+                for c in scheme.components.order_by('order_index'):
+                    if c.code not in comp_codes:
+                        comp_codes.append(c.code)
+            if not comp_codes and s.component_scores:
+                for k in s.component_scores.keys():
+                    if k not in comp_codes:
+                        comp_codes.append(k)
+
+        if not comp_codes:
+            comp_codes = ['CA1', 'CA2', 'EXAM']
+
+        # Construct headers
+        score_headers = [Paragraph("Subject", table_header)]
+        for code in comp_codes:
+            score_headers.append(Paragraph(code, table_header))
+        score_headers.extend([
             Paragraph("Total", table_header),
             Paragraph("Grade", table_header),
             Paragraph("Remark", table_header),
-        ]
+        ])
         table_rows = [score_headers]
 
         for s in student_scores:
             comp = s.component_scores or {}
-            ca1 = str(comp.get('CA1', '-'))
-            ca2 = str(comp.get('CA2', '-'))
-            exam = str(comp.get('EXAM', '-'))
-            subj_name = s.submission.subject.name if hasattr(s, 'submission') and s.submission else 'Subject'
-            table_rows.append([
-                Paragraph(subj_name, body_bold),
-                Paragraph(ca1, body_center),
-                Paragraph(ca2, body_center),
-                Paragraph(exam, body_center),
+            subj_name = s.submission.subject.name if hasattr(s, 'submission') and s.submission and s.submission.subject else 'Subject'
+            row_cells = [Paragraph(subj_name, body_bold)]
+            for code in comp_codes:
+                val = comp.get(code, comp.get(code.upper(), '-'))
+                row_cells.append(Paragraph(str(val), body_center))
+            row_cells.extend([
                 Paragraph(f"<b>{s.total_score}</b>", body_center),
                 Paragraph(f"<b>{s.grade}</b>", body_center),
-                Paragraph(s.remark, body_regular),
+                Paragraph(s.remark or '', body_regular),
             ])
+            table_rows.append(row_cells)
 
         if len(table_rows) == 1:
-            table_rows.append([Paragraph("No published subject scores available for this term.", body_regular)] + [Paragraph("", body_regular)] * 6)
+            empty_row = [Paragraph("No published subject scores available for this term.", body_regular)]
+            empty_row.extend([Paragraph("", body_regular)] * (len(score_headers) - 1))
+            table_rows.append(empty_row)
 
-        scores_table = Table(table_rows, colWidths=[5.5 * cm, 1.8 * cm, 1.8 * cm, 2.0 * cm, 2.0 * cm, 1.8 * cm, 2.6 * cm])
+        # Dynamic column widths
+        total_cols = len(score_headers)
+        avail_width = 17.0  # cm
+        subj_w = 5.0
+        rem_w = 2.4
+        tot_w = 1.8
+        grd_w = 1.6
+        comp_col_count = len(comp_codes)
+        comp_w = max(1.2, (avail_width - subj_w - rem_w - tot_w - grd_w) / max(1, comp_col_count))
+        col_widths = [subj_w * cm] + [comp_w * cm] * comp_col_count + [tot_w * cm, grd_w * cm, rem_w * cm]
+
+        scores_table = Table(table_rows, colWidths=col_widths)
         scores_table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#4f46e5')),
             ('ALIGN', (1, 1), (-2, -1), 'CENTER'),

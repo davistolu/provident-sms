@@ -86,6 +86,43 @@ class ApiClient {
     return this.handleResponse<T>(response);
   }
 
+  async downloadFile(url: string, filename?: string): Promise<void> {
+    const finalUrl = url.startsWith('/api') ? url : `${API_BASE}${url}`;
+    const token = localStorage.getItem('auth_token');
+    const schoolId = localStorage.getItem('active_school_id');
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Token ${token}`;
+    if (schoolId) headers['X-School-ID'] = schoolId;
+
+    const response = await fetch(finalUrl, {
+      method: 'GET',
+      headers,
+    });
+
+    if (!response.ok) {
+      let errMsg = 'Failed to download file.';
+      try {
+        const json = await response.json();
+        errMsg = json.detail || json.error || json.message || errMsg;
+      } catch {}
+      throw new Error(errMsg);
+    }
+
+    const blob = await response.blob();
+    const blobUrl = window.URL.createObjectURL(blob);
+    if (filename) {
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } else {
+      window.open(blobUrl, '_blank');
+    }
+    setTimeout(() => window.URL.revokeObjectURL(blobUrl), 15000);
+  }
+
   private async handleResponse<T>(response: Response): Promise<T> {
     if (response.status === 401) {
       // Unauthenticated session

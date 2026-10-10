@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { CheckSquare, Save, Send, Users, Calendar, CheckCheck, Clock, XCircle, AlertCircle } from 'lucide-react';
+import { CheckSquare, Save, Send, Users, Calendar, CheckCheck, Clock, XCircle, AlertCircle, Sparkles } from 'lucide-react';
 import { api } from '@/services/api';
 import { ClassArm, AttendanceSession, AttendanceRecord, PaginatedResponse } from '@/types';
 import { Button } from '@/components/common/Button';
@@ -86,14 +86,19 @@ export const AttendanceRegisterPage: React.FC = () => {
   const presentCount = records.filter((r) => r.status === 'PRESENT').length;
   const absentCount = records.filter((r) => r.status === 'ABSENT').length;
   const lateCount = records.filter((r) => r.status === 'LATE').length;
+  const excusedCount = records.filter((r) => r.status === 'EXCUSED').length;
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#e5e3dc]">
         <div>
-          <h1 className="text-xl font-bold text-slate-900">Student Attendance Register</h1>
-          <p className="text-xs text-slate-500">Record daily class attendance, track absences, and submit verified registers</p>
+          <h1 className="font-serif text-2xl lg:text-3xl font-bold tracking-tight text-[#141d24]">
+            Daily Attendance Register
+          </h1>
+          <p className="text-xs sm:text-sm text-[#52606d] mt-1 font-sans">
+            Record class attendance, manage student roll calls, and submit verified registers
+          </p>
         </div>
         {sessionData && (
           <div className="flex items-center gap-2">
@@ -107,7 +112,7 @@ export const AttendanceRegisterPage: React.FC = () => {
               Save Draft
             </Button>
             <Button
-              variant="success"
+              variant="primary"
               size="sm"
               icon={Send}
               isLoading={saveRegisterMutation.isPending}
@@ -120,21 +125,23 @@ export const AttendanceRegisterPage: React.FC = () => {
       </div>
 
       {savedSuccess && (
-        <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold rounded-xl flex items-center gap-2">
-          <CheckCheck className="w-4 h-4 text-emerald-600" />
+        <div className="p-3 bg-[#ecfdf5] border border-[#a7f3d0] text-[#064e3b] text-xs font-semibold rounded-md flex items-center gap-2">
+          <CheckCheck className="w-4 h-4 text-[#059669]" />
           {savedSuccess}
         </div>
       )}
 
       {/* Filter & Selector Bar */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex flex-wrap items-center justify-between gap-4">
-        <div className="flex flex-wrap items-center gap-3">
+      <div className="bg-[#ffffff] p-4 rounded-lg border border-[#e5e3dc] shadow-[0_1px_3px_rgba(0,0,0,0.03)] flex flex-wrap items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center gap-4">
           <div>
-            <label className="block text-[11px] font-bold uppercase text-slate-500 mb-1">Class Arm</label>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-[#52606d] mb-1">
+              Class Section / Arm
+            </label>
             <select
               value={selectedClass}
               onChange={(e) => setSelectedClass(e.target.value)}
-              className="px-3 py-2 text-xs font-bold bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:outline-hidden focus:border-indigo-600"
+              className="px-3 py-2 text-xs font-medium bg-[#fbfbfa] border border-[#cbd2d9] rounded-md text-[#141d24] focus:outline-none focus:ring-1 focus:ring-[#064e3b] focus:border-[#064e3b]"
             >
               {classesData?.results?.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -145,32 +152,39 @@ export const AttendanceRegisterPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold uppercase text-slate-500 mb-1">Attendance Date</label>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-[#52606d] mb-1">
+              Register Date
+            </label>
             <input
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="px-3 py-2 text-xs font-bold bg-slate-50 border border-slate-200 rounded-lg text-slate-800 focus:outline-hidden focus:border-indigo-600"
+              className="px-3 py-2 text-xs font-mono bg-[#fbfbfa] border border-[#cbd2d9] rounded-md text-[#141d24] focus:outline-none focus:ring-1 focus:ring-[#064e3b] focus:border-[#064e3b]"
             />
           </div>
         </div>
 
         {/* Quick Batch Actions & Summary */}
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 text-xs font-bold">
-            <span className="px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-md border border-emerald-200">
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex items-center gap-2 text-xs font-mono">
+            <span className="px-2.5 py-1 bg-[#ecfdf5] text-[#064e3b] rounded-md border border-[#a7f3d0] font-semibold">
               {presentCount} Present
             </span>
-            <span className="px-2.5 py-1 bg-rose-50 text-rose-700 rounded-md border border-rose-200">
+            <span className="px-2.5 py-1 bg-[#fff1f2] text-[#be123c] rounded-md border border-[#fecdd3] font-semibold">
               {absentCount} Absent
             </span>
             {lateCount > 0 && (
-              <span className="px-2.5 py-1 bg-amber-50 text-amber-700 rounded-md border border-amber-200">
+              <span className="px-2.5 py-1 bg-[#fffbeb] text-[#b45309] rounded-md border border-[#fde68a] font-semibold">
                 {lateCount} Late
               </span>
             )}
+            {excusedCount > 0 && (
+              <span className="px-2.5 py-1 bg-[#f4f3ef] text-[#52606d] rounded-md border border-[#e5e3dc] font-semibold">
+                {excusedCount} Excused
+              </span>
+            )}
           </div>
-          <div className="flex items-center gap-1.5 border-l border-slate-200 pl-4">
+          <div className="flex items-center gap-1.5 border-l border-[#e5e3dc] pl-4">
             <Button variant="outline" size="sm" onClick={() => markAll('PRESENT')}>
               Mark All Present
             </Button>
@@ -182,47 +196,62 @@ export const AttendanceRegisterPage: React.FC = () => {
       </div>
 
       {/* Roster Table */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+      <div className="bg-[#ffffff] rounded-lg border border-[#e5e3dc] shadow-[0_1px_3px_rgba(0,0,0,0.03)] overflow-hidden">
         {loadRosterMutation.isPending ? (
-          <div className="py-12 text-center text-xs text-slate-500">Loading student attendance register...</div>
+          <div className="py-12 text-center text-xs text-[#52606d]">Loading student attendance register...</div>
         ) : records.length === 0 ? (
-          <div className="py-12 text-center text-xs text-slate-400">
+          <div className="py-12 text-center text-xs text-[#8c9ba5]">
             No students enrolled in this class arm for the active session.
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200/80 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  <th className="px-4 py-3">#</th>
+                <tr className="bg-[#f4f3ef] border-b border-[#e5e3dc] text-[10px] font-bold text-[#52606d] uppercase tracking-wider">
+                  <th className="px-4 py-3 w-12">#</th>
                   <th className="px-4 py-3">Admission No</th>
                   <th className="px-4 py-3">Student Full Name</th>
-                  <th className="px-4 py-3 text-center">Status</th>
-                  <th className="px-4 py-3">Remarks</th>
+                  <th className="px-4 py-3 text-center w-64">Attendance Status</th>
+                  <th className="px-4 py-3">Remarks & Notes</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 text-xs">
+              <tbody className="divide-y divide-[#e5e3dc] text-xs">
                 {records.map((r, idx) => (
-                  <tr key={r.student} className="hover:bg-slate-50/70 transition-colors">
-                    <td className="px-4 py-3 font-semibold text-slate-400">{idx + 1}</td>
-                    <td className="px-4 py-3 font-mono font-bold text-indigo-600">{r.admission_number}</td>
-                    <td className="px-4 py-3 font-bold text-slate-900">{r.student_name}</td>
+                  <tr key={r.student} className="hover:bg-[#fbfbfa] transition-colors">
+                    <td className="px-4 py-3 font-mono text-[#8c9ba5]">{idx + 1}</td>
+                    <td className="px-4 py-3 font-mono font-bold text-[#064e3b]">{r.admission_number}</td>
+                    <td className="px-4 py-3 font-semibold text-[#141d24]">{r.student_name}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-center gap-1">
                         {(['PRESENT', 'ABSENT', 'LATE', 'EXCUSED'] as const).map((st) => {
                           const isActive = r.status === st;
                           const styles = {
-                            PRESENT: isActive ? 'bg-emerald-600 text-white font-bold' : 'bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-700',
-                            ABSENT: isActive ? 'bg-rose-600 text-white font-bold' : 'bg-slate-100 text-slate-600 hover:bg-rose-50 hover:text-rose-700',
-                            LATE: isActive ? 'bg-amber-500 text-white font-bold' : 'bg-slate-100 text-slate-600 hover:bg-amber-50 hover:text-amber-700',
-                            EXCUSED: isActive ? 'bg-sky-600 text-white font-bold' : 'bg-slate-100 text-slate-600 hover:bg-sky-50 hover:text-sky-700',
+                            PRESENT: isActive
+                              ? 'bg-[#064e3b] text-white font-bold shadow-xs'
+                              : 'bg-[#f4f3ef] text-[#52606d] hover:bg-[#ecfdf5] hover:text-[#064e3b]',
+                            ABSENT: isActive
+                              ? 'bg-[#be123c] text-white font-bold shadow-xs'
+                              : 'bg-[#f4f3ef] text-[#52606d] hover:bg-[#fff1f2] hover:text-[#be123c]',
+                            LATE: isActive
+                              ? 'bg-[#b45309] text-white font-bold shadow-xs'
+                              : 'bg-[#f4f3ef] text-[#52606d] hover:bg-[#fffbeb] hover:text-[#b45309]',
+                            EXCUSED: isActive
+                              ? 'bg-[#475569] text-white font-bold shadow-xs'
+                              : 'bg-[#f4f3ef] text-[#52606d] hover:bg-[#e2e8f0] hover:text-[#1e293b]',
+                          };
+                          const labels = {
+                            PRESENT: 'P • Present',
+                            ABSENT: 'A • Absent',
+                            LATE: 'L • Late',
+                            EXCUSED: 'E • Excused',
                           };
                           return (
                             <button
                               key={st}
                               type="button"
                               onClick={() => handleStatusChange(r.student, st)}
-                              className={`px-2.5 py-1 rounded-md text-[11px] transition-all cursor-pointer ${styles[st]}`}
+                              className={`px-2.5 py-1 rounded text-[11px] font-medium transition-all cursor-pointer ${styles[st]}`}
+                              title={labels[st]}
                             >
                               {st === 'PRESENT' ? 'P' : st === 'ABSENT' ? 'A' : st === 'LATE' ? 'L' : 'E'}
                             </button>
@@ -233,10 +262,10 @@ export const AttendanceRegisterPage: React.FC = () => {
                     <td className="px-4 py-3">
                       <input
                         type="text"
-                        placeholder="Optional remarks (e.g. excused with note)..."
+                        placeholder="Optional remarks (e.g. sick note submitted)..."
                         value={r.remarks || ''}
                         onChange={(e) => handleRemarksChange(r.student, e.target.value)}
-                        className="w-full px-2.5 py-1 text-xs bg-slate-50 border border-slate-200 rounded-md focus:bg-white focus:outline-hidden focus:border-indigo-600"
+                        className="w-full px-3 py-1 text-xs bg-[#fbfbfa] border border-[#cbd2d9] rounded-md focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#064e3b] focus:border-[#064e3b] placeholder:text-[#8c9ba5]"
                       />
                     </td>
                   </tr>
@@ -249,3 +278,4 @@ export const AttendanceRegisterPage: React.FC = () => {
     </div>
   );
 };
+

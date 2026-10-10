@@ -2,42 +2,50 @@
 
 @layer base {
   :root {
-    --background: 210 20% 98%;
-    --foreground: 222 47% 11%;
-    --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-    --primary: 226 70% 55%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222 47% 11%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
-    --accent: 210 40% 96%;
-    --accent-foreground: 222 47% 11%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 226 70% 55%;
-    --radius: 0.5rem;
+    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-display: 'Fraunces', Georgia, serif;
+    --font-mono: 'JetBrains Mono', monospace;
+
+    /* Palette tokens */
+    --canvas: #fbfbfa;
+    --canvas-subtle: #f4f3ef;
+    --surface: #ffffff;
+    --surface-hover: #f9f8f5;
+    --border: #e6e4dc;
+    --border-strong: #c8c5b9;
+
+    --brand-forest: #064e3b;
+    --brand-emerald: #059669;
+    --brand-mint: #ecfdf5;
+
+    --gold-deep: #b45309;
+    --gold-warm: #d97706;
+    --gold-light: #fef3c7;
+
+    --ink-charcoal: #141d24;
+    --ink-muted: #52606d;
+    --ink-faint: #8896a4;
+
+    --danger-red: #991b1b;
+    --danger-surface: #fef2f2;
+    --danger-border: #fecaca;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--canvas);
+    color: var(--ink-charcoal);
+    min-height: 100vh;
+    letter-spacing: -0.01em;
   }
 }
 
-body {
-  margin: 0;
-  padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  background-color: #f8fafc;
-  color: #0f172a;
-  min-height: 100vh;
+.font-display {
+  font-family: var(--font-display), Georgia, serif;
 }
 
-#root {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+.font-mono {
+  font-family: var(--font-mono), monospace;
 }
 
 /* Custom modern scrollbar */
@@ -46,12 +54,18 @@ body {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 3px;
+  background: #d8d5cb;
+  border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #b5b1a2;
+}
+
+/* Subtle focus ring utilities */
+.focus-ring {
+  outline: none;
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #064e3b;
 }

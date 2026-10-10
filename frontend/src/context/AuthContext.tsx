@@ -45,7 +45,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const active = matched || data.active_membership || data.memberships[0] || null;
 
       setActiveMembership(active);
-      if (active) {
+      if (active?.school_id) {
         localStorage.setItem('active_school_id', active.school_id);
       }
     } catch {
@@ -81,7 +81,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       const active = res.active_membership || res.memberships[0] || null;
       setActiveMembership(active);
-      if (active) {
+      if (active?.school_id) {
         localStorage.setItem('active_school_id', active.school_id);
       }
     } finally {
@@ -108,7 +108,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const selected = memberships.find(m => m.school_id === schoolId);
     if (selected) {
       setActiveMembership(selected);
-      localStorage.setItem('active_school_id', selected.school_id);
+      if (selected.school_id) {
+        localStorage.setItem('active_school_id', selected.school_id);
+      }
       window.location.reload();
     }
   };

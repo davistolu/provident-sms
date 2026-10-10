@@ -79,6 +79,32 @@ class TeacherProfile(TenantModel):
     def __str__(self):
         return f"{self.user.full_name} ({self.staff_id})"
 
+    @classmethod
+    def generate_staff_id(cls, school):
+        import datetime
+        from django.db import transaction
+        year = datetime.datetime.now().year
+        prefix = 'TCH'
+        with transaction.atomic():
+            last = cls.objects.filter(
+                school=school,
+                staff_id__startswith=f"{prefix}/{year}/"
+            ).order_by('-staff_id').select_for_update().first()
+
+            if last:
+                try:
+                    seq_num = int(last.staff_id.split('/')[-1]) + 1
+                except (ValueError, IndexError):
+                    seq_num = cls.objects.filter(school=school).count() + 1
+            else:
+                seq_num = cls.objects.filter(school=school).count() + 1
+
+            while True:
+                candidate = f"{prefix}/{year}/{seq_num:04d}"
+                if not cls.objects.filter(school=school, staff_id=candidate).exists():
+                    return candidate
+                seq_num += 1
+
 class ClassArm(TenantModel):
     class_level = models.ForeignKey(ClassLevel, on_delete=models.CASCADE, related_name='arms')
     name = models.CharField(max_length=50, blank=True, default='', help_text="e.g. Gold, Blue, A, or empty")

@@ -44,14 +44,17 @@ export interface SchoolSettings {
 
 export interface SchoolMembership {
   id: string;
-  school_id: string;
-  school_name: string;
-  school_code: string;
+  school_id?: string;
+  school_name?: string;
+  school_code?: string;
   school_logo?: string;
-  currency_symbol: string;
+  currency_symbol?: string;
+  user?: User;
   role: Role;
+  role_display?: string;
   is_active: boolean;
-  is_default: boolean;
+  is_default?: boolean;
+  created_at?: string;
 }
 
 export interface AcademicSession {

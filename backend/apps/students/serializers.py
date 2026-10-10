@@ -30,6 +30,7 @@ class StudentEnrollmentSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'created_at']
 
 class StudentSerializer(serializers.ModelSerializer):
+    admission_number = serializers.CharField(required=False, allow_blank=True)
     full_name = serializers.CharField(read_only=True)
     current_enrollment = serializers.SerializerMethodField()
     class_arm_id = serializers.UUIDField(write_only=True, required=False)
@@ -60,6 +61,11 @@ class StudentSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         class_arm_id = validated_data.pop('class_arm_id', None)
         academic_session_id = validated_data.pop('academic_session_id', None)
+        school = validated_data.get('school')
+
+        if not validated_data.get('admission_number') and school:
+            validated_data['admission_number'] = Student.generate_admission_number(school)
+
         student = super().create(validated_data)
 
         if class_arm_id and academic_session_id:
@@ -70,4 +76,26 @@ class StudentSerializer(serializers.ModelSerializer):
                 academic_session_id=academic_session_id,
                 status=StudentEnrollment.EnrollmentStatus.ACTIVE
             )
+        return student
+
+    def update(self, instance, validated_data):
+        class_arm_id = validated_data.pop('class_arm_id', None)
+        academic_session_id = validated_data.pop('academic_session_id', None)
+        student = super().update(instance, validated_data)
+
+        if class_arm_id:
+            active_enrollment = student.enrollments.filter(status='ACTIVE').first()
+            if active_enrollment:
+                active_enrollment.class_arm_id = class_arm_id
+                if academic_session_id:
+                    active_enrollment.academic_session_id = academic_session_id
+                active_enrollment.save()
+            elif academic_session_id:
+                StudentEnrollment.objects.create(
+                    school=student.school,
+                    student=student,
+                    class_arm_id=class_arm_id,
+                    academic_session_id=academic_session_id,
+                    status=StudentEnrollment.EnrollmentStatus.ACTIVE
+                )
         return student

@@ -1,6 +1,6 @@
 import React from 'react';
-import { Search, ChevronLeft, ChevronRight, Inbox } from 'lucide-react';
-import { Input } from './Input';
+import { ChevronLeft, ChevronRight, Inbox, Search } from 'lucide-react';
+import { Button } from './Button';
 
 export interface Column<T> {
   header: string;
@@ -9,61 +9,53 @@ export interface Column<T> {
   className?: string;
 }
 
-interface DataTableProps<T> {
+export interface DataTableProps<T> {
   columns: Column<T>[];
   data: T[];
   isLoading?: boolean;
-  searchPlaceholder?: string;
-  searchValue?: string;
-  onSearchChange?: (val: string) => void;
-  filterComponent?: React.ReactNode;
-  actionsComponent?: React.ReactNode;
-  emptyTitle?: string;
-  emptyDescription?: string;
-  // Pagination
+  totalCount?: number;
   currentPage?: number;
   totalPages?: number;
-  totalCount?: number;
   onPageChange?: (page: number) => void;
+  filterComponent?: React.ReactNode;
+  searchPlaceholder?: string;
+  onSearchChange?: (val: string) => void;
+  searchValue?: string;
+  emptyMessage?: string;
 }
 
-export function DataTable<T extends { id: string | number }>({
+export function DataTable<T extends { id?: string | number }>({
   columns,
   data,
   isLoading = false,
-  searchPlaceholder = 'Search records...',
-  searchValue,
-  onSearchChange,
-  filterComponent,
-  actionsComponent,
-  emptyTitle = 'No records found',
-  emptyDescription = 'There are no records matching your selected filters.',
+  totalCount,
   currentPage = 1,
   totalPages = 1,
-  totalCount,
   onPageChange,
+  filterComponent,
+  searchPlaceholder,
+  onSearchChange,
+  searchValue,
+  emptyMessage = 'No records found matching your selection.',
 }: DataTableProps<T>) {
   return (
-    <div className="bg-white rounded-xl border border-slate-200/80 shadow-xs overflow-hidden">
-      {/* Table Toolbar */}
-      {(onSearchChange || filterComponent || actionsComponent) && (
-        <div className="p-4 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-3 bg-slate-50/50">
-          <div className="flex flex-1 flex-wrap items-center gap-3">
-            {onSearchChange && (
-              <div className="w-full md:w-72 relative">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  placeholder={searchPlaceholder}
-                  value={searchValue || ''}
-                  onChange={(e) => onSearchChange(e.target.value)}
-                  className="w-full pl-9 pr-3 py-1.5 text-xs bg-white border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600"
-                />
-              </div>
-            )}
-            {filterComponent}
-          </div>
-          {actionsComponent && <div className="flex items-center gap-2">{actionsComponent}</div>}
+    <div className="bg-white rounded-xl border border-[#e6e4dc] shadow-2xs overflow-hidden">
+      {/* Header Toolbar */}
+      {(filterComponent || onSearchChange) && (
+        <div className="p-3.5 border-b border-[#e6e4dc] bg-[#fbfbfa] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          {onSearchChange && (
+            <div className="relative flex-1 max-w-sm">
+              <Search className="w-3.5 h-3.5 text-[#8896a4] absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={searchValue || ''}
+                onChange={(e) => onSearchChange(e.target.value)}
+                placeholder={searchPlaceholder || 'Filter records...'}
+                className="w-full pl-8 pr-3 py-1.5 text-xs text-[#141d24] bg-white border border-[#d8d5cb] rounded-lg placeholder:text-[#8896a4] focus:outline-none focus:ring-2 focus:ring-[#064e3b]/20 focus:border-[#064e3b]"
+              />
+            </div>
+          )}
+          {filterComponent && <div className="flex items-center gap-2">{filterComponent}</div>}
         </div>
       )}
 
@@ -71,88 +63,92 @@ export function DataTable<T extends { id: string | number }>({
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-slate-50 border-b border-slate-200/80">
+            <tr className="border-b border-[#e6e4dc] bg-[#f4f3ef]/70">
               {columns.map((col, idx) => (
                 <th
                   key={idx}
-                  className={`px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 ${col.className || ''}`}
+                  className={`px-4 py-3 text-[11px] font-bold text-[#52606d] uppercase tracking-wider ${col.className || ''}`}
                 >
                   {col.header}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100 text-sm">
-            {isLoading && (
-              <>
-                {[...Array(5)].map((_, i) => (
-                  <tr key={i} className="animate-pulse">
-                    {columns.map((_, colIdx) => (
-                      <td key={colIdx} className="px-4 py-3.5">
-                        <div className="h-4 bg-slate-100 rounded-md w-3/4"></div>
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </>
-            )}
-
-            {!isLoading && data.length === 0 && (
+          <tbody className="divide-y divide-[#f0eee6]">
+            {isLoading ? (
+              Array.from({ length: 5 }).map((_, rIdx) => (
+                <tr key={rIdx} className="animate-pulse">
+                  {columns.map((_, cIdx) => (
+                    <td key={cIdx} className="px-4 py-3.5">
+                      <div className="h-3.5 bg-[#eae8e1] rounded w-3/4" />
+                    </td>
+                  ))}
+                </tr>
+              ))
+            ) : data.length > 0 ? (
+              data.map((row, rIdx) => (
+                <tr
+                  key={row.id || rIdx}
+                  className="hover:bg-[#fbfbfa] transition-colors duration-100 group"
+                >
+                  {columns.map((col, cIdx) => (
+                    <td
+                      key={cIdx}
+                      className={`px-4 py-3 text-xs text-[#141d24] align-middle ${col.className || ''}`}
+                    >
+                      {col.cell
+                        ? col.cell(row)
+                        : col.accessorKey
+                        ? String(row[col.accessorKey] ?? '')
+                        : null}
+                    </td>
+                  ))}
+                </tr>
+              ))
+            ) : (
               <tr>
                 <td colSpan={columns.length} className="py-12 text-center">
-                  <div className="flex flex-col items-center justify-center">
-                    <div className="p-3 bg-slate-100 text-slate-400 rounded-full mb-3">
-                      <Inbox className="w-6 h-6" />
+                  <div className="flex flex-col items-center justify-center space-y-2 text-[#8896a4]">
+                    <div className="w-10 h-10 rounded-full bg-[#f4f3ef] border border-[#e6e4dc] flex items-center justify-center">
+                      <Inbox className="w-5 h-5 text-[#52606d]" />
                     </div>
-                    <h4 className="text-sm font-bold text-slate-800">{emptyTitle}</h4>
-                    <p className="text-xs text-slate-500 max-w-sm mt-1">{emptyDescription}</p>
+                    <p className="text-xs font-medium text-[#52606d]">{emptyMessage}</p>
                   </div>
                 </td>
               </tr>
             )}
-
-            {!isLoading &&
-              data.map((row) => (
-                <tr key={row.id} className="hover:bg-slate-50/80 transition-colors">
-                  {columns.map((col, colIdx) => (
-                    <td key={colIdx} className={`px-4 py-3.5 text-slate-700 ${col.className || ''}`}>
-                      {col.cell ? col.cell(row) : col.accessorKey ? String(row[col.accessorKey] ?? '') : ''}
-                    </td>
-                  ))}
-                </tr>
-              ))}
           </tbody>
         </table>
       </div>
 
       {/* Pagination Footer */}
       {totalPages > 1 && onPageChange && (
-        <div className="px-4 py-3 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between text-xs text-slate-500">
-          <div>
-            {totalCount !== undefined ? (
-              <span>Showing {data.length} of {totalCount} records</span>
-            ) : (
-              <span>Page {currentPage} of {totalPages}</span>
-            )}
-          </div>
+        <div className="px-4 py-3 border-t border-[#e6e4dc] bg-[#fbfbfa] flex items-center justify-between text-xs text-[#52606d]">
+          <p>
+            Showing page <span className="font-bold text-[#141d24]">{currentPage}</span> of{' '}
+            <span className="font-bold text-[#141d24]">{totalPages}</span>
+            {totalCount !== undefined && ` (${totalCount} total)`}
+          </p>
           <div className="flex items-center gap-1">
-            <button
-              onClick={() => onPageChange(currentPage - 1)}
+            <Button
+              variant="outline"
+              size="xs"
+              icon={ChevronLeft}
               disabled={currentPage <= 1}
-              className="p-1.5 rounded-md border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:pointer-events-none transition-colors"
+              onClick={() => onPageChange(currentPage - 1)}
             >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <span className="px-2 font-semibold text-slate-700">
-              {currentPage} / {totalPages}
-            </span>
-            <button
-              onClick={() => onPageChange(currentPage + 1)}
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              size="xs"
+              icon={ChevronRight}
+              iconPosition="right"
               disabled={currentPage >= totalPages}
-              className="p-1.5 rounded-md border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:pointer-events-none transition-colors"
+              onClick={() => onPageChange(currentPage + 1)}
             >
-              <ChevronRight className="w-4 h-4" />
-            </button>
+              Next
+            </Button>
           </div>
         </div>
       )}
