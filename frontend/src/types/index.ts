@@ -272,6 +272,7 @@ export interface AssessmentSubmission {
   status_display: string;
   feedback_notes?: string;
   reviewed_by?: string;
+  reviewed_by_name?: string;
   reviewed_at?: string;
   published_at?: string;
   scores: StudentScore[];

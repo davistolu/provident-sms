@@ -103,7 +103,15 @@ export const ResultReviewPage: React.FC = () => {
       className: 'text-right',
       cell: (row) => (
         <div className="flex items-center justify-end gap-2">
-          <Button variant="outline" size="sm" icon={Eye} onClick={() => setSelectedSub(row)}>
+          <Button
+            variant="outline"
+            size="sm"
+            icon={Eye}
+            onClick={() => {
+              setSelectedSub(row);
+              setFeedbackNotes(row.feedback_notes || '');
+            }}
+          >
             Review Scores
           </Button>
         </div>
@@ -151,19 +159,34 @@ export const ResultReviewPage: React.FC = () => {
         isOpen={!!selectedSub}
         onClose={() => setSelectedSub(null)}
         title={`Review Marks: ${selectedSub?.subject_name} (${selectedSub?.class_arm_name})`}
-        subtitle={`Submitted by ${selectedSub?.submitted_by_name} • ${selectedSub?.scores?.length ?? 0} students evaluated`}
-        maxWidth="3xl"
+        subtitle={`Submitted by ${selectedSub?.submitted_by_name || 'Educator'} • ${selectedSub?.scores?.length ?? 0} students evaluated`}
+        maxWidth="4xl"
       >
         <div className="space-y-4">
+          {selectedSub?.feedback_notes && (
+            <div className="p-3 bg-[#fbfbfa] border border-[#e5e3dc] rounded-md text-xs space-y-1">
+              <div className="font-semibold text-[#141d24] flex items-center justify-between">
+                <span>Existing Moderation Feedback</span>
+                {selectedSub.reviewed_by_name && (
+                  <span className="text-[11px] text-[#52606d] font-normal">
+                    By {selectedSub.reviewed_by_name} {selectedSub.reviewed_at ? `on ${new Date(selectedSub.reviewed_at).toLocaleDateString()}` : ''}
+                  </span>
+                )}
+              </div>
+              <p className="text-[#52606d]">{selectedSub.feedback_notes}</p>
+            </div>
+          )}
+
           <div className="max-h-80 overflow-y-auto border border-[#e5e3dc] rounded-md">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="bg-[#f4f3ef] border-b border-[#e5e3dc] font-bold text-[#52606d] text-[10px] uppercase tracking-wider">
+                <tr className="bg-[#f4f3ef] border-b border-[#e5e3dc] font-bold text-[#52606d] text-[10px] uppercase tracking-wider sticky top-0 bg-[#f4f3ef]">
                   <th className="px-3 py-2.5">Admission No</th>
                   <th className="px-3 py-2.5">Student Name</th>
                   <th className="px-3 py-2.5 text-center">Total (100)</th>
                   <th className="px-3 py-2.5 text-center">Grade</th>
                   <th className="px-3 py-2.5">Remark</th>
+                  <th className="px-3 py-2.5">Teacher Feedback / Remarks</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#e5e3dc]">
@@ -177,7 +200,14 @@ export const ResultReviewPage: React.FC = () => {
                         {sc.grade}
                       </span>
                     </td>
-                    <td className="px-3 py-2 text-[#52606d]">{sc.remark}</td>
+                    <td className="px-3 py-2 text-[#52606d] font-medium">{sc.remark}</td>
+                    <td className="px-3 py-2 text-[#52606d]">
+                      {sc.teacher_comment ? (
+                        <span className="italic text-[#141d24]">"{sc.teacher_comment}"</span>
+                      ) : (
+                        <span className="text-[#8c9ba5]">—</span>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -186,11 +216,11 @@ export const ResultReviewPage: React.FC = () => {
 
           <div>
             <label className="block text-xs font-semibold text-[#141d24] mb-1">
-              Feedback / Moderation Notes (Optional)
+              Feedback / Moderation Notes for Teacher
             </label>
             <textarea
               rows={2}
-              placeholder="Add feedback for educator or moderation comments..."
+              placeholder="Add moderation comments, corrections required, or feedback for the teacher..."
               value={feedbackNotes}
               onChange={(e) => setFeedbackNotes(e.target.value)}
               className="w-full px-3 py-2 text-xs bg-[#fbfbfa] border border-[#cbd2d9] rounded-md focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#064e3b] focus:border-[#064e3b] placeholder:text-[#8c9ba5]"
