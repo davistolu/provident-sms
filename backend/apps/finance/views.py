@@ -14,6 +14,7 @@ from apps.finance.serializers import (
     InvoiceItemSerializer, PaymentSerializer, ExpenseSerializer
 )
 from apps.finance.receipt_generator import PaymentReceiptPDFGenerator
+from apps.finance.invoice_generator import StudentInvoicePDFGenerator
 from apps.students.models import Student, StudentEnrollment
 from apps.academics.models import ClassArm, AcademicSession, AcademicTerm
 
@@ -133,6 +134,74 @@ class StudentInvoiceViewSet(TenantScopedModelViewSet):
             'message': f"Invoices generated for {generated_count} students in {class_arm.display_name}.",
             'generated_count': generated_count
         })
+
+    @action(detail=False, methods=['post'], url_path='generate-for-student')
+    def generate_for_student(self, request):
+        """
+        Generates or syncs invoice items for a single student based on class fee structures.
+        """
+        school = self.get_school()
+        student_id = request.data.get('student_id')
+        session_id = request.data.get('academic_session_id')
+        term_id = request.data.get('academic_term_id')
+
+        student = Student.objects.filter(school=school, id=student_id).first()
+        if not student:
+            return Response({'error': 'Valid student_id required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        session = AcademicSession.objects.filter(school=school, id=session_id).first() if session_id else AcademicSession.objects.filter(school=school, is_current=True).first()
+        term = AcademicTerm.objects.filter(school=school, id=term_id).first() if term_id else AcademicTerm.objects.filter(school=school, is_current=True).first()
+
+        if not all([session, term]):
+            return Response({'error': 'Session and term must be configured'}, status=status.HTTP_400_BAD_REQUEST)
+
+        enrollment = StudentEnrollment.objects.filter(school=school, student=student, academic_session=session, status='ACTIVE').first()
+        class_level = enrollment.class_arm.class_level if enrollment and enrollment.class_arm else None
+
+        fee_structures = FeeStructure.objects.filter(
+            school=school,
+            academic_session=session,
+            academic_term=term
+        )
+        if class_level:
+            fee_structures = fee_structures.filter(class_level__in=[class_level, None])
+
+        prefix = getattr(school.settings, 'invoice_prefix', 'INV') if hasattr(school, 'settings') else 'INV'
+        inv_no = f"{prefix}-{session.name[:4]}-{str(student.id)[:6].upper()}"
+
+        with transaction.atomic():
+            invoice, created = StudentInvoice.objects.get_or_create(
+                school=school,
+                student=student,
+                academic_session=session,
+                academic_term=term,
+                defaults={'invoice_number': inv_no}
+            )
+            if created or not invoice.items.exists():
+                for fs in fee_structures:
+                    InvoiceItem.objects.create(
+                        school=school,
+                        invoice=invoice,
+                        fee_category=fs.fee_category,
+                        description=fs.fee_category.name,
+                        amount=fs.amount
+                    )
+                invoice.recalculate_totals()
+
+        invoice.refresh_from_db()
+        return Response({
+            'status': 'success',
+            'invoice': StudentInvoiceSerializer(invoice).data
+        })
+
+    @action(detail=True, methods=['get'], url_path='invoice-pdf')
+    def download_invoice(self, request, pk=None):
+        """Generates and downloads printable student invoice PDF."""
+        invoice = self.get_object()
+        pdf_bytes = StudentInvoicePDFGenerator.generate_invoice(invoice)
+        response = HttpResponse(pdf_bytes, content_type='application/pdf')
+        response['Content-Disposition'] = f'inline; filename="Invoice_{invoice.invoice_number}.pdf"'
+        return response
 
     @action(detail=True, methods=['post'], url_path='record-payment')
     def record_payment(self, request, pk=None):

@@ -33,6 +33,7 @@ class ClassLevelSerializer(serializers.ModelSerializer):
 
 class TeacherProfileSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
+    staff_id = serializers.CharField(required=False, allow_blank=True)
     email = serializers.EmailField(write_only=True, required=False)
     first_name = serializers.CharField(write_only=True, required=False)
     last_name = serializers.CharField(write_only=True, required=False)
@@ -53,6 +54,9 @@ class TeacherProfileSerializer(serializers.ModelSerializer):
         password = validated_data.pop('password', None) or 'TeacherPass123!'
         school = validated_data.get('school')
 
+        if not validated_data.get('staff_id') and school:
+            validated_data['staff_id'] = TeacherProfile.generate_staff_id(school)
+
         if email:
             user, created = User.objects.get_or_create(
                 email=email.lower().strip(),
@@ -69,6 +73,17 @@ class TeacherProfileSerializer(serializers.ModelSerializer):
             )
             validated_data['user'] = user
         return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        first_name = validated_data.pop('first_name', None)
+        last_name = validated_data.pop('last_name', None)
+        if instance.user and (first_name is not None or last_name is not None):
+            if first_name is not None:
+                instance.user.first_name = first_name
+            if last_name is not None:
+                instance.user.last_name = last_name
+            instance.user.save()
+        return super().update(instance, validated_data)
 
 class ClassArmSerializer(serializers.ModelSerializer):
     class_level_name = serializers.CharField(source='class_level.name', read_only=True)

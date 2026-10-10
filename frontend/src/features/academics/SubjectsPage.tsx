@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { BookOpen, Plus, UserCheck } from 'lucide-react';
+import { BookOpen, Plus, UserCheck, Trash2, Edit } from 'lucide-react';
 import { api } from '@/services/api';
 import { Subject, TeacherSubjectAssignment, ClassArm, TeacherProfile, AcademicSession, PaginatedResponse } from '@/types';
 import { DataTable, Column } from '@/components/common/DataTable';
 import { Button } from '@/components/common/Button';
 import { Badge } from '@/components/common/Badge';
 import { Modal } from '@/components/common/Modal';
+import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { Input } from '@/components/common/Input';
 
 export const SubjectsPage: React.FC = () => {
@@ -14,12 +15,22 @@ export const SubjectsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'subjects' | 'assignments'>('subjects');
   const [isSubjectModalOpen, setIsSubjectModalOpen] = useState(false);
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+  const [editSubjectTarget, setEditSubjectTarget] = useState<Subject | null>(null);
+  const [deleteSubjectTarget, setDeleteSubjectTarget] = useState<Subject | null>(null);
+  const [deleteAssignTarget, setDeleteAssignTarget] = useState<TeacherSubjectAssignment | null>(null);
 
   // Subject Form
   const [subjectForm, setSubjectForm] = useState({
     name: '',
     code: '',
     category: 'GENERAL',
+  });
+
+  const [editSubjectForm, setEditSubjectForm] = useState({
+    name: '',
+    code: '',
+    category: 'GENERAL',
+    is_active: true,
   });
 
   // Assignment Form
@@ -66,6 +77,22 @@ export const SubjectsPage: React.FC = () => {
     },
   });
 
+  const updateSubjectMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: any }) => api.patch(`/academics/subjects/${id}/`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['subjects'] });
+      setEditSubjectTarget(null);
+    },
+  });
+
+  const deleteSubjectMutation = useMutation({
+    mutationFn: (id: string) => api.delete(`/academics/subjects/${id}/`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['subjects'] });
+      setDeleteSubjectTarget(null);
+    },
+  });
+
   const createAssignMutation = useMutation({
     mutationFn: (data: any) => api.post('/academics/assignments/', data),
     onSuccess: () => {
@@ -74,6 +101,30 @@ export const SubjectsPage: React.FC = () => {
       setAssignForm({ teacher: '', subject: '', class_arm: '', academic_session: '' });
     },
   });
+
+  const deleteAssignMutation = useMutation({
+    mutationFn: (id: string) => api.delete(`/academics/assignments/${id}/`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['teacher-assignments'] });
+      setDeleteAssignTarget(null);
+    },
+  });
+
+  const handleEditSubjectOpen = (subject: Subject) => {
+    setEditSubjectTarget(subject);
+    setEditSubjectForm({
+      name: subject.name || '',
+      code: subject.code || '',
+      category: subject.category || 'GENERAL',
+      is_active: subject.is_active,
+    });
+  };
+
+  const handleEditSubjectSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editSubjectTarget) return;
+    updateSubjectMutation.mutate({ id: editSubjectTarget.id, data: editSubjectForm });
+  };
 
   const subjectColumns: Column<Subject>[] = [
     {
@@ -96,6 +147,32 @@ export const SubjectsPage: React.FC = () => {
         <Badge variant={row.is_active ? 'success' : 'neutral'}>
           {row.is_active ? 'Active' : 'Inactive'}
         </Badge>
+      ),
+    },
+    {
+      header: 'Actions',
+      className: 'text-right',
+      cell: (row) => (
+        <div className="flex items-center justify-end gap-1.5">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-slate-600 hover:text-indigo-600 hover:bg-slate-100"
+            icon={Edit}
+            onClick={() => handleEditSubjectOpen(row)}
+          >
+            Edit
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-rose-600 hover:bg-rose-50"
+            icon={Trash2}
+            onClick={() => setDeleteSubjectTarget(row)}
+          >
+            Delete
+          </Button>
+        </div>
       ),
     },
   ];
@@ -123,6 +200,23 @@ export const SubjectsPage: React.FC = () => {
     {
       header: 'Session',
       accessorKey: 'session_name',
+    },
+    {
+      header: 'Actions',
+      className: 'text-right',
+      cell: (row) => (
+        <div className="flex items-center justify-end">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-rose-600 hover:bg-rose-50"
+            icon={Trash2}
+            onClick={() => setDeleteAssignTarget(row)}
+          >
+            Remove
+          </Button>
+        </div>
+      ),
     },
   ];
 
@@ -331,6 +425,92 @@ export const SubjectsPage: React.FC = () => {
           </div>
         </form>
       </Modal>
+
+      {/* Edit Subject Modal */}
+      <Modal
+        isOpen={!!editSubjectTarget}
+        onClose={() => setEditSubjectTarget(null)}
+        title="Edit Subject"
+        subtitle={`Update details for ${editSubjectTarget?.name}`}
+      >
+        <form onSubmit={handleEditSubjectSubmit} className="space-y-4">
+          <Input
+            label="Subject Name"
+            required
+            value={editSubjectForm.name}
+            onChange={(e) => setEditSubjectForm({ ...editSubjectForm, name: e.target.value })}
+          />
+
+          <div className="grid grid-cols-2 gap-3">
+            <Input
+              label="Subject Code"
+              placeholder="e.g. MTH, ENG, PHY"
+              value={editSubjectForm.code}
+              onChange={(e) => setEditSubjectForm({ ...editSubjectForm, code: e.target.value })}
+            />
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">Status</label>
+              <select
+                value={editSubjectForm.is_active ? 'true' : 'false'}
+                onChange={(e) => setEditSubjectForm({ ...editSubjectForm, is_active: e.target.value === 'true' })}
+                className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-hidden focus:border-indigo-600"
+              >
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">Category / Department</label>
+            <select
+              value={editSubjectForm.category}
+              onChange={(e) => setEditSubjectForm({ ...editSubjectForm, category: e.target.value })}
+              className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-hidden focus:border-indigo-600"
+            >
+              <option value="GENERAL">General Studies</option>
+              <option value="SCIENCES">Sciences & Mathematics</option>
+              <option value="ARTS">Arts & Humanities</option>
+              <option value="COMMERCIAL">Commercial / Business</option>
+              <option value="VOCATIONAL">Vocational / Technical</option>
+              <option value="LANGUAGES">Languages</option>
+            </select>
+          </div>
+
+          <div className="pt-3 border-t border-slate-100 flex justify-end gap-2">
+            <Button type="button" variant="ghost" onClick={() => setEditSubjectTarget(null)}>
+              Cancel
+            </Button>
+            <Button type="submit" variant="primary" isLoading={updateSubjectMutation.isPending}>
+              Save Subject Changes
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Delete Subject Confirm */}
+      <ConfirmDialog
+        isOpen={!!deleteSubjectTarget}
+        onClose={() => setDeleteSubjectTarget(null)}
+        onConfirm={() => {
+          if (deleteSubjectTarget) deleteSubjectMutation.mutate(deleteSubjectTarget.id);
+        }}
+        title="Delete Subject"
+        message={`Are you sure you want to delete the subject "${deleteSubjectTarget?.name}"?`}
+        isLoading={deleteSubjectMutation.isPending}
+      />
+
+      {/* Delete Assignment Confirm */}
+      <ConfirmDialog
+        isOpen={!!deleteAssignTarget}
+        onClose={() => setDeleteAssignTarget(null)}
+        onConfirm={() => {
+          if (deleteAssignTarget) deleteAssignMutation.mutate(deleteAssignTarget.id);
+        }}
+        title="Remove Teacher Assignment"
+        message={`Are you sure you want to unassign ${deleteAssignTarget?.teacher_name} from ${deleteAssignTarget?.subject_name} (${deleteAssignTarget?.class_arm_name})?`}
+        isLoading={deleteAssignMutation.isPending}
+      />
     </div>
   );
 };

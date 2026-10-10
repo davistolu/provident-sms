@@ -1,5 +1,6 @@
 import React from 'react';
-import { Menu, School, Bell, LogOut, ChevronDown } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Menu, School, Bell, LogOut, ChevronDown, UserCog } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 interface NavbarProps {
@@ -51,7 +52,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
 
       {/* Right Controls */}
       <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2 pl-3 border-l border-slate-200">
+        <Link
+          to="/settings/profile"
+          className="flex items-center gap-2 pl-3 border-l border-slate-200 hover:opacity-80 transition-opacity"
+        >
           <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold shadow-xs">
             {user?.first_name?.[0] || 'U'}
           </div>
@@ -59,7 +63,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
             <p className="text-xs font-bold text-slate-800 leading-tight">{user?.full_name}</p>
             <p className="text-[10px] font-semibold text-slate-400">{activeMembership?.role}</p>
           </div>
-        </div>
+        </Link>
       </div>
     </header>
   );

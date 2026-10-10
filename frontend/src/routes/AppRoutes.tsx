@@ -20,6 +20,9 @@ import { InvoicesListPage } from '@/features/finance/InvoicesListPage';
 import { FeeStructuresPage } from '@/features/finance/FeeStructuresPage';
 import { ExpensesPage } from '@/features/finance/ExpensesPage';
 import { AuditLogsPage } from '@/features/audit/AuditLogsPage';
+import { UserAccountsPage } from '@/features/accounts/UserAccountsPage';
+import { SchoolSettingsPage } from '@/features/settings/SchoolSettingsPage';
+import { UserProfilePage } from '@/features/settings/UserProfilePage';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode; requiredRole?: 'ADMIN' | 'TEACHER' }> = ({
   children,
@@ -113,6 +116,14 @@ export const AppRoutes: React.FC = () => {
           }
         />
         <Route
+          path="admin/users"
+          element={
+            <ProtectedRoute requiredRole="ADMIN">
+              <UserAccountsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="admin/classes"
           element={
             <ProtectedRoute requiredRole="ADMIN">
@@ -193,6 +204,14 @@ export const AppRoutes: React.FC = () => {
           }
         />
         <Route
+          path="admin/settings"
+          element={
+            <ProtectedRoute requiredRole="ADMIN">
+              <SchoolSettingsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="admin/audit-logs"
           element={
             <ProtectedRoute requiredRole="ADMIN">
@@ -201,9 +220,20 @@ export const AppRoutes: React.FC = () => {
           }
         />
 
+        {/* User Profile Route (Common) */}
+        <Route
+          path="settings/profile"
+          element={
+            <ProtectedRoute>
+              <UserProfilePage />
+            </ProtectedRoute>
+          }
+        />
+
         {/* Teacher Routes */}
         <Route path="teacher/dashboard" element={<TeacherDashboardPage />} />
         <Route path="teacher/classes" element={<StudentListPage />} />
+        <Route path="teacher/students/:id" element={<StudentDetailPage />} />
         <Route path="teacher/attendance" element={<AttendanceRegisterPage />} />
         <Route path="teacher/assessments/scores" element={<ScoreEntrySpreadsheetPage />} />
         <Route path="teacher/submissions" element={<ResultReviewPage />} />

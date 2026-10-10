@@ -6,20 +6,37 @@ import {
   Trash2, Edit, AlertCircle
 } from 'lucide-react';
 import { api } from '@/services/api';
+import { useAuth } from '@/context/AuthContext';
 import { Student, ClassArm, AcademicSession, PaginatedResponse } from '@/types';
 import { DataTable, Column } from '@/components/common/DataTable';
 import { Button } from '@/components/common/Button';
 import { Badge } from '@/components/common/Badge';
 import { Modal } from '@/components/common/Modal';
+import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { Input } from '@/components/common/Input';
 
 export const StudentListPage: React.FC = () => {
+  const { isAdmin } = useAuth();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
   const [selectedClass, setSelectedClass] = useState<string>('');
   const [page, setPage] = useState(1);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [isImportOpen, setIsImportOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<Student | null>(null);
+  const [editTarget, setEditTarget] = useState<Student | null>(null);
+  const [editForm, setEditForm] = useState({
+    first_name: '',
+    middle_name: '',
+    last_name: '',
+    gender: 'MALE',
+    date_of_birth: '',
+    status: 'ACTIVE',
+    class_arm_id: '',
+  });
+  const [editError, setEditError] = useState<string | null>(null);
+
+  const studentDetailBase = isAdmin ? '/admin/students' : '/teacher/students';
 
   // Form State
   const [formData, setFormData] = useState({
@@ -82,6 +99,28 @@ export const StudentListPage: React.FC = () => {
     },
   });
 
+  // Edit mutation
+  const updateStudentMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: any }) => api.patch(`/students/students/${id}/`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['students'] });
+      setEditTarget(null);
+      setEditError(null);
+    },
+    onError: (err: any) => {
+      setEditError(err.message || 'Failed to update student.');
+    },
+  });
+
+  // Delete mutation
+  const deleteStudentMutation = useMutation({
+    mutationFn: (id: string) => api.delete(`/students/students/${id}/`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['students'] });
+      setDeleteTarget(null);
+    },
+  });
+
   // Bulk import mutation
   const importMutation = useMutation({
     mutationFn: (fd: FormData) => api.upload('/students/students/bulk_import/', fd),
@@ -98,6 +137,26 @@ export const StudentListPage: React.FC = () => {
     e.preventDefault();
     setFormError(null);
     createStudentMutation.mutate(formData);
+  };
+
+  const handleEditOpen = (student: Student) => {
+    setEditTarget(student);
+    setEditForm({
+      first_name: student.first_name || '',
+      middle_name: student.middle_name || '',
+      last_name: student.last_name || '',
+      gender: student.gender || 'MALE',
+      date_of_birth: student.date_of_birth || '',
+      status: student.status || 'ACTIVE',
+      class_arm_id: student.current_enrollment?.class_arm_id || '',
+    });
+    setEditError(null);
+  };
+
+  const handleEditSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editTarget) return;
+    updateStudentMutation.mutate({ id: editTarget.id, data: editForm });
   };
 
   const handleImportSubmit = (e: React.FormEvent) => {
@@ -145,12 +204,34 @@ export const StudentListPage: React.FC = () => {
       header: 'Actions',
       className: 'text-right',
       cell: (row) => (
-        <div className="flex items-center justify-end gap-2">
-          <Link to={`/admin/students/${row.id}`}>
+        <div className="flex items-center justify-end gap-1.5">
+          <Link to={`${studentDetailBase}/${row.id}`}>
             <Button variant="outline" size="sm" icon={Eye}>
               Profile
             </Button>
           </Link>
+          {isAdmin && (
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-slate-600 hover:text-indigo-600 hover:bg-slate-100"
+                icon={Edit}
+                onClick={() => handleEditOpen(row)}
+              >
+                Edit
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-rose-600 hover:text-rose-700 hover:bg-rose-50"
+                icon={Trash2}
+                onClick={() => setDeleteTarget(row)}
+              >
+                Delete
+              </Button>
+            </>
+          )}
         </div>
       ),
     },
@@ -161,22 +242,30 @@ export const StudentListPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-slate-900">Student Directory</h1>
-          <p className="text-xs text-slate-500">Manage institution student registry, admissions, and enrollments</p>
+          <h1 className="text-xl font-bold text-slate-900">
+            {isAdmin ? 'Student Directory' : 'My Assigned Students'}
+          </h1>
+          <p className="text-xs text-slate-500">
+            {isAdmin
+              ? 'Manage institution student registry, admissions, and enrollments'
+              : 'View student profiles, class rosters, and academic records'}
+          </p>
         </div>
-        <div className="flex items-center gap-2">
-          <a href="/api/v1/students/students/export_csv/" target="_blank" rel="noreferrer">
-            <Button variant="outline" size="sm" icon={Download}>
-              Export CSV
+        {isAdmin && (
+          <div className="flex items-center gap-2">
+            <a href="/api/v1/students/students/export_csv/" target="_blank" rel="noreferrer">
+              <Button variant="outline" size="sm" icon={Download}>
+                Export CSV
+              </Button>
+            </a>
+            <Button variant="outline" size="sm" icon={Upload} onClick={() => setIsImportOpen(true)}>
+              Bulk Import
             </Button>
-          </a>
-          <Button variant="outline" size="sm" icon={Upload} onClick={() => setIsImportOpen(true)}>
-            Bulk Import
-          </Button>
-          <Button variant="primary" size="sm" icon={UserPlus} onClick={() => setIsRegisterOpen(true)}>
-            Register Student
-          </Button>
-        </div>
+            <Button variant="primary" size="sm" icon={UserPlus} onClick={() => setIsRegisterOpen(true)}>
+              Register Student
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Table */}
@@ -412,6 +501,113 @@ export const StudentListPage: React.FC = () => {
           </div>
         </form>
       </Modal>
+
+      {/* Edit Student Modal */}
+      <Modal
+        isOpen={!!editTarget}
+        onClose={() => setEditTarget(null)}
+        title="Edit Student Record"
+        subtitle={`Update details for ${editTarget?.full_name}`}
+      >
+        <form onSubmit={handleEditSubmit} className="space-y-4">
+          {editError && (
+            <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-lg">
+              {editError}
+            </div>
+          )}
+
+          <div className="grid grid-cols-3 gap-3">
+            <Input
+              label="First Name"
+              required
+              value={editForm.first_name}
+              onChange={(e) => setEditForm({ ...editForm, first_name: e.target.value })}
+            />
+            <Input
+              label="Middle Name"
+              value={editForm.middle_name}
+              onChange={(e) => setEditForm({ ...editForm, middle_name: e.target.value })}
+            />
+            <Input
+              label="Last Name (Surname)"
+              required
+              value={editForm.last_name}
+              onChange={(e) => setEditForm({ ...editForm, last_name: e.target.value })}
+            />
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">Gender</label>
+              <select
+                value={editForm.gender}
+                onChange={(e) => setEditForm({ ...editForm, gender: e.target.value })}
+                className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-hidden focus:border-indigo-600"
+              >
+                <option value="MALE">Male</option>
+                <option value="FEMALE">Female</option>
+              </select>
+            </div>
+            <Input
+              label="Date of Birth"
+              type="date"
+              value={editForm.date_of_birth}
+              onChange={(e) => setEditForm({ ...editForm, date_of_birth: e.target.value })}
+            />
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">Status</label>
+              <select
+                value={editForm.status}
+                onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
+                className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-hidden focus:border-indigo-600"
+              >
+                <option value="ACTIVE">Active</option>
+                <option value="INACTIVE">Inactive</option>
+                <option value="GRADUATED">Graduated</option>
+                <option value="SUSPENDED">Suspended</option>
+                <option value="WITHDRAWN">Withdrawn</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">Assigned Class Arm</label>
+            <select
+              value={editForm.class_arm_id}
+              onChange={(e) => setEditForm({ ...editForm, class_arm_id: e.target.value })}
+              className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-hidden focus:border-indigo-600"
+            >
+              <option value="">Select Class Arm</option>
+              {classesData?.results?.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.display_name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+            <Button type="button" variant="ghost" onClick={() => setEditTarget(null)}>
+              Cancel
+            </Button>
+            <Button type="submit" variant="primary" isLoading={updateStudentMutation.isPending}>
+              Update Student
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={() => {
+          if (deleteTarget) deleteStudentMutation.mutate(deleteTarget.id);
+        }}
+        title="Delete Student Record"
+        message={`Are you sure you want to delete ${deleteTarget?.full_name} (${deleteTarget?.admission_number})? This action will remove their active enrollment.`}
+        isLoading={deleteStudentMutation.isPending}
+      />
     </div>
   );
 };

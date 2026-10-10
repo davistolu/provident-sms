@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Users, GraduationCap, School as SchoolIcon,
   BookOpen, Calendar, CheckSquare, Award, FileText,
   CreditCard, DollarSign, ShieldAlert, BookMarked,
-  Layers, CheckCheck, FileBarChart, LogOut, ChevronRight
+  Layers, CheckCheck, UserCheck, Settings, UserCog, LogOut, ChevronRight
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
@@ -20,6 +20,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     { title: 'Overview', to: '/admin/dashboard', icon: LayoutDashboard },
     { title: 'Student Registry', to: '/admin/students', icon: Users },
     { title: 'Teachers & Staff', to: '/admin/teachers', icon: GraduationCap },
+    { title: 'User Accounts', to: '/admin/users', icon: UserCheck },
     { title: 'Classes & Arms', to: '/admin/classes', icon: Layers },
     { title: 'Subjects', to: '/admin/subjects', icon: BookOpen },
     { title: 'Sessions & Terms', to: '/admin/academic-sessions', icon: Calendar },
@@ -30,6 +31,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     { title: 'Fees & Invoicing', to: '/admin/finance/invoices', icon: CreditCard },
     { title: 'Fee Structures', to: '/admin/finance/fee-structures', icon: BookMarked },
     { title: 'School Expenses', to: '/admin/finance/expenses', icon: DollarSign },
+    { title: 'School Settings', to: '/admin/settings', icon: Settings },
+    { title: 'My Profile', to: '/settings/profile', icon: UserCog },
     { title: 'Audit Trail', to: '/admin/audit-logs', icon: ShieldAlert },
   ];
 
@@ -40,6 +43,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     { title: 'Score Entry Grid', to: '/teacher/assessments/scores', icon: Award },
     { title: 'My Submissions', to: '/teacher/submissions', icon: CheckCheck },
     { title: 'Report Cards', to: '/teacher/report-cards', icon: FileText },
+    { title: 'My Profile', to: '/settings/profile', icon: UserCog },
   ];
 
   const navItems = isAdmin ? adminNav : teacherNav;
@@ -110,14 +114,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         {/* User Footer */}
         <div className="p-3 border-t border-slate-800 bg-slate-950/30">
           <div className="flex items-center justify-between p-2 rounded-lg bg-slate-800/50 border border-slate-700/50">
-            <div className="overflow-hidden">
+            <NavLink to="/settings/profile" className="overflow-hidden block flex-1 hover:opacity-80">
               <p className="text-xs font-bold text-white truncate">{user?.full_name}</p>
               <p className="text-[10px] text-slate-400 truncate">{user?.email}</p>
-            </div>
+            </NavLink>
             <button
               onClick={() => logout()}
               title="Logout"
-              className="p-1.5 rounded-md hover:bg-slate-700 text-slate-400 hover:text-rose-400 transition-colors"
+              className="p-1.5 rounded-md hover:bg-slate-700 text-slate-400 hover:text-rose-400 transition-colors shrink-0 ml-2"
             >
               <LogOut className="w-4 h-4" />
             </button>

@@ -1,18 +1,29 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Calendar, Plus, CheckCircle2 } from 'lucide-react';
+import { Calendar, Plus, CheckCircle2, Edit, Trash2 } from 'lucide-react';
 import { api } from '@/services/api';
 import { AcademicSession, AcademicTerm, PaginatedResponse } from '@/types';
 import { DataTable, Column } from '@/components/common/DataTable';
 import { Button } from '@/components/common/Button';
 import { Badge } from '@/components/common/Badge';
 import { Modal } from '@/components/common/Modal';
+import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { Input } from '@/components/common/Input';
 
 export const AcademicSessionsPage: React.FC = () => {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState<AcademicSession | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<AcademicSession | null>(null);
+
   const [sessionForm, setSessionForm] = useState({
+    name: '',
+    start_date: '',
+    end_date: '',
+    is_current: false,
+  });
+
+  const [editForm, setEditForm] = useState({
     name: '',
     start_date: '',
     end_date: '',
@@ -32,6 +43,38 @@ export const AcademicSessionsPage: React.FC = () => {
       setSessionForm({ name: '', start_date: '', end_date: '', is_current: false });
     },
   });
+
+  const updateSessionMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: any }) => api.patch(`/academics/sessions/${id}/`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['academic-sessions'] });
+      setEditTarget(null);
+    },
+  });
+
+  const deleteSessionMutation = useMutation({
+    mutationFn: (id: string) => api.delete(`/academics/sessions/${id}/`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['academic-sessions'] });
+      setDeleteTarget(null);
+    },
+  });
+
+  const handleEditOpen = (session: AcademicSession) => {
+    setEditTarget(session);
+    setEditForm({
+      name: session.name || '',
+      start_date: session.start_date || '',
+      end_date: session.end_date || '',
+      is_current: session.is_current,
+    });
+  };
+
+  const handleEditSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editTarget) return;
+    updateSessionMutation.mutate({ id: editTarget.id, data: editForm });
+  };
 
   const columns: Column<AcademicSession>[] = [
     {
@@ -66,6 +109,32 @@ export const AcademicSessionsPage: React.FC = () => {
               {t.name} {t.is_current ? '(Active)' : ''}
             </span>
           ))}
+        </div>
+      ),
+    },
+    {
+      header: 'Actions',
+      className: 'text-right',
+      cell: (row) => (
+        <div className="flex items-center justify-end gap-1.5">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-slate-600 hover:text-indigo-600 hover:bg-slate-100"
+            icon={Edit}
+            onClick={() => handleEditOpen(row)}
+          >
+            Edit
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-rose-600 hover:bg-rose-50"
+            icon={Trash2}
+            onClick={() => setDeleteTarget(row)}
+          >
+            Delete
+          </Button>
         </div>
       ),
     },
@@ -147,6 +216,72 @@ export const AcademicSessionsPage: React.FC = () => {
           </div>
         </form>
       </Modal>
+
+      {/* Edit Session Modal */}
+      <Modal
+        isOpen={!!editTarget}
+        onClose={() => setEditTarget(null)}
+        title="Edit Academic Session"
+        subtitle={`Update calendar dates for session ${editTarget?.name}`}
+      >
+        <form onSubmit={handleEditSubmit} className="space-y-4">
+          <Input
+            label="Session Name"
+            required
+            placeholder="e.g. 2025/2026"
+            value={editForm.name}
+            onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+          />
+          <div className="grid grid-cols-2 gap-3">
+            <Input
+              label="Start Date"
+              type="date"
+              required
+              value={editForm.start_date}
+              onChange={(e) => setEditForm({ ...editForm, start_date: e.target.value })}
+            />
+            <Input
+              label="End Date"
+              type="date"
+              required
+              value={editForm.end_date}
+              onChange={(e) => setEditForm({ ...editForm, end_date: e.target.value })}
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="edit_is_current"
+              checked={editForm.is_current}
+              onChange={(e) => setEditForm({ ...editForm, is_current: e.target.checked })}
+              className="rounded text-indigo-600 focus:ring-indigo-500"
+            />
+            <label htmlFor="edit_is_current" className="text-xs font-semibold text-slate-700">
+              Set as current active academic session
+            </label>
+          </div>
+          <div className="pt-3 border-t border-slate-100 flex justify-end gap-2">
+            <Button type="button" variant="ghost" onClick={() => setEditTarget(null)}>
+              Cancel
+            </Button>
+            <Button type="submit" variant="primary" isLoading={updateSessionMutation.isPending}>
+              Save Session Changes
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Delete Session Confirmation */}
+      <ConfirmDialog
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={() => {
+          if (deleteTarget) deleteSessionMutation.mutate(deleteTarget.id);
+        }}
+        title="Delete Academic Session"
+        message={`Are you sure you want to delete session "${deleteTarget?.name}"?`}
+        isLoading={deleteSessionMutation.isPending}
+      />
     </div>
   );
 };
