@@ -102,9 +102,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       >
         {/* Brand Header */}
         <div className="h-16 flex items-center gap-3 px-5 border-b border-[#e8e6df]">
-          <div className="w-8 h-8 rounded-lg bg-[#064e3b] text-white flex items-center justify-center font-bold text-sm shadow-xs font-display">
-            P
-          </div>
+          {activeMembership?.school_logo ? (
+            <img
+              src={activeMembership.school_logo}
+              alt={activeMembership?.school_name || 'School Crest'}
+              className="w-8 h-8 rounded-lg object-contain bg-white border border-[#e8e6df] p-0.5 shadow-xs shrink-0"
+            />
+          ) : (
+            <div className="w-8 h-8 rounded-lg bg-[#064e3b] text-white flex items-center justify-center font-bold text-sm shadow-xs font-display shrink-0">
+              {activeMembership?.school_name?.[0] || 'P'}
+            </div>
+          )}
           <div className="overflow-hidden">
             <h2 className="text-xs font-bold text-[#141d24] tracking-wide truncate uppercase font-display">
               {activeMembership?.school_name || 'Providence SMS'}

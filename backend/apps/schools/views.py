@@ -1,6 +1,7 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from apps.common.viewsets import TenantScopedModelViewSet
 from apps.common.permissions import IsSchoolAdmin, IsSchoolMember, resolve_membership_for_request
 from apps.schools.models import School, SchoolMembership, SchoolSettings
@@ -24,6 +25,7 @@ class SchoolViewSet(viewsets.ModelViewSet):
     queryset = School.objects.filter(is_active=True)
     serializer_class = SchoolSerializer
     permission_classes = [permissions.IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_queryset(self):
         if self.request.user.is_superuser:

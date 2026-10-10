@@ -70,7 +70,7 @@ class ApiClient {
     return this.handleResponse<T>(response);
   }
 
-  async upload<T>(url: string, formData: FormData): Promise<T> {
+  async upload<T>(url: string, formData: FormData, method: 'POST' | 'PATCH' = 'POST'): Promise<T> {
     const finalUrl = url.startsWith('/api') ? url : `${API_BASE}${url}`;
     const token = localStorage.getItem('auth_token');
     const schoolId = localStorage.getItem('active_school_id');
@@ -79,11 +79,15 @@ class ApiClient {
     if (schoolId) headers['X-School-ID'] = schoolId;
 
     const response = await fetch(finalUrl, {
-      method: 'POST',
+      method,
       headers,
       body: formData,
     });
     return this.handleResponse<T>(response);
+  }
+
+  async uploadPatch<T>(url: string, formData: FormData): Promise<T> {
+    return this.upload<T>(url, formData, 'PATCH');
   }
 
   async downloadFile(url: string, filename?: string): Promise<void> {

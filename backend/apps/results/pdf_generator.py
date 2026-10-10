@@ -8,10 +8,11 @@ from reportlab.platypus import (
 )
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT, TA_JUSTIFY
+from apps.common.pdf_utils import generate_qr_flowable, get_school_logo_flowable
 
 class ReportCardPDFGenerator:
     """
-    Generates professional, printable PDF report cards with school branding.
+    Generates professional, printable PDF report cards with school branding & QR authenticity verification.
     """
 
     @staticmethod
@@ -38,49 +39,69 @@ class ReportCardPDFGenerator:
             'SchoolTitle',
             parent=styles['Normal'],
             fontName='Helvetica-Bold',
-            fontSize=16,
-            leading=20,
+            fontSize=15,
+            leading=18,
             alignment=TA_CENTER,
-            textColor=colors.HexColor('#1e293b')
+            textColor=colors.HexColor('#064e3b')
         )
         school_sub_style = ParagraphStyle(
             'SchoolSub',
             parent=styles['Normal'],
             fontName='Helvetica',
-            fontSize=8.5,
-            leading=12,
+            fontSize=8,
+            leading=11,
             alignment=TA_CENTER,
-            textColor=colors.HexColor('#64748b')
+            textColor=colors.HexColor('#52606d')
         )
         report_title_style = ParagraphStyle(
             'ReportTitle',
             parent=styles['Normal'],
             fontName='Helvetica-Bold',
-            fontSize=12,
-            leading=16,
+            fontSize=11,
+            leading=15,
             alignment=TA_CENTER,
-            textColor=colors.HexColor('#0f172a')
+            textColor=colors.HexColor('#064e3b')
         )
         body_bold = ParagraphStyle('BodyBold', parent=styles['Normal'], fontName='Helvetica-Bold', fontSize=8.5, leading=11)
         body_regular = ParagraphStyle('BodyRegular', parent=styles['Normal'], fontName='Helvetica', fontSize=8.5, leading=11)
-        body_center = ParagraphStyle('BodyCenter', parent=styles['Normal'], fontName='Helvetica', fontSize=8.5, leading=11, alignment=TA_CENTER)
+        body_center = ParagraphStyle('BodyCenter', parent=styles['Normal'], fontName='Helvetica', fontSize=8, leading=10, alignment=TA_CENTER)
+        sec_style = ParagraphStyle('RepSec', fontName='Helvetica-Bold', fontSize=7.5, leading=9.5, textColor=colors.HexColor('#064e3b'))
+        sec_sub = ParagraphStyle('RepSecSub', fontName='Helvetica', fontSize=7, leading=8.5, textColor=colors.HexColor('#64748b'))
         table_header = ParagraphStyle('TableHeader', parent=styles['Normal'], fontName='Helvetica-Bold', fontSize=8.5, leading=11, alignment=TA_CENTER, textColor=colors.white)
 
         elements = []
 
-        # 1. School Header
-        elements.append(Paragraph(school.name.upper(), school_title_style))
+        # 1. School Header with Logo
+        logo_flowable = get_school_logo_flowable(school, max_width=52, max_height=52)
+        header_text_cells = [
+            Paragraph(school.name.upper(), school_title_style),
+        ]
         if school.motto:
-            elements.append(Paragraph(f'<i>"{school.motto}"</i>', school_sub_style))
+            header_text_cells.append(Paragraph(f'<i>"{school.motto}"</i>', school_sub_style))
         address_parts = [school.address, school.city, school.state, school.phone]
-        clean_addr = ", ".join([p for p in address_parts if p])
+        clean_addr = " | ".join([p for p in address_parts if p])
         if clean_addr:
-            elements.append(Paragraph(clean_addr, school_sub_style))
+            header_text_cells.append(Paragraph(clean_addr, school_sub_style))
 
+        if logo_flowable:
+            header_table_data = [[
+                logo_flowable,
+                header_text_cells
+            ]]
+            header_table = Table(header_table_data, colWidths=[2.2 * cm, 14.8 * cm])
+            header_table.setStyle(TableStyle([
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('ALIGN', (0, 0), (0, 0), 'CENTER'),
+            ]))
+            elements.append(header_table)
+        else:
+            for cell in header_text_cells:
+                elements.append(cell)
+
+        elements.append(Spacer(1, 6))
+        elements.append(HRFlowable(width="100%", thickness=1.5, color=colors.HexColor('#064e3b'), spaceBefore=2, spaceAfter=6))
+        elements.append(Paragraph(f"OFFICIAL STUDENT PROGRESS REPORT &bull; {term.name.upper()} ({session.name})", report_title_style))
         elements.append(Spacer(1, 8))
-        elements.append(HRFlowable(width="100%", thickness=1.5, color=colors.HexColor('#4f46e5'), spaceBefore=2, spaceAfter=8))
-        elements.append(Paragraph(f"STUDENT PROGRESS REPORT &bull; {term.name.upper()} ({session.name})", report_title_style))
-        elements.append(Spacer(1, 10))
 
         # 2. Student Biodata Grid
         pos_str = f"{term_result.position_in_class} of {term_result.total_students_in_class}" if term_result.position_in_class else "N/A"
@@ -105,12 +126,12 @@ class ReportCardPDFGenerator:
             ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#f8fafc')),
             ('BOX', (0, 0), (-1, -1), 0.5, colors.HexColor('#cbd5e1')),
             ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#e2e8f0')),
-            ('TOPPADDING', (0, 0), (-1, -1), 4),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+            ('TOPPADDING', (0, 0), (-1, -1), 3),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
         ]))
         elements.append(bio_table)
-        elements.append(Spacer(1, 12))
+        elements.append(Spacer(1, 10))
 
         # 3. Academic Performance Table with dynamic component breakdown
         comp_codes = []
@@ -171,16 +192,16 @@ class ReportCardPDFGenerator:
 
         scores_table = Table(table_rows, colWidths=col_widths)
         scores_table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#4f46e5')),
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#064e3b')),
             ('ALIGN', (1, 1), (-2, -1), 'CENTER'),
             ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#cbd5e1')),
             ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f8fafc')]),
-            ('TOPPADDING', (0, 0), (-1, -1), 4),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+            ('TOPPADDING', (0, 0), (-1, -1), 3.5),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 3.5),
             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
         ]))
         elements.append(scores_table)
-        elements.append(Spacer(1, 12))
+        elements.append(Spacer(1, 10))
 
         # 4. Summary & Comments Box
         avg_str = f"{term_result.average_score}%"
@@ -205,27 +226,39 @@ class ReportCardPDFGenerator:
             ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#f1f5f9')),
             ('BOX', (0, 0), (-1, -1), 0.5, colors.HexColor('#94a3b8')),
             ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#cbd5e1')),
-            ('TOPPADDING', (0, 0), (-1, -1), 5),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+            ('TOPPADDING', (0, 0), (-1, -1), 4),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
             ('VALIGN', (0, 0), (-1, -1), 'TOP'),
         ]))
         elements.append(summary_table)
-        elements.append(Spacer(1, 18))
+        elements.append(Spacer(1, 12))
 
-        # 5. Signatures Block
+        # 5. Verification QR Code & Signatures Block
+        qr_string = f"https://verify.providence.edu/report/{str(term_result.id)[:8].upper()}?adm={student.admission_number}"
+        qr_flowable = generate_qr_flowable(qr_string, size=75)
+
         sig_data = [
             [
+                qr_flowable,
+                [
+                    Paragraph("<b>OFFICIAL VERIFIED REPORT CARD</b>", sec_style),
+                    Paragraph("Scan QR code with any camera to verify academic report authenticity.", sec_sub),
+                    Spacer(1, 2),
+                    Paragraph(f"Security ID: <b>SEC-{str(term_result.id)[:8].upper()}</b>", sec_sub),
+                ],
                 Paragraph("__________________________<br/><b>Class Teacher's Signature</b>", body_center),
                 Paragraph("__________________________<br/><b>Principal's Signature & Stamp</b>", body_center)
             ]
         ]
-        sig_table = Table(sig_data, colWidths=[8.5 * cm, 8.5 * cm])
+        sig_table = Table(sig_data, colWidths=[2.9 * cm, 4.3 * cm, 4.9 * cm, 4.9 * cm])
         sig_table.setStyle(TableStyle([
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('ALIGN', (0, 0), (0, 0), 'CENTER'),
+            ('ALIGN', (2, 0), (-1, -1), 'CENTER'),
         ]))
         elements.append(sig_table)
 
         doc.build(elements)
         buffer.seek(0)
         return buffer.getvalue()
+
