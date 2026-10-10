@@ -1,32 +1,80 @@
-# React + TypeScript + Vite
+# Providence SMS - Frontend Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+The frontend of Providence SMS is built with **React 19**, **TypeScript**, **Vite**, and **Tailwind CSS**. It follows the **Modern Classical Academy** design system.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Tech Stack & Libraries
 
-## React Compiler
+- **Framework**: React 19 + TypeScript (Strict Mode)
+- **Bundler & Dev Server**: Vite 5
+- **Styling & Design System**: Tailwind CSS v4 (Modern Classical Academy Palette)
+- **State & Server Cache**: TanStack React Query v5
+- **Icons**: Lucide React
+- **Data Visualization**: Recharts (Executive KPI & Enrollment distribution charts)
+- **Routing**: React Router DOM v6
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the Oxlint configuration
+## Directory Structure
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```
+frontend/src/
+├── components/
+│   ├── common/             # Reusable UI primitives (Button, Input, Badge, DataTable, Modal, ConfirmDialog, ToastContainer, StatCard)
+│   └── layout/             # AppLayout, Navbar, Sidebar, PageHeader
+├── context/
+│   ├── AuthContext.tsx     # Authentication state, active school switcher, token storage
+│   └── ToastContext.tsx    # Zero-dependency deduplicating toast system (success, error, warning, info, loading, promise)
+├── features/
+│   ├── auth/               # LoginPage, RegisterOnboardingPage (multi-step wizard)
+│   ├── dashboard/          # AdminDashboardPage, TeacherDashboardPage
+│   ├── academics/          # ClassesAndArmsPage, SubjectsPage, TeachersPage, AcademicSessionsPage
+│   ├── students/           # StudentListPage, StudentDetailPage
+│   ├── attendance/         # AttendanceRegisterPage
+│   ├── results/            # ScoreEntrySpreadsheetPage, ResultReviewPage, ReportCardsPage, AssessmentSchemesPage
+│   ├── finance/            # InvoicesListPage, FeeStructuresPage, ExpensesPage
+│   ├── accounts/           # UserAccountsPage (staff RBAC)
+│   ├── settings/           # SchoolSettingsPage (logo, branding, prefixes), UserProfilePage
+│   └── audit/              # AuditLogsPage (event filtering & JSON inspector)
+├── services/
+│   ├── api.ts              # Fetch client with tenant header injection & download handlers
+│   └── errorService.ts     # Normalized DRF validation and HTTP error parser
+├── types/                  # TypeScript domain interfaces
+├── App.tsx                 # Root router & query client setup
+└── main.tsx                # Application mounting
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+---
+
+## Key Frontend Features
+
+### 1. Modern Classical Academy Design System
+- Custom palette featuring deep emerald accents (`#064e3b`), warm alabaster backgrounds (`#fbfbfa`), and crisp typography.
+- Standardized badge system (evergreen, gold, success, danger, neutral).
+- Clean interactive skeletons and responsive cards.
+
+### 2. Normalized Error Handling & Deduplicating Toast System
+- Automatic parsing of nested DRF error dictionaries into readable user summaries.
+- Dedicated toast notifications (`toast.success`, `toast.error`, `toast.warning`, `toast.info`, `toast.loading`, `toast.promise`).
+- Built-in **2000ms deduplication window** to eliminate notification spam during query refetches.
+
+### 3. Resilient UI State & Non-Destructive Forms
+- **Data Tables (`DataTable.tsx`)**: Skeletons during data loading, informative error states with retry buttons on failure, and clean empty placeholders.
+- **Action Buttons (`Button.tsx`)**: Automatic `loadingText`, `aria-busy`, and disabled states during mutations to eliminate double submissions.
+- **Form State Preservation**: User input is preserved across validation errors for rapid, frictionless correction.
+
+---
+
+## Available Scripts
+
+```bash
+# Start local development server on http://localhost:3000
+npm run dev
+
+# Run TypeScript typecheck and production build
+npm run build
+
+# Preview production build locally
+npm run preview
+```
