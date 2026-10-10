@@ -247,6 +247,22 @@ class Command(BaseCommand):
             defaults={'payment_date': today, 'amount': Decimal('100000.00'), 'payment_method': Payment.MethodChoices.BANK_TRANSFER, 'recorded_by': admin_user, 'notes': 'First installment via GTBank transfer.'}
         )
 
+        # 11. Seed Initial Security Audit Log Entries
+        from apps.audit.models import AuditLog
+        sample_logs = [
+            (AuditLog.ActionChoices.CREATE, 'AcademicSession', str(session.id), {'name': session.name, 'message': 'Initialized 2024/2025 Academic Session'}),
+            (AuditLog.ActionChoices.CREATE, 'Student', str(created_students[0].id), {'name': created_students[0].full_name, 'admission_no': created_students[0].admission_number, 'message': 'Registered new student dossier'}),
+            (AuditLog.ActionChoices.CREATE, 'AssessmentScheme', str(scheme.id), {'name': scheme.name, 'message': 'Configured standard continuous assessment weightage (CA 30 / Exam 70)'}),
+            (AuditLog.ActionChoices.SUBMIT, 'AssessmentSubmission', str(sub_math.id), {'subject': 'Mathematics', 'class': 'JSS 1 Gold', 'message': 'Teacher submitted terminal gradebook for review'}),
+            (AuditLog.ActionChoices.PAYMENT, 'Payment', 'REC-2024-001', {'amount': '100000.00', 'student': created_students[0].full_name, 'invoice': 'INV-2024-001', 'message': 'Recorded bank transfer tuition fee installment'}),
+            (AuditLog.ActionChoices.UPDATE, 'SchoolSettings', str(school.id), {'message': 'Updated institutional invoice and grading rules'}),
+        ]
+        for act, etype, eid, details in sample_logs:
+            AuditLog.objects.get_or_create(
+                school=school, action=act, entity_type=etype, entity_id=eid,
+                defaults={'actor': admin_user, 'details': details, 'ip_address': '127.0.0.1'}
+            )
+
         self.stdout.write(self.style.SUCCESS(
             "Successfully seeded database! Credentials:\n"
             "  Admin: admin@providence.edu (Password: Admin123!)\n"
