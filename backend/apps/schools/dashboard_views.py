@@ -15,7 +15,20 @@ class AdminDashboardStatsView(APIView):
     permission_classes = [IsSchoolAdmin]
 
     def get(self, request):
-        school = request.school
+        school = getattr(request, 'school', None)
+        if not school:
+            from apps.common.permissions import resolve_membership_for_request
+            membership = resolve_membership_for_request(request)
+            if membership:
+                school = membership.school
+            elif request.user.is_superuser or request.user.is_staff:
+                from apps.schools.models import School
+                school_id = request.headers.get('X-School-ID')
+                if school_id:
+                    school = School.objects.filter(id=school_id).first()
+                if not school:
+                    school = School.objects.filter(is_active=True).first()
+
         if not school:
             return Response({'error': 'School context not resolved'}, status=400)
 
@@ -94,7 +107,23 @@ class TeacherDashboardStatsView(APIView):
     permission_classes = [IsSchoolMember]
 
     def get(self, request):
-        school = request.school
+        school = getattr(request, 'school', None)
+        if not school:
+            from apps.common.permissions import resolve_membership_for_request
+            membership = resolve_membership_for_request(request)
+            if membership:
+                school = membership.school
+            elif request.user.is_superuser or request.user.is_staff:
+                from apps.schools.models import School
+                school_id = request.headers.get('X-School-ID')
+                if school_id:
+                    school = School.objects.filter(id=school_id).first()
+                if not school:
+                    school = School.objects.filter(is_active=True).first()
+
+        if not school:
+            return Response({'error': 'School context not resolved'}, status=400)
+
         user = request.user
         teacher_profile = TeacherProfile.objects.filter(school=school, user=user).first()
 

@@ -105,14 +105,21 @@ class Command(BaseCommand):
 
         # 4. Class Levels & Arms
         levels_data = [
-            ('Nursery 1', 'NUR', ClassLevel.CategoryChoices.NURSERY, 1),
-            ('Primary 1', 'PRI-1', ClassLevel.CategoryChoices.PRIMARY, 2),
-            ('Primary 2', 'PRI-2', ClassLevel.CategoryChoices.PRIMARY, 3),
-            ('Primary 3', 'PRI-3', ClassLevel.CategoryChoices.PRIMARY, 4),
-            ('JSS 1', 'JSS-1', ClassLevel.CategoryChoices.JUNIOR_SECONDARY, 5),
-            ('JSS 2', 'JSS-2', ClassLevel.CategoryChoices.JUNIOR_SECONDARY, 6),
-            ('SS 1', 'SS-1', ClassLevel.CategoryChoices.SENIOR_SECONDARY, 7),
-            ('SS 2', 'SS-2', ClassLevel.CategoryChoices.SENIOR_SECONDARY, 8),
+            ('Nursery 1', 'NUR-1', ClassLevel.CategoryChoices.NURSERY, 1),
+            ('Nursery 2', 'NUR-2', ClassLevel.CategoryChoices.NURSERY, 2),
+            ('Nursery 3', 'NUR-3', ClassLevel.CategoryChoices.NURSERY, 3),
+            ('Primary 1', 'PRI-1', ClassLevel.CategoryChoices.PRIMARY, 4),
+            ('Primary 2', 'PRI-2', ClassLevel.CategoryChoices.PRIMARY, 5),
+            ('Primary 3', 'PRI-3', ClassLevel.CategoryChoices.PRIMARY, 6),
+            ('Primary 4', 'PRI-4', ClassLevel.CategoryChoices.PRIMARY, 7),
+            ('Primary 5', 'PRI-5', ClassLevel.CategoryChoices.PRIMARY, 8),
+            ('Primary 6', 'PRI-6', ClassLevel.CategoryChoices.PRIMARY, 9),
+            ('JSS 1', 'JSS-1', ClassLevel.CategoryChoices.JUNIOR_SECONDARY, 10),
+            ('JSS 2', 'JSS-2', ClassLevel.CategoryChoices.JUNIOR_SECONDARY, 11),
+            ('JSS 3', 'JSS-3', ClassLevel.CategoryChoices.JUNIOR_SECONDARY, 12),
+            ('SS 1', 'SS-1', ClassLevel.CategoryChoices.SENIOR_SECONDARY, 13),
+            ('SS 2', 'SS-2', ClassLevel.CategoryChoices.SENIOR_SECONDARY, 14),
+            ('SS 3', 'SS-3', ClassLevel.CategoryChoices.SENIOR_SECONDARY, 15),
         ]
         created_levels = {}
         for name, code, cat, order in levels_data:
@@ -121,8 +128,12 @@ class Command(BaseCommand):
 
         jss1_gold, _ = ClassArm.objects.get_or_create(school=school, class_level=created_levels['JSS 1'], name='Gold', defaults={'class_teacher': t1_profile})
         jss1_silver, _ = ClassArm.objects.get_or_create(school=school, class_level=created_levels['JSS 1'], name='Silver', defaults={'class_teacher': t2_profile})
+        jss2_ruby, _ = ClassArm.objects.get_or_create(school=school, class_level=created_levels['JSS 2'], name='Ruby')
+        jss3_sapphire, _ = ClassArm.objects.get_or_create(school=school, class_level=created_levels['JSS 3'], name='Sapphire')
         pri3_emerald, _ = ClassArm.objects.get_or_create(school=school, class_level=created_levels['Primary 3'], name='Emerald')
         ss1_diamond, _ = ClassArm.objects.get_or_create(school=school, class_level=created_levels['SS 1'], name='Diamond')
+        ss2_platinum, _ = ClassArm.objects.get_or_create(school=school, class_level=created_levels['SS 2'], name='Platinum')
+        ss3_titanium, _ = ClassArm.objects.get_or_create(school=school, class_level=created_levels['SS 3'], name='Titanium')
 
         # 5. Subjects & Assignments
         subjects_data = [
@@ -235,6 +246,22 @@ class Command(BaseCommand):
             school=school, student=created_students[0], invoice=inv1, reference_number='REC-2024-001',
             defaults={'payment_date': today, 'amount': Decimal('100000.00'), 'payment_method': Payment.MethodChoices.BANK_TRANSFER, 'recorded_by': admin_user, 'notes': 'First installment via GTBank transfer.'}
         )
+
+        # 11. Seed Initial Security Audit Log Entries
+        from apps.audit.models import AuditLog
+        sample_logs = [
+            (AuditLog.ActionChoices.CREATE, 'AcademicSession', str(session.id), {'name': session.name, 'message': 'Initialized 2024/2025 Academic Session'}),
+            (AuditLog.ActionChoices.CREATE, 'Student', str(created_students[0].id), {'name': created_students[0].full_name, 'admission_no': created_students[0].admission_number, 'message': 'Registered new student dossier'}),
+            (AuditLog.ActionChoices.CREATE, 'AssessmentScheme', str(scheme.id), {'name': scheme.name, 'message': 'Configured standard continuous assessment weightage (CA 30 / Exam 70)'}),
+            (AuditLog.ActionChoices.SUBMIT, 'AssessmentSubmission', str(sub_math.id), {'subject': 'Mathematics', 'class': 'JSS 1 Gold', 'message': 'Teacher submitted terminal gradebook for review'}),
+            (AuditLog.ActionChoices.PAYMENT, 'Payment', 'REC-2024-001', {'amount': '100000.00', 'student': created_students[0].full_name, 'invoice': 'INV-2024-001', 'message': 'Recorded bank transfer tuition fee installment'}),
+            (AuditLog.ActionChoices.UPDATE, 'SchoolSettings', str(school.id), {'message': 'Updated institutional invoice and grading rules'}),
+        ]
+        for act, etype, eid, details in sample_logs:
+            AuditLog.objects.get_or_create(
+                school=school, action=act, entity_type=etype, entity_id=eid,
+                defaults={'actor': admin_user, 'details': details, 'ip_address': '127.0.0.1'}
+            )
 
         self.stdout.write(self.style.SUCCESS(
             "Successfully seeded database! Credentials:\n"

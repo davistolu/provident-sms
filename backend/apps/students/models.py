@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 from apps.common.models import TenantModel
 
 class Student(TenantModel):
@@ -13,7 +14,7 @@ class Student(TenantModel):
         WITHDRAWN = 'WITHDRAWN', 'Withdrawn'
         SUSPENDED = 'SUSPENDED', 'Suspended'
 
-    admission_number = models.CharField(max_length=50, db_index=True)
+    admission_number = models.CharField(max_length=50, blank=True, db_index=True)
     first_name = models.CharField(max_length=100)
     middle_name = models.CharField(max_length=100, blank=True, default='')
     last_name = models.CharField(max_length=100)
@@ -30,6 +31,43 @@ class Student(TenantModel):
     class Meta:
         unique_together = ('school', 'admission_number')
         ordering = ['last_name', 'first_name']
+
+    @classmethod
+    def generate_admission_number(cls, school):
+        """
+        Automatically generates a unique, sequential admission number.
+        Format: {PREFIX}/{YEAR}/{0001} (e.g. SMS/2026/0001)
+        """
+        year = timezone.now().year
+        prefix = 'SMS'
+        if hasattr(school, 'settings') and school.settings and school.settings.admission_number_prefix:
+            prefix = school.settings.admission_number_prefix
+        elif school and school.code:
+            prefix = school.code.split('-')[0]
+
+        pattern = f"{prefix}/{year}/"
+        latest = cls.objects.filter(school=school, admission_number__startswith=pattern).order_by('-admission_number').first()
+
+        next_num = 1
+        if latest and latest.admission_number:
+            try:
+                suffix = latest.admission_number.split('/')[-1]
+                next_num = int(suffix) + 1
+            except (ValueError, IndexError):
+                next_num = cls.objects.filter(school=school).count() + 1
+        else:
+            next_num = cls.objects.filter(school=school).count() + 1
+
+        while True:
+            candidate = f"{prefix}/{year}/{next_num:04d}"
+            if not cls.objects.filter(school=school, admission_number=candidate).exists():
+                return candidate
+            next_num += 1
+
+    def save(self, *args, **kwargs):
+        if not self.admission_number and self.school:
+            self.admission_number = self.generate_admission_number(self.school)
+        super().save(*args, **kwargs)
 
     @property
     def full_name(self):
