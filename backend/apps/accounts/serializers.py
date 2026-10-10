@@ -46,3 +46,51 @@ class PasswordChangeSerializer(serializers.Serializer):
         if not user.check_password(value):
             raise serializers.ValidationError('Current password is incorrect.')
         return value
+
+class RegisterAndOnboardSerializer(serializers.Serializer):
+    first_name = serializers.CharField(max_length=150)
+    last_name = serializers.CharField(max_length=150)
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True, min_length=6)
+    phone = serializers.CharField(max_length=30, required=False, allow_blank=True, default='')
+
+    school_name = serializers.CharField(max_length=255)
+    school_code = serializers.CharField(max_length=50, required=False, allow_blank=True)
+    motto = serializers.CharField(max_length=255, required=False, allow_blank=True, default='')
+    school_email = serializers.EmailField(required=False, allow_blank=True, default='')
+    school_phone = serializers.CharField(max_length=50, required=False, allow_blank=True, default='')
+    address = serializers.CharField(required=False, allow_blank=True, default='')
+    city = serializers.CharField(max_length=100, required=False, allow_blank=True, default='')
+    state = serializers.CharField(max_length=100, required=False, allow_blank=True, default='')
+    country = serializers.CharField(max_length=100, required=False, default='Nigeria')
+    currency_symbol = serializers.CharField(max_length=10, required=False, default='₦')
+    session_name = serializers.CharField(max_length=50, required=False, default='2024/2025')
+    stages = serializers.ListField(
+        child=serializers.CharField(),
+        required=False,
+        default=['NURSERY', 'PRIMARY', 'JUNIOR_SECONDARY', 'SENIOR_SECONDARY']
+    )
+    create_standard_classes = serializers.BooleanField(default=True)
+    create_standard_subjects = serializers.BooleanField(default=True)
+    create_standard_grading = serializers.BooleanField(default=True)
+
+class CreateSchoolSerializer(serializers.Serializer):
+    school_name = serializers.CharField(max_length=255)
+    school_code = serializers.CharField(max_length=50, required=False, allow_blank=True)
+    motto = serializers.CharField(max_length=255, required=False, allow_blank=True, default='')
+    email = serializers.EmailField(required=False, allow_blank=True, default='')
+    phone = serializers.CharField(max_length=50, required=False, allow_blank=True, default='')
+    address = serializers.CharField(required=False, allow_blank=True, default='')
+    city = serializers.CharField(max_length=100, required=False, allow_blank=True, default='')
+    state = serializers.CharField(max_length=100, required=False, allow_blank=True, default='')
+    country = serializers.CharField(max_length=100, required=False, default='Nigeria')
+    currency_symbol = serializers.CharField(max_length=10, required=False, default='₦')
+    session_name = serializers.CharField(max_length=50, required=False, default='2024/2025')
+    stages = serializers.ListField(
+        child=serializers.CharField(),
+        required=False,
+        default=['NURSERY', 'PRIMARY', 'JUNIOR_SECONDARY', 'SENIOR_SECONDARY']
+    )
+    create_standard_classes = serializers.BooleanField(default=True)
+    create_standard_subjects = serializers.BooleanField(default=True)
+    create_standard_grading = serializers.BooleanField(default=True)

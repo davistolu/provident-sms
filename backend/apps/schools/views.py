@@ -6,6 +6,8 @@ from apps.common.viewsets import TenantScopedModelViewSet
 from apps.common.permissions import IsSchoolAdmin, IsSchoolMember, resolve_membership_for_request
 from apps.schools.models import School, SchoolMembership, SchoolSettings
 from apps.schools.serializers import SchoolSerializer, SchoolMembershipSerializer, SchoolSettingsSerializer
+from apps.accounts.serializers import CreateSchoolSerializer, SchoolMembershipDetailSerializer
+from apps.schools.services import SchoolProvisioningService
 
 def get_school_context(request):
     school = getattr(request, 'school', None)
@@ -45,6 +47,41 @@ class SchoolViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
 
         return Response(SchoolSerializer(school).data)
+
+    @action(detail=False, methods=['post'], permission_classes=[permissions.IsAuthenticated], url_path='create-school')
+    def create_school(self, request):
+        serializer = CreateSchoolSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        school, membership = SchoolProvisioningService.provision_school(
+            user=request.user,
+            school_name=data['school_name'],
+            motto=data.get('motto', ''),
+            email=data.get('email', ''),
+            phone=data.get('phone', ''),
+            address=data.get('address', ''),
+            city=data.get('city', ''),
+            state=data.get('state', ''),
+            country=data.get('country', 'Nigeria'),
+            currency_symbol=data.get('currency_symbol', '₦'),
+            session_name=data.get('session_name', '2024/2025'),
+            stages=data.get('stages'),
+            create_standard_classes=data.get('create_standard_classes', True),
+            create_standard_subjects=data.get('create_standard_subjects', True),
+            create_standard_grading=data.get('create_standard_grading', True),
+            school_code=data.get('school_code')
+        )
+
+        memberships = SchoolMembership.objects.filter(user=request.user, is_active=True).select_related('school')
+
+        return Response({
+            'status': 'success',
+            'message': f"School '{school.name}' created and added to your portfolio.",
+            'school': SchoolSerializer(school).data,
+            'memberships': SchoolMembershipDetailSerializer(memberships, many=True).data,
+            'active_membership': SchoolMembershipDetailSerializer(membership).data,
+        }, status=status.HTTP_201_CREATED)
 
 class SchoolMembershipViewSet(TenantScopedModelViewSet):
     queryset = SchoolMembership.objects.all().select_related('user')

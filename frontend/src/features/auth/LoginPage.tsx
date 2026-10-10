@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { School, ArrowRight, ShieldCheck, Sparkles, BookOpen, GraduationCap } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { School, ArrowRight, ShieldCheck, Sparkles, BookOpen, GraduationCap, PlusCircle } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
@@ -130,6 +130,19 @@ export const LoginPage: React.FC = () => {
             >
               Authenticate & Enter Workspace
             </Button>
+
+            <div className="pt-2 text-center">
+              <p className="text-xs text-[#52606d]">
+                Setting up a new school entity?{' '}
+                <Link
+                  to="/register"
+                  className="font-bold text-[#064e3b] hover:text-[#043326] underline inline-flex items-center gap-1"
+                >
+                  <span>Register & Setup School</span>
+                  <ArrowRight className="w-3 h-3" />
+                </Link>
+              </p>
+            </div>
           </form>
 
           {/* Quick Demo Selector */}
