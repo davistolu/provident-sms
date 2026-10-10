@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import {
   UserPlus, Download, Upload, Eye, Filter, CheckCircle2,
-  Trash2, Edit, AlertCircle
+  Trash2, Edit, AlertCircle, Users, GraduationCap
 } from 'lucide-react';
 import { api } from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
@@ -171,24 +171,28 @@ export const StudentListPage: React.FC = () => {
 
   const columns: Column<Student>[] = [
     {
-      header: 'Admission No',
+      header: 'Admission Number',
       accessorKey: 'admission_number',
-      cell: (row) => <span className="font-mono font-bold text-xs text-indigo-600">{row.admission_number}</span>,
+      cell: (row) => (
+        <span className="font-mono font-bold text-xs text-[#064e3b] bg-[#ecfdf5] px-2 py-0.5 rounded border border-[#a7f3d0]">
+          {row.admission_number}
+        </span>
+      ),
     },
     {
-      header: 'Full Name',
+      header: 'Student Name',
       cell: (row) => (
         <div>
-          <p className="font-bold text-slate-900">{row.full_name}</p>
-          <p className="text-[11px] text-slate-400">{row.gender}</p>
+          <p className="font-bold text-[#141d24]">{row.full_name}</p>
+          <p className="text-[11px] text-[#8896a4]">{row.gender}</p>
         </div>
       ),
     },
     {
-      header: 'Class / Arm',
+      header: 'Class / Stream',
       cell: (row) => (
-        <span className="font-semibold text-slate-700">
-          {row.current_enrollment?.class_arm_name || <span className="text-slate-400">Unassigned</span>}
+        <span className="font-semibold text-[#141d24]">
+          {row.current_enrollment?.class_arm_name || <span className="text-[#8896a4] italic">Unassigned</span>}
         </span>
       ),
     },
@@ -206,16 +210,15 @@ export const StudentListPage: React.FC = () => {
       cell: (row) => (
         <div className="flex items-center justify-end gap-1.5">
           <Link to={`${studentDetailBase}/${row.id}`}>
-            <Button variant="outline" size="sm" icon={Eye}>
-              Profile
+            <Button variant="outline" size="xs" icon={Eye}>
+              Dossier
             </Button>
           </Link>
           {isAdmin && (
             <>
               <Button
                 variant="ghost"
-                size="sm"
-                className="text-slate-600 hover:text-indigo-600 hover:bg-slate-100"
+                size="xs"
                 icon={Edit}
                 onClick={() => handleEditOpen(row)}
               >
@@ -223,8 +226,8 @@ export const StudentListPage: React.FC = () => {
               </Button>
               <Button
                 variant="ghost"
-                size="sm"
-                className="text-rose-600 hover:text-rose-700 hover:bg-rose-50"
+                size="xs"
+                className="text-[#991b1b] hover:bg-[#fef2f2]"
                 icon={Trash2}
                 onClick={() => setDeleteTarget(row)}
               >
@@ -242,22 +245,30 @@ export const StudentListPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-slate-900">
-            {isAdmin ? 'Student Directory' : 'My Assigned Students'}
-          </h1>
-          <p className="text-xs text-slate-500">
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl font-bold font-display text-[#141d24]">
+              {isAdmin ? 'Student Master Directory' : 'My Enrolled Students'}
+            </h1>
+            <Badge variant="evergreen">
+              {studentsData?.count ?? 0} Students
+            </Badge>
+          </div>
+          <p className="text-xs text-[#52606d] mt-0.5">
             {isAdmin
-              ? 'Manage institution student registry, admissions, and enrollments'
-              : 'View student profiles, class rosters, and academic records'}
+              ? 'Institutional admission registry, academic records, and enrollment streams'
+              : 'Class rosters, biodata, and student academic performance dossiers'}
           </p>
         </div>
         {isAdmin && (
           <div className="flex items-center gap-2">
-            <a href="/api/v1/students/students/export_csv/" target="_blank" rel="noreferrer">
-              <Button variant="outline" size="sm" icon={Download}>
-                Export CSV
-              </Button>
-            </a>
+            <Button
+              variant="outline"
+              size="sm"
+              icon={Download}
+              onClick={() => api.downloadFile('/students/students/export_csv/', 'Student_Registry.csv')}
+            >
+              Export CSV
+            </Button>
             <Button variant="outline" size="sm" icon={Upload} onClick={() => setIsImportOpen(true)}>
               Bulk Import
             </Button>
@@ -273,7 +284,7 @@ export const StudentListPage: React.FC = () => {
         columns={columns}
         data={studentsData?.results || []}
         isLoading={isLoading}
-        searchPlaceholder="Search student by name or admission no..."
+        searchPlaceholder="Filter student by name or admission number..."
         searchValue={search}
         onSearchChange={(val) => {
           setSearch(val);
@@ -286,7 +297,7 @@ export const StudentListPage: React.FC = () => {
               setSelectedClass(e.target.value);
               setPage(1);
             }}
-            className="px-3 py-1.5 text-xs bg-white border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 text-slate-700"
+            className="px-3 py-1.5 text-xs bg-white border border-[#d8d5cb] rounded-lg text-[#141d24] focus:outline-none focus:ring-2 focus:ring-[#064e3b]/20 focus:border-[#064e3b]"
           >
             <option value="">All Class Arms</option>
             {classesData?.results?.map((c) => (
@@ -311,7 +322,7 @@ export const StudentListPage: React.FC = () => {
       >
         <form onSubmit={handleRegisterSubmit} className="space-y-4">
           {formError && (
-            <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-lg">
+            <div className="p-3 bg-[#fef2f2] border border-[#fecaca] text-[#991b1b] text-xs font-medium rounded-lg">
               {formError}
             </div>
           )}
@@ -321,15 +332,17 @@ export const StudentListPage: React.FC = () => {
               label="Admission Number"
               placeholder="Auto-generated if left blank"
               value={formData.admission_number}
-              helperText="Leave empty to auto-generate unique ID"
+              helperText="Leave empty for sequential auto-generation"
               onChange={(e) => setFormData({ ...formData, admission_number: e.target.value })}
             />
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Gender</label>
+              <label className="block text-[11px] font-bold text-[#52606d] uppercase tracking-wider mb-1.5">
+                Gender
+              </label>
               <select
                 value={formData.gender}
                 onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-                className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-hidden focus:border-indigo-600"
+                className="w-full px-3 py-2 text-xs bg-white border border-[#d8d5cb] rounded-lg text-[#141d24] focus:outline-none focus:ring-2 focus:ring-[#064e3b]/20 focus:border-[#064e3b]"
               >
                 <option value="MALE">Male</option>
                 <option value="FEMALE">Female</option>
@@ -352,9 +365,9 @@ export const StudentListPage: React.FC = () => {
               onChange={(e) => setFormData({ ...formData, middle_name: e.target.value })}
             />
             <Input
-              label="Last Name (Surname)"
+              label="Surname"
               required
-              placeholder="Surname"
+              placeholder="Last name"
               value={formData.last_name}
               onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
             />
@@ -368,11 +381,13 @@ export const StudentListPage: React.FC = () => {
               onChange={(e) => setFormData({ ...formData, date_of_birth: e.target.value })}
             />
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Assign Class Arm</label>
+              <label className="block text-[11px] font-bold text-[#52606d] uppercase tracking-wider mb-1.5">
+                Assign Class Stream
+              </label>
               <select
                 value={formData.class_arm_id}
                 onChange={(e) => setFormData({ ...formData, class_arm_id: e.target.value })}
-                className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-hidden focus:border-indigo-600"
+                className="w-full px-3 py-2 text-xs bg-white border border-[#d8d5cb] rounded-lg text-[#141d24] focus:outline-none focus:ring-2 focus:ring-[#064e3b]/20 focus:border-[#064e3b]"
               >
                 <option value="">Select Class Arm</option>
                 {classesData?.results?.map((c) => (
@@ -385,11 +400,13 @@ export const StudentListPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">Academic Session</label>
+            <label className="block text-[11px] font-bold text-[#52606d] uppercase tracking-wider mb-1.5">
+              Academic Session
+            </label>
             <select
               value={formData.academic_session_id}
               onChange={(e) => setFormData({ ...formData, academic_session_id: e.target.value })}
-              className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-hidden focus:border-indigo-600"
+              className="w-full px-3 py-2 text-xs bg-white border border-[#d8d5cb] rounded-lg text-[#141d24] focus:outline-none focus:ring-2 focus:ring-[#064e3b]/20 focus:border-[#064e3b]"
             >
               <option value="">Select Academic Session</option>
               {sessionsData?.results?.map((s) => (
@@ -400,7 +417,7 @@ export const StudentListPage: React.FC = () => {
             </select>
           </div>
 
-          <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+          <div className="pt-3 border-t border-[#e6e4dc] flex items-center justify-end gap-2">
             <Button type="button" variant="ghost" onClick={() => setIsRegisterOpen(false)}>
               Cancel
             </Button>
@@ -422,8 +439,8 @@ export const StudentListPage: React.FC = () => {
         subtitle="Upload a CSV file containing Admission Number, First Name, Last Name, and Gender"
       >
         <form onSubmit={handleImportSubmit} className="space-y-4">
-          <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-600">
-            <p className="font-bold text-slate-800 mb-1">CSV Column Requirements:</p>
+          <div className="p-3 bg-[#fbfbfa] border border-[#e6e4dc] rounded-lg text-xs text-[#52606d]">
+            <p className="font-bold text-[#141d24] mb-1">CSV Column Requirements:</p>
             <p className="font-mono text-[11px]">Admission Number, First Name, Last Name, Gender, Date of Birth</p>
           </div>
 
@@ -432,16 +449,18 @@ export const StudentListPage: React.FC = () => {
             accept=".csv"
             required
             onChange={(e) => setImportFile(e.target.files?.[0] || null)}
-            className="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+            className="block w-full text-xs text-[#52606d] file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#ecfdf5] file:text-[#064e3b] hover:file:bg-[#d1fae5] cursor-pointer"
           />
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Assign to Class</label>
+              <label className="block text-[11px] font-bold text-[#52606d] uppercase tracking-wider mb-1">
+                Assign to Class
+              </label>
               <select
                 value={formData.class_arm_id}
                 onChange={(e) => setFormData({ ...formData, class_arm_id: e.target.value })}
-                className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-lg"
+                className="w-full px-3 py-2 text-xs bg-white border border-[#d8d5cb] rounded-lg"
               >
                 <option value="">Select Class Arm</option>
                 {classesData?.results?.map((c) => (
@@ -452,11 +471,13 @@ export const StudentListPage: React.FC = () => {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Session</label>
+              <label className="block text-[11px] font-bold text-[#52606d] uppercase tracking-wider mb-1">
+                Session
+              </label>
               <select
                 value={formData.academic_session_id}
                 onChange={(e) => setFormData({ ...formData, academic_session_id: e.target.value })}
-                className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-lg"
+                className="w-full px-3 py-2 text-xs bg-white border border-[#d8d5cb] rounded-lg"
               >
                 <option value="">Select Academic Session</option>
                 {sessionsData?.results?.map((s) => (
@@ -471,7 +492,7 @@ export const StudentListPage: React.FC = () => {
           {importResult && (
             <div
               className={`p-3 rounded-lg text-xs ${
-                importResult.error ? 'bg-rose-50 text-rose-700' : 'bg-emerald-50 text-emerald-700'
+                importResult.error ? 'bg-[#fef2f2] text-[#991b1b]' : 'bg-[#ecfdf5] text-[#065f46]'
               }`}
             >
               {importResult.error ? (
@@ -484,7 +505,7 @@ export const StudentListPage: React.FC = () => {
             </div>
           )}
 
-          <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+          <div className="pt-3 border-t border-[#e6e4dc] flex items-center justify-end gap-2">
             <Button
               type="button"
               variant="ghost"
@@ -511,7 +532,7 @@ export const StudentListPage: React.FC = () => {
       >
         <form onSubmit={handleEditSubmit} className="space-y-4">
           {editError && (
-            <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-lg">
+            <div className="p-3 bg-[#fef2f2] border border-[#fecaca] text-[#991b1b] text-xs font-medium rounded-lg">
               {editError}
             </div>
           )}
@@ -529,7 +550,7 @@ export const StudentListPage: React.FC = () => {
               onChange={(e) => setEditForm({ ...editForm, middle_name: e.target.value })}
             />
             <Input
-              label="Last Name (Surname)"
+              label="Surname"
               required
               value={editForm.last_name}
               onChange={(e) => setEditForm({ ...editForm, last_name: e.target.value })}
@@ -538,11 +559,13 @@ export const StudentListPage: React.FC = () => {
 
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Gender</label>
+              <label className="block text-[11px] font-bold text-[#52606d] uppercase tracking-wider mb-1.5">
+                Gender
+              </label>
               <select
                 value={editForm.gender}
                 onChange={(e) => setEditForm({ ...editForm, gender: e.target.value })}
-                className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-hidden focus:border-indigo-600"
+                className="w-full px-3 py-2 text-xs bg-white border border-[#d8d5cb] rounded-lg text-[#141d24]"
               >
                 <option value="MALE">Male</option>
                 <option value="FEMALE">Female</option>
@@ -555,11 +578,13 @@ export const StudentListPage: React.FC = () => {
               onChange={(e) => setEditForm({ ...editForm, date_of_birth: e.target.value })}
             />
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Status</label>
+              <label className="block text-[11px] font-bold text-[#52606d] uppercase tracking-wider mb-1.5">
+                Status
+              </label>
               <select
                 value={editForm.status}
                 onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
-                className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-hidden focus:border-indigo-600"
+                className="w-full px-3 py-2 text-xs bg-white border border-[#d8d5cb] rounded-lg text-[#141d24]"
               >
                 <option value="ACTIVE">Active</option>
                 <option value="INACTIVE">Inactive</option>
@@ -571,11 +596,13 @@ export const StudentListPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">Assigned Class Arm</label>
+            <label className="block text-[11px] font-bold text-[#52606d] uppercase tracking-wider mb-1.5">
+              Assigned Class Stream
+            </label>
             <select
               value={editForm.class_arm_id}
               onChange={(e) => setEditForm({ ...editForm, class_arm_id: e.target.value })}
-              className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-hidden focus:border-indigo-600"
+              className="w-full px-3 py-2 text-xs bg-white border border-[#d8d5cb] rounded-lg text-[#141d24]"
             >
               <option value="">Select Class Arm</option>
               {classesData?.results?.map((c) => (
@@ -586,12 +613,12 @@ export const StudentListPage: React.FC = () => {
             </select>
           </div>
 
-          <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+          <div className="pt-3 border-t border-[#e6e4dc] flex items-center justify-end gap-2">
             <Button type="button" variant="ghost" onClick={() => setEditTarget(null)}>
               Cancel
             </Button>
             <Button type="submit" variant="primary" isLoading={updateStudentMutation.isPending}>
-              Update Student
+              Save Changes
             </Button>
           </div>
         </form>

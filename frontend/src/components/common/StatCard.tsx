@@ -1,16 +1,16 @@
 import React from 'react';
 import { LucideIcon } from 'lucide-react';
 
-interface StatCardProps {
+export interface StatCardProps {
   title: string;
   value: string | number;
   subtitle?: string;
-  icon: LucideIcon;
+  icon?: LucideIcon;
   trend?: {
     value: string;
     isPositive: boolean;
   };
-  variant?: 'primary' | 'success' | 'warning' | 'indigo' | 'slate';
+  className?: string;
 }
 
 export const StatCard: React.FC<StatCardProps> = ({
@@ -19,36 +19,37 @@ export const StatCard: React.FC<StatCardProps> = ({
   subtitle,
   icon: Icon,
   trend,
-  variant = 'primary',
+  className = '',
 }) => {
-  const colorMap = {
-    primary: 'bg-indigo-50 text-indigo-600 border-indigo-100',
-    success: 'bg-emerald-50 text-emerald-600 border-emerald-100',
-    warning: 'bg-amber-50 text-amber-600 border-amber-100',
-    indigo: 'bg-blue-50 text-blue-600 border-blue-100',
-    slate: 'bg-slate-100 text-slate-700 border-slate-200',
-  };
-
   return (
-    <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-xs hover:shadow-md transition-shadow">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">{title}</p>
-          <h3 className="text-2xl font-bold text-slate-900 mt-1">{value}</h3>
-          {subtitle && <p className="text-xs text-slate-500 mt-1">{subtitle}</p>}
-        </div>
-        <div className={`p-3 rounded-lg border ${colorMap[variant]}`}>
-          <Icon className="w-5 h-5" />
-        </div>
+    <div
+      className={`bg-white p-5 rounded-xl border border-[#e6e4dc] hover:border-[#c8c5b9] transition-all duration-150 shadow-2xs ${className}`}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-[11px] font-bold text-[#52606d] uppercase tracking-wider">{title}</p>
+        {Icon && (
+          <div className="w-7 h-7 rounded-lg bg-[#f4f3ef] border border-[#e6e4dc] text-[#064e3b] flex items-center justify-center">
+            <Icon className="w-3.5 h-3.5" />
+          </div>
+        )}
       </div>
-      {trend && (
-        <div className="mt-3 pt-3 border-t border-slate-100 flex items-center gap-1.5 text-xs">
-          <span className={`font-semibold ${trend.isPositive ? 'text-emerald-600' : 'text-rose-600'}`}>
+
+      <div className="mt-3 flex items-baseline gap-2">
+        <span className="text-2xl font-bold font-mono tracking-tight text-[#141d24]">{value}</span>
+        {trend && (
+          <span
+            className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+              trend.isPositive
+                ? 'bg-[#ecfdf5] text-[#065f46] border border-[#a7f3d0]'
+                : 'bg-[#fef2f2] text-[#991b1b] border border-[#fecaca]'
+            }`}
+          >
             {trend.value}
           </span>
-          <span className="text-slate-400">vs last period</span>
-        </div>
-      )}
+        )}
+      </div>
+
+      {subtitle && <p className="mt-1 text-[11px] text-[#8896a4]">{subtitle}</p>}
     </div>
   );
 };

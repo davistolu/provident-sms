@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { CreditCard, DollarSign, Download, Plus, CheckCircle2, FileText, Printer, User } from 'lucide-react';
+import { CreditCard, DollarSign, Download, Plus, CheckCircle2, FileText, Printer, User, Wallet, Sparkles } from 'lucide-react';
 import { api } from '@/services/api';
 import { StudentInvoice, ClassArm, Student, PaginatedResponse } from '@/types';
 import { DataTable, Column } from '@/components/common/DataTable';
@@ -122,41 +122,40 @@ export const InvoicesListPage: React.FC = () => {
 
   const columns: Column<StudentInvoice>[] = [
     {
-      header: 'Invoice No',
+      header: 'Invoice Reference',
       accessorKey: 'invoice_number',
-      cell: (row) => <span className="font-mono font-bold text-xs text-indigo-600">{row.invoice_number}</span>,
-    },
-    {
-      header: 'Student Name',
       cell: (row) => (
         <div>
-          <p className="font-bold text-slate-900">{row.student_name}</p>
-          <p className="text-[11px] font-mono text-slate-400">{row.admission_number}</p>
+          <span className="font-mono font-bold text-xs text-[#064e3b]">{row.invoice_number}</span>
+          <div className="text-[11px] text-[#52606d] font-sans">
+            {row.term_name} • {row.session_name}
+          </div>
         </div>
       ),
     },
     {
-      header: 'Term / Session',
+      header: 'Student Dossier',
       cell: (row) => (
-        <span className="text-xs text-slate-600">
-          {row.term_name} ({row.session_name})
-        </span>
+        <div>
+          <p className="font-semibold text-sm text-[#141d24]">{row.student_name}</p>
+          <p className="text-xs font-mono text-[#52606d]">{row.admission_number}</p>
+        </div>
       ),
     },
     {
       header: 'Total Billed',
-      cell: (row) => <span className="font-bold text-slate-900 text-xs">₦{Number(row.total_amount).toLocaleString()}</span>,
+      cell: (row) => <span className="font-mono font-bold text-[#141d24] text-xs">₦{Number(row.total_amount).toLocaleString()}</span>,
     },
     {
       header: 'Paid to Date',
       cell: (row) => (
-        <span className="font-bold text-emerald-700 text-xs">₦{Number(row.amount_paid).toLocaleString()}</span>
+        <span className="font-mono font-bold text-[#064e3b] text-xs">₦{Number(row.amount_paid).toLocaleString()}</span>
       ),
     },
     {
       header: 'Balance Due',
       cell: (row) => (
-        <span className="font-bold text-rose-700 text-xs">₦{Number(row.balance).toLocaleString()}</span>
+        <span className="font-mono font-bold text-[#be123c] text-xs">₦{Number(row.balance).toLocaleString()}</span>
       ),
     },
     {
@@ -164,7 +163,7 @@ export const InvoicesListPage: React.FC = () => {
       cell: (row) => (
         <Badge
           variant={
-            row.status === 'PAID' ? 'success' : row.status === 'PARTIALLY_PAID' ? 'warning' : 'danger'
+            row.status === 'PAID' ? 'evergreen' : row.status === 'PARTIALLY_PAID' ? 'gold' : 'danger'
           }
         >
           {row.status_display}
@@ -205,11 +204,11 @@ export const InvoicesListPage: React.FC = () => {
           )}
 
           {/* Download Receipt PDF if payment recorded */}
-          {row.payments?.length > 0 && (
+          {row.payments && row.payments.length > 0 && (
             <Button
               variant="outline"
               size="sm"
-              className="text-emerald-700 border-emerald-200 hover:bg-emerald-50"
+              className="text-[#064e3b] border-[#a7f3d0] hover:bg-[#ecfdf5]"
               icon={Printer}
               title="Download Payment Receipt PDF"
               isLoading={downloadingId === `rec-${row.payments[0].id}`}
@@ -225,10 +224,14 @@ export const InvoicesListPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#e5e3dc]">
         <div>
-          <h1 className="text-xl font-bold text-slate-900">Student Fee Invoicing & Receipts</h1>
-          <p className="text-xs text-slate-500">Track fee obligations, issue official PDF invoices & receipts, and record payments</p>
+          <h1 className="font-serif text-2xl lg:text-3xl font-bold tracking-tight text-[#141d24]">
+            Student Fee Invoicing & Receipts
+          </h1>
+          <p className="text-xs sm:text-sm text-[#52606d] mt-1 font-sans">
+            Track student fee obligations, issue official PDF billing statements, and record financial settlements
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" icon={User} onClick={() => setIsStudentInvoiceModalOpen(true)}>
@@ -241,14 +244,15 @@ export const InvoicesListPage: React.FC = () => {
       </div>
 
       {genMessage && (
-        <div className="p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold rounded-xl flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+        <div className="p-3.5 bg-[#ecfdf5] border border-[#a7f3d0] text-[#064e3b] text-xs font-semibold rounded-md flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 text-[#059669]" />
           {genMessage}
         </div>
       )}
 
       {genError && (
-        <div className="p-3.5 bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold rounded-xl flex items-center gap-2">
+        <div className="p-3.5 bg-[#fff1f2] border border-[#fecdd3] text-[#be123c] text-xs font-semibold rounded-md flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-[#be123c]" />
           {genError}
         </div>
       )}
@@ -264,7 +268,7 @@ export const InvoicesListPage: React.FC = () => {
               setStatusFilter(e.target.value);
               setPage(1);
             }}
-            className="px-3 py-1.5 text-xs bg-white border border-slate-200 rounded-lg text-slate-700"
+            className="px-3 py-1.5 text-xs bg-[#fbfbfa] border border-[#cbd2d9] rounded-md text-[#141d24] focus:outline-none focus:ring-1 focus:ring-[#064e3b] focus:border-[#064e3b]"
           >
             <option value="">All Payment Statuses</option>
             <option value="UNPAID">Unpaid</option>
@@ -293,12 +297,12 @@ export const InvoicesListPage: React.FC = () => {
           className="space-y-4"
         >
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">Select Target Class</label>
+            <label className="block text-xs font-semibold text-[#141d24] mb-1">Select Target Class</label>
             <select
               required
               value={genClassId}
               onChange={(e) => setGenClassId(e.target.value)}
-              className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg"
+              className="w-full px-3 py-2 text-xs font-medium bg-[#fbfbfa] border border-[#cbd2d9] rounded-md text-[#141d24] focus:outline-none focus:ring-1 focus:ring-[#064e3b] focus:border-[#064e3b]"
             >
               <option value="">Select Class Arm</option>
               {classesData?.results?.map((c) => (
@@ -309,11 +313,14 @@ export const InvoicesListPage: React.FC = () => {
             </select>
           </div>
 
-          <p className="text-xs text-slate-500 bg-slate-50 p-3 rounded-lg border border-slate-200">
-            This will calculate applicable fees for all enrolled students in the selected class and create pending invoice statements.
-          </p>
+          <div className="text-xs text-[#52606d] bg-[#fbfbfa] p-3 rounded-md border border-[#e5e3dc] space-y-1">
+            <p className="font-semibold text-[#141d24]">Automated Fee Allocation</p>
+            <p>
+              Calculates applicable tuition and auxiliary levies for all enrolled students in the selected class arm, creating pending debit records.
+            </p>
+          </div>
 
-          <div className="pt-3 border-t border-slate-100 flex justify-end gap-2">
+          <div className="pt-3 border-t border-[#e5e3dc] flex justify-end gap-2">
             <Button type="button" variant="ghost" onClick={() => setIsGenerateModalOpen(false)}>
               Cancel
             </Button>
@@ -339,12 +346,12 @@ export const InvoicesListPage: React.FC = () => {
           className="space-y-4"
         >
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">Select Student</label>
+            <label className="block text-xs font-semibold text-[#141d24] mb-1">Select Student</label>
             <select
               required
               value={genStudentId}
               onChange={(e) => setGenStudentId(e.target.value)}
-              className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg"
+              className="w-full px-3 py-2 text-xs font-medium bg-[#fbfbfa] border border-[#cbd2d9] rounded-md text-[#141d24] focus:outline-none focus:ring-1 focus:ring-[#064e3b] focus:border-[#064e3b]"
             >
               <option value="">Select Student</option>
               {studentsData?.results?.map((s) => (
@@ -355,7 +362,7 @@ export const InvoicesListPage: React.FC = () => {
             </select>
           </div>
 
-          <div className="pt-3 border-t border-slate-100 flex justify-end gap-2">
+          <div className="pt-3 border-t border-[#e5e3dc] flex justify-end gap-2">
             <Button type="button" variant="ghost" onClick={() => setIsStudentInvoiceModalOpen(false)}>
               Cancel
             </Button>
@@ -370,8 +377,8 @@ export const InvoicesListPage: React.FC = () => {
       <Modal
         isOpen={isPaymentModalOpen}
         onClose={() => setIsPaymentModalOpen(false)}
-        title="Record Fee Payment"
-        subtitle={`Invoice: ${selectedInvoice?.invoice_number} &bull; Student: ${selectedInvoice?.student_name}`}
+        title="Record Fee Settlement"
+        subtitle={`Invoice: ${selectedInvoice?.invoice_number} • Student: ${selectedInvoice?.student_name}`}
       >
         <form
           onSubmit={(e) => {
@@ -397,11 +404,11 @@ export const InvoicesListPage: React.FC = () => {
           />
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">Payment Method</label>
+            <label className="block text-xs font-semibold text-[#141d24] mb-1">Payment Method</label>
             <select
               value={paymentForm.payment_method}
               onChange={(e) => setPaymentForm({ ...paymentForm, payment_method: e.target.value })}
-              className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg"
+              className="w-full px-3 py-2 text-xs font-medium bg-[#fbfbfa] border border-[#cbd2d9] rounded-md text-[#141d24] focus:outline-none focus:ring-1 focus:ring-[#064e3b] focus:border-[#064e3b]"
             >
               <option value="BANK_TRANSFER">Bank Direct Transfer</option>
               <option value="CASH">Cash Deposit</option>
@@ -417,7 +424,7 @@ export const InvoicesListPage: React.FC = () => {
             onChange={(e) => setPaymentForm({ ...paymentForm, notes: e.target.value })}
           />
 
-          <div className="pt-3 border-t border-slate-100 flex justify-end gap-2">
+          <div className="pt-3 border-t border-[#e5e3dc] flex justify-end gap-2">
             <Button type="button" variant="ghost" onClick={() => setIsPaymentModalOpen(false)}>
               Cancel
             </Button>
@@ -430,3 +437,4 @@ export const InvoicesListPage: React.FC = () => {
     </div>
   );
 };
+

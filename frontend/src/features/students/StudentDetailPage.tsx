@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   User, Calendar, MapPin, Award, CreditCard,
-  ArrowLeft, FileText, Download, CheckCircle2, Edit
+  ArrowLeft, FileText, Download, CheckCircle2, Edit, Printer
 } from 'lucide-react';
 import { api } from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
@@ -98,41 +98,41 @@ export const StudentDetailPage: React.FC = () => {
   });
 
   if (isLoading) {
-    return <div className="py-12 text-center text-slate-500">Loading student profile...</div>;
+    return <div className="py-12 text-center text-xs text-[#8896a4]">Loading student dossier...</div>;
   }
 
   if (!student) {
-    return <div className="py-12 text-center text-slate-500">Student not found.</div>;
+    return <div className="py-12 text-center text-xs text-[#8896a4]">Student record not found.</div>;
   }
 
   return (
     <div className="space-y-6">
-      {/* Back Link */}
-      <Link to={backUrl} className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-indigo-600">
-        <ArrowLeft className="w-4 h-4" /> Back to {isAdmin ? 'Student Registry' : 'My Classes'}
+      {/* Back Navigation */}
+      <Link to={backUrl} className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#52606d] hover:text-[#064e3b] transition-colors">
+        <ArrowLeft className="w-3.5 h-3.5" /> Back to {isAdmin ? 'Student Directory' : 'My Classes'}
       </Link>
 
-      {/* Student Banner Card */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
+      {/* Student Banner Dossier */}
+      <div className="bg-white p-6 rounded-2xl border border-[#e6e4dc] shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xl border border-indigo-200">
+          <div className="w-14 h-14 rounded-2xl bg-[#064e3b] text-white flex items-center justify-center font-bold text-lg font-display border border-[#043326] shadow-inner">
             {student.first_name[0]}{student.last_name[0]}
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold text-slate-900">{student.full_name}</h1>
+              <h1 className="text-xl font-bold font-display text-[#141d24]">{student.full_name}</h1>
               <Badge variant={student.status === 'ACTIVE' ? 'success' : 'neutral'}>
                 {student.status}
               </Badge>
             </div>
-            <p className="text-xs text-slate-500 mt-1 font-mono">
-              Admission No: <b className="text-indigo-600">{student.admission_number}</b> &bull; Class: <b className="text-slate-800">{student.current_enrollment?.class_arm_name || 'Unassigned'}</b>
+            <p className="text-xs text-[#52606d] mt-1 font-mono">
+              Admission No: <b className="text-[#064e3b] font-bold">{student.admission_number}</b> &bull; Stream: <b className="text-[#141d24]">{student.current_enrollment?.class_arm_name || 'Unassigned'}</b>
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <Badge variant="indigo" size="md">
+          <Badge variant="neutral" size="md">
             Gender: {student.gender}
           </Badge>
           {isAdmin && (
@@ -142,30 +142,30 @@ export const StudentDetailPage: React.FC = () => {
               icon={Edit}
               onClick={() => setIsEditModalOpen(true)}
             >
-              Edit Student Details
+              Edit Dossier
             </Button>
           )}
         </div>
       </div>
 
-      {/* Navigation Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-200">
+      {/* Tabs */}
+      <div className="flex items-center gap-2 border-b border-[#e6e4dc]">
         <button
           onClick={() => setActiveTab('overview')}
-          className={`px-4 py-2.5 text-xs font-bold border-b-2 transition-colors ${
+          className={`px-4 py-2.5 text-xs font-bold border-b-2 transition-colors cursor-pointer ${
             activeTab === 'overview'
-              ? 'border-indigo-600 text-indigo-600'
-              : 'border-transparent text-slate-500 hover:text-slate-700'
+              ? 'border-[#064e3b] text-[#064e3b]'
+              : 'border-transparent text-[#52606d] hover:text-[#141d24]'
           }`}
         >
           Biodata & Info
         </button>
         <button
           onClick={() => setActiveTab('results')}
-          className={`px-4 py-2.5 text-xs font-bold border-b-2 transition-colors ${
+          className={`px-4 py-2.5 text-xs font-bold border-b-2 transition-colors cursor-pointer ${
             activeTab === 'results'
-              ? 'border-indigo-600 text-indigo-600'
-              : 'border-transparent text-slate-500 hover:text-slate-700'
+              ? 'border-[#064e3b] text-[#064e3b]'
+              : 'border-transparent text-[#52606d] hover:text-[#141d24]'
           }`}
         >
           Academic Reports ({resultsData?.results?.length ?? 0})
@@ -173,10 +173,10 @@ export const StudentDetailPage: React.FC = () => {
         {isAdmin && (
           <button
             onClick={() => setActiveTab('finance')}
-            className={`px-4 py-2.5 text-xs font-bold border-b-2 transition-colors ${
+            className={`px-4 py-2.5 text-xs font-bold border-b-2 transition-colors cursor-pointer ${
               activeTab === 'finance'
-                ? 'border-indigo-600 text-indigo-600'
-                : 'border-transparent text-slate-500 hover:text-slate-700'
+                ? 'border-[#064e3b] text-[#064e3b]'
+                : 'border-transparent text-[#52606d] hover:text-[#141d24]'
             }`}
           >
             Billing & Invoices ({invoicesData?.results?.length ?? 0})
@@ -184,55 +184,55 @@ export const StudentDetailPage: React.FC = () => {
         )}
       </div>
 
-      {/* Tab 1: Overview Biodata */}
+      {/* Tab 1: Overview */}
       {activeTab === 'overview' && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
-            <h3 className="text-sm font-bold text-slate-900 border-b border-slate-100 pb-2">
+          <div className="bg-white p-6 rounded-2xl border border-[#e6e4dc] shadow-2xs space-y-4">
+            <h3 className="text-xs font-bold text-[#52606d] uppercase tracking-wider border-b border-[#f0eee6] pb-2">
               Personal Information
             </h3>
             <div className="grid grid-cols-2 gap-4 text-xs">
               <div>
-                <p className="text-slate-400">First Name</p>
-                <p className="font-bold text-slate-800 mt-0.5">{student.first_name}</p>
+                <p className="text-[#8896a4]">First Name</p>
+                <p className="font-bold text-[#141d24] mt-0.5">{student.first_name}</p>
               </div>
               <div>
-                <p className="text-slate-400">Surname</p>
-                <p className="font-bold text-slate-800 mt-0.5">{student.last_name}</p>
+                <p className="text-[#8896a4]">Surname</p>
+                <p className="font-bold text-[#141d24] mt-0.5">{student.last_name}</p>
               </div>
               <div>
-                <p className="text-slate-400">Date of Birth</p>
-                <p className="font-bold text-slate-800 mt-0.5">{student.date_of_birth || 'Not specified'}</p>
+                <p className="text-[#8896a4]">Date of Birth</p>
+                <p className="font-bold text-[#141d24] mt-0.5">{student.date_of_birth || 'Not specified'}</p>
               </div>
               <div>
-                <p className="text-slate-400">Gender</p>
-                <p className="font-bold text-slate-800 mt-0.5">{student.gender}</p>
+                <p className="text-[#8896a4]">Gender</p>
+                <p className="font-bold text-[#141d24] mt-0.5">{student.gender}</p>
               </div>
               <div>
-                <p className="text-slate-400">Blood Group / Genotype</p>
-                <p className="font-bold text-slate-800 mt-0.5">
+                <p className="text-[#8896a4]">Blood Group & Genotype</p>
+                <p className="font-bold text-[#141d24] mt-0.5">
                   {student.blood_group || 'N/A'} &bull; {student.genotype || 'N/A'}
                 </p>
               </div>
               <div>
-                <p className="text-slate-400">Admission Date</p>
-                <p className="font-bold text-slate-800 mt-0.5">{student.admission_date}</p>
+                <p className="text-[#8896a4]">Admission Date</p>
+                <p className="font-bold text-[#141d24] mt-0.5">{student.admission_date}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
-            <h3 className="text-sm font-bold text-slate-900 border-b border-slate-100 pb-2">
+          <div className="bg-white p-6 rounded-2xl border border-[#e6e4dc] shadow-2xs space-y-4">
+            <h3 className="text-xs font-bold text-[#52606d] uppercase tracking-wider border-b border-[#f0eee6] pb-2">
               Contact & Address
             </h3>
             <div className="space-y-3 text-xs">
               <div>
-                <p className="text-slate-400">Residential Address</p>
-                <p className="font-bold text-slate-800 mt-0.5">{student.address || 'No address provided'}</p>
+                <p className="text-[#8896a4]">Residential Address</p>
+                <p className="font-bold text-[#141d24] mt-0.5">{student.address || 'No address provided'}</p>
               </div>
               <div>
-                <p className="text-slate-400">State of Origin</p>
-                <p className="font-bold text-slate-800 mt-0.5">{student.state_of_origin || 'Nigeria'}</p>
+                <p className="text-[#8896a4]">State of Origin</p>
+                <p className="font-bold text-[#141d24] mt-0.5">{student.state_of_origin || 'Nigeria'}</p>
               </div>
             </div>
           </div>
@@ -241,23 +241,23 @@ export const StudentDetailPage: React.FC = () => {
 
       {/* Tab 2: Academic Results */}
       {activeTab === 'results' && (
-        <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs divide-y divide-slate-100">
+        <div className="bg-white rounded-2xl border border-[#e6e4dc] shadow-2xs divide-y divide-[#f0eee6]">
           {resultsData?.results?.length === 0 ? (
-            <p className="text-xs text-slate-400 py-12 text-center">No published term results for this student yet.</p>
+            <p className="text-xs text-[#8896a4] py-12 text-center">No published term progress reports for this student yet.</p>
           ) : (
             resultsData?.results?.map((res) => (
               <div key={res.id} className="p-4 flex items-center justify-between">
                 <div>
-                  <h4 className="text-sm font-bold text-slate-900">
+                  <h4 className="text-sm font-bold font-display text-[#141d24]">
                     {res.term_name} &bull; {res.session_name}
                   </h4>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Class: <b>{res.class_arm_name}</b> &bull; Average: <b className="text-indigo-600">{res.average_score}%</b> &bull; Position: <b>{res.position_in_class ? `${res.position_in_class} of ${res.total_students_in_class}` : 'N/A'}</b>
+                  <p className="text-xs text-[#52606d] mt-0.5">
+                    Stream: <b>{res.class_arm_name}</b> &bull; Average: <b className="text-[#064e3b]">{res.average_score}%</b> &bull; Rank: <b>{res.position_in_class ? `${res.position_in_class} of ${res.total_students_in_class}` : 'N/A'}</b>
                   </p>
                 </div>
                 <Button
                   variant="outline"
-                  size="sm"
+                  size="xs"
                   icon={Download}
                   onClick={() =>
                     api.downloadFile(
@@ -276,27 +276,27 @@ export const StudentDetailPage: React.FC = () => {
 
       {/* Tab 3: Finance & Invoices */}
       {activeTab === 'finance' && (
-        <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs divide-y divide-slate-100">
+        <div className="bg-white rounded-2xl border border-[#e6e4dc] shadow-2xs divide-y divide-[#f0eee6]">
           {invoicesData?.results?.length === 0 ? (
-            <p className="text-xs text-slate-400 py-12 text-center">No fee invoices issued for this student yet.</p>
+            <p className="text-xs text-[#8896a4] py-12 text-center">No fee invoices issued for this student yet.</p>
           ) : (
             invoicesData?.results?.map((inv) => (
               <div key={inv.id} className="p-4 flex items-center justify-between">
                 <div>
                   <div className="flex items-center gap-2">
-                    <h4 className="text-xs font-mono font-bold text-indigo-600">{inv.invoice_number}</h4>
+                    <h4 className="text-xs font-mono font-bold text-[#064e3b]">{inv.invoice_number}</h4>
                     <Badge variant={inv.status === 'PAID' ? 'success' : inv.status === 'PARTIALLY_PAID' ? 'warning' : 'danger'}>
                       {inv.status_display}
                     </Badge>
                   </div>
-                  <p className="text-xs text-slate-500 mt-1">
-                    {inv.term_name} ({inv.session_name}) &bull; Total: <b>₦{Number(inv.total_amount).toLocaleString()}</b> &bull; Paid: <b className="text-emerald-600">₦{Number(inv.amount_paid).toLocaleString()}</b> &bull; Balance: <b className="text-rose-600">₦{Number(inv.balance).toLocaleString()}</b>
+                  <p className="text-xs text-[#52606d] mt-1 font-mono">
+                    {inv.term_name} ({inv.session_name}) &bull; Billed: <b>₦{Number(inv.total_amount).toLocaleString()}</b> &bull; Paid: <b className="text-[#059669]">₦{Number(inv.amount_paid).toLocaleString()}</b> &bull; Balance: <b className="text-[#991b1b]">₦{Number(inv.balance).toLocaleString()}</b>
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
                   <Button
                     variant="outline"
-                    size="sm"
+                    size="xs"
                     icon={FileText}
                     onClick={() =>
                       api.downloadFile(
@@ -310,9 +310,9 @@ export const StudentDetailPage: React.FC = () => {
                   {inv.payments?.length > 0 && (
                     <Button
                       variant="outline"
-                      size="sm"
-                      className="text-emerald-700 border-emerald-200 hover:bg-emerald-50"
-                      icon={Download}
+                      size="xs"
+                      className="text-[#065f46] border-[#a7f3d0] hover:bg-[#ecfdf5]"
+                      icon={Printer}
                       onClick={() =>
                         api.downloadFile(
                           `/finance/payments/${inv.payments[0].id}/receipt-pdf/`,
@@ -339,7 +339,7 @@ export const StudentDetailPage: React.FC = () => {
       >
         <form onSubmit={handleEditSubmit} className="space-y-4">
           {editError && (
-            <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-lg">
+            <div className="p-3 bg-[#fef2f2] border border-[#fecaca] text-[#991b1b] text-xs font-medium rounded-lg">
               {editError}
             </div>
           )}
@@ -357,7 +357,7 @@ export const StudentDetailPage: React.FC = () => {
               onChange={(e) => setEditForm({ ...editForm, middle_name: e.target.value })}
             />
             <Input
-              label="Last Name (Surname)"
+              label="Surname"
               required
               value={editForm.last_name}
               onChange={(e) => setEditForm({ ...editForm, last_name: e.target.value })}
@@ -366,11 +366,13 @@ export const StudentDetailPage: React.FC = () => {
 
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Gender</label>
+              <label className="block text-[11px] font-bold text-[#52606d] uppercase tracking-wider mb-1.5">
+                Gender
+              </label>
               <select
                 value={editForm.gender}
                 onChange={(e) => setEditForm({ ...editForm, gender: e.target.value })}
-                className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-hidden focus:border-indigo-600"
+                className="w-full px-3 py-2 text-xs bg-white border border-[#d8d5cb] rounded-lg text-[#141d24]"
               >
                 <option value="MALE">Male</option>
                 <option value="FEMALE">Female</option>
@@ -383,11 +385,13 @@ export const StudentDetailPage: React.FC = () => {
               onChange={(e) => setEditForm({ ...editForm, date_of_birth: e.target.value })}
             />
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Status</label>
+              <label className="block text-[11px] font-bold text-[#52606d] uppercase tracking-wider mb-1.5">
+                Status
+              </label>
               <select
                 value={editForm.status}
                 onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
-                className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-hidden focus:border-indigo-600"
+                className="w-full px-3 py-2 text-xs bg-white border border-[#d8d5cb] rounded-lg text-[#141d24]"
               >
                 <option value="ACTIVE">Active</option>
                 <option value="INACTIVE">Inactive</option>
@@ -412,11 +416,13 @@ export const StudentDetailPage: React.FC = () => {
               onChange={(e) => setEditForm({ ...editForm, genotype: e.target.value })}
             />
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Class Arm</label>
+              <label className="block text-[11px] font-bold text-[#52606d] uppercase tracking-wider mb-1.5">
+                Class Stream
+              </label>
               <select
                 value={editForm.class_arm_id}
                 onChange={(e) => setEditForm({ ...editForm, class_arm_id: e.target.value })}
-                className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-hidden focus:border-indigo-600"
+                className="w-full px-3 py-2 text-xs bg-white border border-[#d8d5cb] rounded-lg text-[#141d24]"
               >
                 <option value="">Select Class Arm</option>
                 {classesData?.results?.map((c) => (
@@ -443,7 +449,7 @@ export const StudentDetailPage: React.FC = () => {
             />
           </div>
 
-          <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+          <div className="pt-3 border-t border-[#e6e4dc] flex items-center justify-end gap-2">
             <Button type="button" variant="ghost" onClick={() => setIsEditModalOpen(false)}>
               Cancel
             </Button>

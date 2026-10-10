@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, CreditCard, Trash2, Edit } from 'lucide-react';
+import { Plus, CreditCard, Trash2, Edit3, Banknote, Sparkles, Layers } from 'lucide-react';
 import { api } from '@/services/api';
 import { FeeStructure, FeeCategory, ClassLevel, AcademicSession, AcademicTerm, PaginatedResponse } from '@/types';
 import { DataTable, Column } from '@/components/common/DataTable';
@@ -105,29 +105,39 @@ export const FeeStructuresPage: React.FC = () => {
     {
       header: 'Fee Category',
       accessorKey: 'fee_category_name',
-      cell: (row) => <span className="font-bold text-slate-900">{row.fee_category_name}</span>,
+      cell: (row) => (
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-md bg-[#f4f3ef] border border-[#e5e3dc] flex items-center justify-center text-[#064e3b]">
+            <Banknote className="w-4 h-4" />
+          </div>
+          <div>
+            <p className="font-semibold text-sm text-[#141d24]">{row.fee_category_name}</p>
+            <p className="text-xs text-[#52606d] font-mono mt-0.5">
+              {row.term_name} • {row.session_name}
+            </p>
+          </div>
+        </div>
+      ),
     },
     {
-      header: 'Class Target',
+      header: 'Educational Tier Target',
       cell: (row) => (
-        <span className="font-semibold text-slate-700">
-          {row.class_level_name || <Badge variant="neutral">All Classes</Badge>}
+        <span className="font-medium text-xs text-[#141d24]">
+          {row.class_level_name ? (
+            <span className="px-2 py-0.5 rounded bg-[#f4f3ef] border border-[#e5e3dc] font-mono">
+              {row.class_level_name}
+            </span>
+          ) : (
+            <Badge variant="neutral">All School Levels</Badge>
+          )}
         </span>
       ),
     },
     {
-      header: 'Academic Term',
-      cell: (row) => (
-        <span className="text-xs text-slate-600">
-          {row.term_name} ({row.session_name})
-        </span>
-      ),
-    },
-    {
-      header: 'Amount',
+      header: 'Tariff Amount',
       accessorKey: 'amount',
       cell: (row) => (
-        <span className="font-bold text-indigo-700 text-sm">
+        <span className="font-mono font-bold text-[#064e3b] text-sm">
           ₦{Number(row.amount).toLocaleString()}
         </span>
       ),
@@ -140,8 +150,8 @@ export const FeeStructuresPage: React.FC = () => {
           <Button
             variant="ghost"
             size="sm"
-            className="text-slate-600 hover:text-indigo-600 hover:bg-slate-100"
-            icon={Edit}
+            className="text-[#52606d] hover:text-[#064e3b] hover:bg-[#f4f3ef]"
+            icon={Edit3}
             onClick={() => handleEditOpen(row)}
           >
             Edit
@@ -149,7 +159,7 @@ export const FeeStructuresPage: React.FC = () => {
           <Button
             variant="ghost"
             size="sm"
-            className="text-rose-600 hover:bg-rose-50"
+            className="text-[#be123c] hover:bg-[#fff1f2]"
             icon={Trash2}
             onClick={() => setDeleteTarget(row)}
           >
@@ -162,10 +172,14 @@ export const FeeStructuresPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#e5e3dc]">
         <div>
-          <h1 className="text-xl font-bold text-slate-900">Fee Structures & Tariffs</h1>
-          <p className="text-xs text-slate-500">Configure tuition, development, and examination charges by class level</p>
+          <h1 className="font-serif text-2xl lg:text-3xl font-bold tracking-tight text-[#141d24]">
+            Fee Structures & Tariffs
+          </h1>
+          <p className="text-xs sm:text-sm text-[#52606d] mt-1 font-sans">
+            Configure institutional tuition, development, lab, and examination charges by class level
+          </p>
         </div>
         <Button variant="primary" size="sm" icon={Plus} onClick={() => setIsModalOpen(true)}>
           New Fee Structure
@@ -178,6 +192,7 @@ export const FeeStructuresPage: React.FC = () => {
         isLoading={isLoading}
       />
 
+      {/* Add Modal */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -196,12 +211,12 @@ export const FeeStructuresPage: React.FC = () => {
           className="space-y-4"
         >
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">Fee Category</label>
+            <label className="block text-xs font-semibold text-[#141d24] mb-1">Fee Category</label>
             <select
               required
               value={feeForm.fee_category}
               onChange={(e) => setFeeForm({ ...feeForm, fee_category: e.target.value })}
-              className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg"
+              className="w-full px-3 py-2 text-xs font-medium bg-[#fbfbfa] border border-[#cbd2d9] rounded-md text-[#141d24] focus:outline-none focus:ring-1 focus:ring-[#064e3b] focus:border-[#064e3b]"
             >
               <option value="">Select Category</option>
               {categoriesData?.results?.map((c) => (
@@ -214,12 +229,12 @@ export const FeeStructuresPage: React.FC = () => {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Session</label>
+              <label className="block text-xs font-semibold text-[#141d24] mb-1">Session</label>
               <select
                 required
                 value={feeForm.academic_session}
                 onChange={(e) => setFeeForm({ ...feeForm, academic_session: e.target.value })}
-                className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg"
+                className="w-full px-3 py-2 text-xs font-medium bg-[#fbfbfa] border border-[#cbd2d9] rounded-md text-[#141d24] focus:outline-none focus:ring-1 focus:ring-[#064e3b] focus:border-[#064e3b]"
               >
                 <option value="">Select Session</option>
                 {sessionsData?.results?.map((s) => (
@@ -230,12 +245,12 @@ export const FeeStructuresPage: React.FC = () => {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Term</label>
+              <label className="block text-xs font-semibold text-[#141d24] mb-1">Term</label>
               <select
                 required
                 value={feeForm.academic_term}
                 onChange={(e) => setFeeForm({ ...feeForm, academic_term: e.target.value })}
-                className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg"
+                className="w-full px-3 py-2 text-xs font-medium bg-[#fbfbfa] border border-[#cbd2d9] rounded-md text-[#141d24] focus:outline-none focus:ring-1 focus:ring-[#064e3b] focus:border-[#064e3b]"
               >
                 <option value="">Select Term</option>
                 {sessionsData?.results?.find((s) => s.id === feeForm.academic_session)?.terms?.map((t) => (
@@ -248,11 +263,11 @@ export const FeeStructuresPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">Target Class Level (Optional)</label>
+            <label className="block text-xs font-semibold text-[#141d24] mb-1">Target Class Level (Optional)</label>
             <select
               value={feeForm.class_level}
               onChange={(e) => setFeeForm({ ...feeForm, class_level: e.target.value })}
-              className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg"
+              className="w-full px-3 py-2 text-xs font-medium bg-[#fbfbfa] border border-[#cbd2d9] rounded-md text-[#141d24] focus:outline-none focus:ring-1 focus:ring-[#064e3b] focus:border-[#064e3b]"
             >
               <option value="">All Classes (General)</option>
               {levelsData?.results?.map((l) => (
@@ -272,7 +287,7 @@ export const FeeStructuresPage: React.FC = () => {
             onChange={(e) => setFeeForm({ ...feeForm, amount: e.target.value })}
           />
 
-          <div className="pt-3 border-t border-slate-100 flex justify-end gap-2">
+          <div className="pt-3 border-t border-[#e5e3dc] flex justify-end gap-2">
             <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>
               Cancel
             </Button>
@@ -292,12 +307,12 @@ export const FeeStructuresPage: React.FC = () => {
       >
         <form onSubmit={handleEditSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">Fee Category</label>
+            <label className="block text-xs font-semibold text-[#141d24] mb-1">Fee Category</label>
             <select
               required
               value={editForm.fee_category}
               onChange={(e) => setEditForm({ ...editForm, fee_category: e.target.value })}
-              className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg"
+              className="w-full px-3 py-2 text-xs font-medium bg-[#fbfbfa] border border-[#cbd2d9] rounded-md text-[#141d24] focus:outline-none focus:ring-1 focus:ring-[#064e3b] focus:border-[#064e3b]"
             >
               <option value="">Select Category</option>
               {categoriesData?.results?.map((c) => (
@@ -310,12 +325,12 @@ export const FeeStructuresPage: React.FC = () => {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Session</label>
+              <label className="block text-xs font-semibold text-[#141d24] mb-1">Session</label>
               <select
                 required
                 value={editForm.academic_session}
                 onChange={(e) => setEditForm({ ...editForm, academic_session: e.target.value })}
-                className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg"
+                className="w-full px-3 py-2 text-xs font-medium bg-[#fbfbfa] border border-[#cbd2d9] rounded-md text-[#141d24] focus:outline-none focus:ring-1 focus:ring-[#064e3b] focus:border-[#064e3b]"
               >
                 <option value="">Select Session</option>
                 {sessionsData?.results?.map((s) => (
@@ -326,12 +341,12 @@ export const FeeStructuresPage: React.FC = () => {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Term</label>
+              <label className="block text-xs font-semibold text-[#141d24] mb-1">Term</label>
               <select
                 required
                 value={editForm.academic_term}
                 onChange={(e) => setEditForm({ ...editForm, academic_term: e.target.value })}
-                className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg"
+                className="w-full px-3 py-2 text-xs font-medium bg-[#fbfbfa] border border-[#cbd2d9] rounded-md text-[#141d24] focus:outline-none focus:ring-1 focus:ring-[#064e3b] focus:border-[#064e3b]"
               >
                 <option value="">Select Term</option>
                 {sessionsData?.results?.find((s) => s.id === editForm.academic_session)?.terms?.map((t) => (
@@ -344,11 +359,11 @@ export const FeeStructuresPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">Target Class Level (Optional)</label>
+            <label className="block text-xs font-semibold text-[#141d24] mb-1">Target Class Level (Optional)</label>
             <select
               value={editForm.class_level}
               onChange={(e) => setEditForm({ ...editForm, class_level: e.target.value })}
-              className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg"
+              className="w-full px-3 py-2 text-xs font-medium bg-[#fbfbfa] border border-[#cbd2d9] rounded-md text-[#141d24] focus:outline-none focus:ring-1 focus:ring-[#064e3b] focus:border-[#064e3b]"
             >
               <option value="">All Classes (General)</option>
               {levelsData?.results?.map((l) => (
@@ -368,7 +383,7 @@ export const FeeStructuresPage: React.FC = () => {
             onChange={(e) => setEditForm({ ...editForm, amount: e.target.value })}
           />
 
-          <div className="pt-3 border-t border-slate-100 flex justify-end gap-2">
+          <div className="pt-3 border-t border-[#e5e3dc] flex justify-end gap-2">
             <Button type="button" variant="ghost" onClick={() => setEditTarget(null)}>
               Cancel
             </Button>
@@ -392,3 +407,4 @@ export const FeeStructuresPage: React.FC = () => {
     </div>
   );
 };
+

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { User, Lock, CheckCircle2, Shield } from 'lucide-react';
+import { User, Lock, CheckCircle2, Shield, UserCheck, KeyRound, Sparkles } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/services/api';
 import { Button } from '@/components/common/Button';
@@ -31,7 +31,7 @@ export const UserProfilePage: React.FC = () => {
     mutationFn: (data: any) => api.patch('/auth/me/', data),
     onSuccess: async () => {
       await refreshProfile();
-      setProfileSuccess('Profile details updated successfully.');
+      setProfileSuccess('Profile credentials updated successfully.');
       setProfileError(null);
       setTimeout(() => setProfileSuccess(null), 4000);
     },
@@ -43,7 +43,7 @@ export const UserProfilePage: React.FC = () => {
   const changePasswordMutation = useMutation({
     mutationFn: (data: any) => api.post('/auth/change-password/', data),
     onSuccess: () => {
-      setPasswordSuccess('Password changed successfully.');
+      setPasswordSuccess('Password authentication credentials changed successfully.');
       setPasswordError(null);
       setPasswordForm({ old_password: '', new_password: '', confirm_password: '' });
       setTimeout(() => setPasswordSuccess(null), 4000);
@@ -72,43 +72,53 @@ export const UserProfilePage: React.FC = () => {
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
-      <div>
-        <h1 className="text-xl font-bold text-slate-900">User Account & Profile Settings</h1>
-        <p className="text-xs text-slate-500">Manage your personal credentials, contact information, and security</p>
+      <div className="pb-4 border-b border-[#e5e3dc]">
+        <h1 className="font-serif text-2xl lg:text-3xl font-bold tracking-tight text-[#141d24]">
+          User Profile & Access Security
+        </h1>
+        <p className="text-xs sm:text-sm text-[#52606d] mt-1 font-sans">
+          Manage your personal credentials, contact coordinates, and authentication passwords
+        </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* User Summary Card */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col items-center text-center">
-          <div className="w-20 h-20 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-2xl shadow-md mb-3">
+        <div className="bg-[#ffffff] p-6 rounded-lg border border-[#e5e3dc] shadow-[0_1px_3px_rgba(0,0,0,0.03)] flex flex-col items-center text-center">
+          <div className="w-20 h-20 rounded-full bg-[#064e3b] text-white flex items-center justify-center font-serif font-bold text-2xl shadow-sm mb-3">
             {user?.first_name?.[0]}{user?.last_name?.[0]}
           </div>
-          <h3 className="text-base font-bold text-slate-900">{user?.full_name}</h3>
-          <p className="text-xs text-slate-500">{user?.email}</p>
+          <h3 className="font-serif text-base font-bold text-[#141d24]">{user?.full_name}</h3>
+          <p className="text-xs font-mono text-[#52606d] mt-0.5">{user?.email}</p>
           <div className="mt-3">
-            <Badge variant="indigo">{activeMembership?.role || 'User'}</Badge>
+            <Badge variant="evergreen">{activeMembership?.role || 'Staff User'}</Badge>
           </div>
-          <div className="mt-6 pt-6 border-t border-slate-100 w-full text-left text-xs text-slate-500 space-y-2">
-            <p>Institution: <b className="text-slate-800">{activeMembership?.school_name}</b></p>
-            <p>Role Status: <b className="text-emerald-600">Active</b></p>
+          <div className="mt-6 pt-5 border-t border-[#e5e3dc] w-full text-left text-xs text-[#52606d] space-y-2">
+            <p>
+              School: <b className="text-[#141d24]">{activeMembership?.school_name}</b>
+            </p>
+            <p>
+              Status: <b className="text-[#064e3b]">Active</b>
+            </p>
           </div>
         </div>
 
-        {/* Profile & Password Tabs */}
+        {/* Profile & Password Forms */}
         <div className="md:col-span-2 space-y-6">
           {/* Edit Profile Form */}
-          <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
-            <h3 className="text-sm font-bold text-slate-900 mb-1">Personal Details</h3>
-            <p className="text-xs text-slate-500 mb-4">Update your profile name and contact number</p>
+          <div className="bg-[#ffffff] p-6 rounded-lg border border-[#e5e3dc] shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
+            <div className="flex items-center gap-2 mb-4">
+              <UserCheck className="w-4 h-4 text-[#064e3b]" />
+              <h3 className="font-serif text-sm font-bold text-[#141d24]">Personal Coordinates</h3>
+            </div>
 
             {profileSuccess && (
-              <div className="p-3 mb-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold rounded-lg flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+              <div className="p-3 mb-4 bg-[#ecfdf5] border border-[#a7f3d0] text-[#064e3b] text-xs font-semibold rounded-md flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-[#059669]" />
                 {profileSuccess}
               </div>
             )}
             {profileError && (
-              <div className="p-3 mb-4 bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold rounded-lg">
+              <div className="p-3 mb-4 bg-[#fff1f2] border border-[#fecdd3] text-[#be123c] text-xs font-semibold rounded-md">
                 {profileError}
               </div>
             )}
@@ -138,25 +148,27 @@ export const UserProfilePage: React.FC = () => {
 
               <div className="pt-2 flex justify-end">
                 <Button type="submit" variant="primary" size="sm" isLoading={updateProfileMutation.isPending}>
-                  Save Changes
+                  Save Profile Details
                 </Button>
               </div>
             </form>
           </div>
 
           {/* Change Password Form */}
-          <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
-            <h3 className="text-sm font-bold text-slate-900 mb-1">Security & Password</h3>
-            <p className="text-xs text-slate-500 mb-4">Ensure your account uses a strong, secure password</p>
+          <div className="bg-[#ffffff] p-6 rounded-lg border border-[#e5e3dc] shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
+            <div className="flex items-center gap-2 mb-4">
+              <KeyRound className="w-4 h-4 text-[#b45309]" />
+              <h3 className="font-serif text-sm font-bold text-[#141d24]">Security & Password</h3>
+            </div>
 
             {passwordSuccess && (
-              <div className="p-3 mb-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold rounded-lg flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+              <div className="p-3 mb-4 bg-[#ecfdf5] border border-[#a7f3d0] text-[#064e3b] text-xs font-semibold rounded-md flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-[#059669]" />
                 {passwordSuccess}
               </div>
             )}
             {passwordError && (
-              <div className="p-3 mb-4 bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold rounded-lg">
+              <div className="p-3 mb-4 bg-[#fff1f2] border border-[#fecdd3] text-[#be123c] text-xs font-semibold rounded-md">
                 {passwordError}
               </div>
             )}
@@ -198,3 +210,4 @@ export const UserProfilePage: React.FC = () => {
     </div>
   );
 };
+

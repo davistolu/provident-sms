@@ -1,33 +1,37 @@
 import React from 'react';
 
-interface BadgeProps {
+export interface BadgeProps {
   children: React.ReactNode;
-  variant?: 'success' | 'warning' | 'danger' | 'info' | 'neutral' | 'indigo';
+  variant?: 'success' | 'warning' | 'danger' | 'gold' | 'evergreen' | 'neutral' | 'indigo' | 'default';
   size?: 'sm' | 'md';
+  className?: string;
 }
 
 export const Badge: React.FC<BadgeProps> = ({
   children,
   variant = 'neutral',
-  size = 'md',
+  size = 'sm',
+  className = '',
 }) => {
-  const styles = {
-    success: 'bg-emerald-50 text-emerald-700 border-emerald-200/80',
-    warning: 'bg-amber-50 text-amber-700 border-amber-200/80',
-    danger: 'bg-rose-50 text-rose-700 border-rose-200/80',
-    info: 'bg-sky-50 text-sky-700 border-sky-200/80',
-    indigo: 'bg-indigo-50 text-indigo-700 border-indigo-200/80',
-    neutral: 'bg-slate-100 text-slate-700 border-slate-200',
+  const sizeStyles = {
+    sm: 'px-2 py-0.5 text-[10px]',
+    md: 'px-2.5 py-1 text-xs',
   };
 
-  const sizeStyles = {
-    sm: 'px-2 py-0.5 text-[11px]',
-    md: 'px-2.5 py-1 text-xs',
+  const variantStyles = {
+    success: 'bg-[#ecfdf5] text-[#065f46] border border-[#a7f3d0]',
+    evergreen: 'bg-[#064e3b] text-white border border-[#043326]',
+    warning: 'bg-[#fffbeb] text-[#92400e] border border-[#fde68a]',
+    gold: 'bg-[#fef3c7] text-[#78350f] border border-[#fcd34d]',
+    danger: 'bg-[#fef2f2] text-[#991b1b] border border-[#fecaca]',
+    neutral: 'bg-[#f4f3ef] text-[#52606d] border border-[#e6e4dc]',
+    indigo: 'bg-[#f0fdf4] text-[#166534] border border-[#bbf7d0]',
+    default: 'bg-[#f4f3ef] text-[#141d24] border border-[#d8d5cb]',
   };
 
   return (
     <span
-      className={`inline-flex items-center gap-1 font-semibold rounded-md border ${styles[variant]} ${sizeStyles[size]}`}
+      className={`inline-flex items-center font-bold tracking-tight rounded-md select-none ${sizeStyles[size]} ${variantStyles[variant]} ${className}`}
     >
       {children}
     </span>

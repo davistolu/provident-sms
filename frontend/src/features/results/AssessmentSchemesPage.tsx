@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Award, Plus, Layers, Edit, Trash2, Sliders, CheckCircle2 } from 'lucide-react';
+import { Award, Plus, Layers, Edit3, Trash2, Sliders, CheckCircle2, Bookmark, BarChart3, Scale } from 'lucide-react';
 import { api } from '@/services/api';
 import { AssessmentScheme, AssessmentComponent, GradingScale, GradeRule, PaginatedResponse } from '@/types';
 import { DataTable, Column } from '@/components/common/DataTable';
@@ -302,35 +302,44 @@ export const AssessmentSchemesPage: React.FC = () => {
     {
       header: 'Scheme Name',
       cell: (row) => (
-        <div className="flex items-center gap-2">
-          <p className="font-bold text-slate-900">{row.name}</p>
-          {row.is_default && <Badge variant="success">Default</Badge>}
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-md bg-[#f4f3ef] border border-[#e5e3dc] flex items-center justify-center text-[#064e3b]">
+            <BarChart3 className="w-4 h-4" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-sm text-[#141d24]">{row.name}</span>
+              {row.is_default && <Badge variant="evergreen">Default</Badge>}
+            </div>
+            <div className="text-xs text-[#52606d] font-mono mt-0.5">
+              Cumulative Cap: <span className="font-semibold text-[#141d24]">{row.max_total_score} marks</span>
+            </div>
+          </div>
         </div>
       ),
     },
     {
-      header: 'Max Marks',
-      accessorKey: 'max_total_score',
-      cell: (row) => <span className="font-bold text-slate-800">{row.max_total_score} marks</span>,
-    },
-    {
-      header: 'Components Breakdown',
+      header: 'Weightage Breakdown',
       cell: (row) => {
         const totalCompScore = row.components?.reduce((sum, c) => sum + Number(c.max_score || 0), 0) || 0;
         return (
-          <div className="space-y-1">
+          <div className="space-y-1.5">
             <div className="flex items-center gap-1.5 flex-wrap">
-              {row.components?.map((c) => (
-                <span key={c.id} className="px-2 py-0.5 rounded bg-slate-100 text-[11px] font-semibold text-slate-700">
-                  {c.name} ({c.code}: {c.max_score}m)
-                </span>
-              ))}
-              {(!row.components || row.components.length === 0) && (
-                <span className="text-xs text-slate-400 italic">No components defined</span>
+              {row.components && row.components.length > 0 ? (
+                row.components.map((c) => (
+                  <span
+                    key={c.id}
+                    className="px-2 py-0.5 rounded text-[11px] font-mono font-medium bg-[#f4f3ef] text-[#141d24] border border-[#e5e3dc]"
+                  >
+                    {c.name} ({c.code}: <span className="font-bold text-[#064e3b]">{c.max_score}m</span>)
+                  </span>
+                ))
+              ) : (
+                <span className="text-xs text-[#8c9ba5] italic">No components configured</span>
               )}
             </div>
-            <p className="text-[11px] text-slate-500">
-              Total component marks: <span className="font-bold text-slate-700">{totalCompScore}</span> / {row.max_total_score}
+            <p className="text-[11px] text-[#52606d] font-mono">
+              Allocated: <span className={`font-bold ${totalCompScore === row.max_total_score ? 'text-[#064e3b]' : 'text-[#b45309]'}`}>{totalCompScore}</span> / {row.max_total_score} marks
             </p>
           </div>
         );
@@ -344,7 +353,6 @@ export const AssessmentSchemesPage: React.FC = () => {
           <Button
             variant="outline"
             size="sm"
-            className="text-indigo-600 border-indigo-200 hover:bg-indigo-50"
             icon={Sliders}
             onClick={() => setManagingScheme(row)}
           >
@@ -353,8 +361,8 @@ export const AssessmentSchemesPage: React.FC = () => {
           <Button
             variant="ghost"
             size="sm"
-            className="text-slate-600 hover:text-indigo-600 hover:bg-slate-100"
-            icon={Edit}
+            className="text-[#52606d] hover:text-[#064e3b] hover:bg-[#f4f3ef]"
+            icon={Edit3}
             onClick={() => handleEditSchemeOpen(row)}
           >
             Edit
@@ -362,7 +370,7 @@ export const AssessmentSchemesPage: React.FC = () => {
           <Button
             variant="ghost"
             size="sm"
-            className="text-rose-600 hover:bg-rose-50"
+            className="text-[#be123c] hover:bg-[#fff1f2]"
             icon={Trash2}
             onClick={() => setDeleteSchemeTarget(row)}
           >
@@ -377,9 +385,19 @@ export const AssessmentSchemesPage: React.FC = () => {
     {
       header: 'Grading Scale Name',
       cell: (row) => (
-        <div className="flex items-center gap-2">
-          <p className="font-bold text-slate-900">{row.name}</p>
-          {row.is_default && <Badge variant="success">Default</Badge>}
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-md bg-[#f4f3ef] border border-[#e5e3dc] flex items-center justify-center text-[#b45309]">
+            <Scale className="w-4 h-4" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-sm text-[#141d24]">{row.name}</span>
+              {row.is_default && <Badge variant="gold">Default</Badge>}
+            </div>
+            <div className="text-xs text-[#52606d] font-mono mt-0.5">
+              {row.rules?.length || 0} Grade Brackets Configured
+            </div>
+          </div>
         </div>
       ),
     },
@@ -387,13 +405,17 @@ export const AssessmentSchemesPage: React.FC = () => {
       header: 'Grade Boundaries',
       cell: (row) => (
         <div className="flex items-center gap-1.5 flex-wrap">
-          {row.rules?.map((r) => (
-            <span key={r.id} className="px-2 py-0.5 rounded bg-indigo-50 border border-indigo-200 text-[11px] font-bold text-indigo-800">
-              {r.grade} ({r.min_score}-{r.max_score}%: {r.remark})
-            </span>
-          ))}
-          {(!row.rules || row.rules.length === 0) && (
-            <span className="text-xs text-slate-400 italic">No grade rules configured</span>
+          {row.rules && row.rules.length > 0 ? (
+            row.rules.map((r) => (
+              <span
+                key={r.id}
+                className="px-2 py-0.5 rounded bg-[#fffbeb] border border-[#fde68a] text-[11px] font-mono font-semibold text-[#b45309]"
+              >
+                {r.grade} ({r.min_score}-{r.max_score}%: {r.remark})
+              </span>
+            ))
+          ) : (
+            <span className="text-xs text-[#8c9ba5] italic">No grade rules configured</span>
           )}
         </div>
       ),
@@ -406,7 +428,6 @@ export const AssessmentSchemesPage: React.FC = () => {
           <Button
             variant="outline"
             size="sm"
-            className="text-indigo-600 border-indigo-200 hover:bg-indigo-50"
             icon={Award}
             onClick={() => setManagingScale(row)}
           >
@@ -415,8 +436,8 @@ export const AssessmentSchemesPage: React.FC = () => {
           <Button
             variant="ghost"
             size="sm"
-            className="text-slate-600 hover:text-indigo-600 hover:bg-slate-100"
-            icon={Edit}
+            className="text-[#52606d] hover:text-[#064e3b] hover:bg-[#f4f3ef]"
+            icon={Edit3}
             onClick={() => handleEditScaleOpen(row)}
           >
             Edit
@@ -424,7 +445,7 @@ export const AssessmentSchemesPage: React.FC = () => {
           <Button
             variant="ghost"
             size="sm"
-            className="text-rose-600 hover:bg-rose-50"
+            className="text-[#be123c] hover:bg-[#fff1f2]"
             icon={Trash2}
             onClick={() => setDeleteScaleTarget(row)}
           >
@@ -437,10 +458,15 @@ export const AssessmentSchemesPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* Header Banner */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#e5e3dc]">
         <div>
-          <h1 className="text-xl font-bold text-slate-900">Assessment Schemes & Grading Rules</h1>
-          <p className="text-xs text-slate-500">Configure Continuous Assessment (CA) weightages, exam marks, and letter grade brackets</p>
+          <h1 className="font-serif text-2xl lg:text-3xl font-bold tracking-tight text-[#141d24]">
+            Assessment Schemes & Grading Rules
+          </h1>
+          <p className="text-xs sm:text-sm text-[#52606d] mt-1 font-sans">
+            Configure continuous assessment weightages, exam caps, and letter grade brackets
+          </p>
         </div>
         <div className="flex items-center gap-2">
           {activeTab === 'schemes' ? (
@@ -455,23 +481,24 @@ export const AssessmentSchemesPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex items-center gap-2 border-b border-slate-200">
+      {/* Tabs */}
+      <div className="flex items-center gap-2 border-b border-[#e5e3dc]">
         <button
           onClick={() => setActiveTab('schemes')}
-          className={`px-4 py-2.5 text-xs font-bold border-b-2 transition-colors ${
+          className={`px-4 py-2.5 text-xs font-semibold border-b-2 transition-colors cursor-pointer ${
             activeTab === 'schemes'
-              ? 'border-indigo-600 text-indigo-600'
-              : 'border-transparent text-slate-500 hover:text-slate-700'
+              ? 'border-[#064e3b] text-[#064e3b]'
+              : 'border-transparent text-[#52606d] hover:text-[#141d24]'
           }`}
         >
           Assessment Schemes ({schemesData?.results?.length ?? 0})
         </button>
         <button
           onClick={() => setActiveTab('grading')}
-          className={`px-4 py-2.5 text-xs font-bold border-b-2 transition-colors ${
+          className={`px-4 py-2.5 text-xs font-semibold border-b-2 transition-colors cursor-pointer ${
             activeTab === 'grading'
-              ? 'border-indigo-600 text-indigo-600'
-              : 'border-transparent text-slate-500 hover:text-slate-700'
+              ? 'border-[#064e3b] text-[#064e3b]'
+              : 'border-transparent text-[#52606d] hover:text-[#141d24]'
           }`}
         >
           Grading Scales ({gradingData?.results?.length ?? 0})
@@ -493,7 +520,7 @@ export const AssessmentSchemesPage: React.FC = () => {
         isOpen={isSchemeModalOpen}
         onClose={() => setIsSchemeModalOpen(false)}
         title="Create Assessment Scheme"
-        subtitle="Define marks structure (e.g. 30% Continuous Assessment + 70% Terminal Exam)"
+        subtitle="Define marks structure (e.g. 40% Continuous Assessment + 60% Terminal Exam)"
       >
         <form
           onSubmit={(e) => {
@@ -516,18 +543,19 @@ export const AssessmentSchemesPage: React.FC = () => {
             value={schemeForm.max_total_score}
             onChange={(e) => setSchemeForm({ ...schemeForm, max_total_score: Number(e.target.value) })}
           />
-          <div className="flex items-center gap-2">
+          <label className="flex items-center gap-2.5 p-3 rounded-md border border-[#e5e3dc] bg-[#fbfbfa] cursor-pointer hover:bg-[#f4f3ef] transition-colors">
             <input
               type="checkbox"
-              id="scheme_default"
               checked={schemeForm.is_default}
               onChange={(e) => setSchemeForm({ ...schemeForm, is_default: e.target.checked })}
+              className="w-4 h-4 rounded text-[#064e3b] focus:ring-[#064e3b] border-[#cbd2d9]"
             />
-            <label htmlFor="scheme_default" className="text-xs font-semibold text-slate-700">
-              Set as institution default scheme
-            </label>
-          </div>
-          <div className="pt-3 border-t border-slate-100 flex justify-end gap-2">
+            <div>
+              <div className="text-xs font-semibold text-[#141d24]">Set as Default Scheme</div>
+              <div className="text-[11px] text-[#52606d]">Automatically applies to newly created subjects</div>
+            </div>
+          </label>
+          <div className="pt-3 border-t border-[#e5e3dc] flex justify-end gap-2">
             <Button type="button" variant="ghost" onClick={() => setIsSchemeModalOpen(false)}>
               Cancel
             </Button>
@@ -560,18 +588,19 @@ export const AssessmentSchemesPage: React.FC = () => {
             value={editSchemeForm.max_total_score}
             onChange={(e) => setEditSchemeForm({ ...editSchemeForm, max_total_score: Number(e.target.value) })}
           />
-          <div className="flex items-center gap-2">
+          <label className="flex items-center gap-2.5 p-3 rounded-md border border-[#e5e3dc] bg-[#fbfbfa] cursor-pointer hover:bg-[#f4f3ef] transition-colors">
             <input
               type="checkbox"
-              id="edit_scheme_default"
               checked={editSchemeForm.is_default}
               onChange={(e) => setEditSchemeForm({ ...editSchemeForm, is_default: e.target.checked })}
+              className="w-4 h-4 rounded text-[#064e3b] focus:ring-[#064e3b] border-[#cbd2d9]"
             />
-            <label htmlFor="edit_scheme_default" className="text-xs font-semibold text-slate-700">
-              Set as institution default scheme
-            </label>
-          </div>
-          <div className="pt-3 border-t border-slate-100 flex justify-end gap-2">
+            <div>
+              <div className="text-xs font-semibold text-[#141d24]">Set as Default Scheme</div>
+              <div className="text-[11px] text-[#52606d]">Automatically applies to newly created subjects</div>
+            </div>
+          </label>
+          <div className="pt-3 border-t border-[#e5e3dc] flex justify-end gap-2">
             <Button type="button" variant="ghost" onClick={() => setEditSchemeTarget(null)}>
               Cancel
             </Button>
@@ -607,7 +636,7 @@ export const AssessmentSchemesPage: React.FC = () => {
       >
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-700">Assessment Components</span>
+            <span className="text-xs font-bold text-[#141d24]">Assessment Components</span>
             {!isAddComponentOpen && !editComponentTarget && (
               <Button
                 variant="outline"
@@ -630,8 +659,8 @@ export const AssessmentSchemesPage: React.FC = () => {
 
           {/* Add Component Subform */}
           {isAddComponentOpen && (
-            <form onSubmit={handleAddComponentSubmit} className="p-3 bg-indigo-50/50 border border-indigo-200 rounded-lg space-y-3">
-              <p className="text-xs font-bold text-indigo-900">Add New Component</p>
+            <form onSubmit={handleAddComponentSubmit} className="p-3 bg-[#fbfbfa] border border-[#cbd2d9] rounded-md space-y-3">
+              <p className="text-xs font-semibold text-[#064e3b]">Add New Assessment Component</p>
               <div className="grid grid-cols-2 gap-2">
                 <Input
                   label="Component Name"
@@ -676,8 +705,8 @@ export const AssessmentSchemesPage: React.FC = () => {
 
           {/* Edit Component Subform */}
           {editComponentTarget && (
-            <form onSubmit={handleEditComponentSubmit} className="p-3 bg-amber-50/60 border border-amber-200 rounded-lg space-y-3">
-              <p className="text-xs font-bold text-amber-900">Edit Component: {editComponentTarget.name}</p>
+            <form onSubmit={handleEditComponentSubmit} className="p-3 bg-[#fbfbfa] border border-[#cbd2d9] rounded-md space-y-3">
+              <p className="text-xs font-semibold text-[#b45309]">Edit Component: {editComponentTarget.name}</p>
               <div className="grid grid-cols-2 gap-2">
                 <Input
                   label="Component Name"
@@ -719,26 +748,26 @@ export const AssessmentSchemesPage: React.FC = () => {
           )}
 
           {/* Component List */}
-          <div className="divide-y divide-slate-100 border border-slate-200 rounded-lg overflow-hidden">
+          <div className="divide-y divide-[#e5e3dc] border border-[#e5e3dc] rounded-md overflow-hidden">
             {currentManagedScheme?.components?.map((comp) => (
-              <div key={comp.id} className="p-3 flex items-center justify-between bg-white hover:bg-slate-50 transition-colors">
+              <div key={comp.id} className="p-3 flex items-center justify-between bg-white hover:bg-[#fbfbfa] transition-colors">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-slate-800">{comp.name}</span>
-                    <span className="px-1.5 py-0.5 rounded bg-slate-100 text-[10px] font-mono font-bold text-slate-600">
+                    <span className="text-xs font-semibold text-[#141d24]">{comp.name}</span>
+                    <span className="px-1.5 py-0.5 rounded bg-[#f4f3ef] text-[10px] font-mono font-bold text-[#52606d]">
                       {comp.code}
                     </span>
                   </div>
-                  <p className="text-[11px] text-slate-500">
-                    Max Marks: <span className="font-semibold text-slate-700">{comp.max_score}</span> | Order: {comp.order_index}
+                  <p className="text-[11px] text-[#52606d] font-mono mt-0.5">
+                    Max Marks: <span className="font-semibold text-[#064e3b]">{comp.max_score}</span> | Order: {comp.order_index}
                   </p>
                 </div>
                 <div className="flex items-center gap-1">
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-slate-600 hover:text-indigo-600"
-                    icon={Edit}
+                    className="text-[#52606d] hover:text-[#064e3b]"
+                    icon={Edit3}
                     onClick={() => handleEditComponentOpen(comp)}
                   >
                     Edit
@@ -746,7 +775,7 @@ export const AssessmentSchemesPage: React.FC = () => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-rose-600 hover:bg-rose-50"
+                    className="text-[#be123c] hover:bg-[#fff1f2]"
                     icon={Trash2}
                     onClick={() => setDeleteComponentTarget(comp)}
                   >
@@ -756,7 +785,7 @@ export const AssessmentSchemesPage: React.FC = () => {
               </div>
             ))}
             {(!currentManagedScheme?.components || currentManagedScheme.components.length === 0) && (
-              <div className="p-6 text-center text-xs text-slate-400">
+              <div className="p-6 text-center text-xs text-[#8c9ba5]">
                 No components added yet. Click &quot;Add Component&quot; to define CA / Exam marks.
               </div>
             )}
@@ -815,18 +844,19 @@ export const AssessmentSchemesPage: React.FC = () => {
             value={scaleForm.name}
             onChange={(e) => setScaleForm({ ...scaleForm, name: e.target.value })}
           />
-          <div className="flex items-center gap-2">
+          <label className="flex items-center gap-2.5 p-3 rounded-md border border-[#e5e3dc] bg-[#fbfbfa] cursor-pointer hover:bg-[#f4f3ef] transition-colors">
             <input
               type="checkbox"
-              id="scale_default"
               checked={scaleForm.is_default}
               onChange={(e) => setScaleForm({ ...scaleForm, is_default: e.target.checked })}
+              className="w-4 h-4 rounded text-[#064e3b] focus:ring-[#064e3b] border-[#cbd2d9]"
             />
-            <label htmlFor="scale_default" className="text-xs font-semibold text-slate-700">
-              Set as institution default grading scale
-            </label>
-          </div>
-          <div className="pt-3 border-t border-slate-100 flex justify-end gap-2">
+            <div>
+              <div className="text-xs font-semibold text-[#141d24]">Set as Default Grading Scale</div>
+              <div className="text-[11px] text-[#52606d]">Default standard used for report cards across classes</div>
+            </div>
+          </label>
+          <div className="pt-3 border-t border-[#e5e3dc] flex justify-end gap-2">
             <Button type="button" variant="ghost" onClick={() => setIsScaleModalOpen(false)}>
               Cancel
             </Button>
@@ -851,18 +881,19 @@ export const AssessmentSchemesPage: React.FC = () => {
             value={editScaleForm.name}
             onChange={(e) => setEditScaleForm({ ...editScaleForm, name: e.target.value })}
           />
-          <div className="flex items-center gap-2">
+          <label className="flex items-center gap-2.5 p-3 rounded-md border border-[#e5e3dc] bg-[#fbfbfa] cursor-pointer hover:bg-[#f4f3ef] transition-colors">
             <input
               type="checkbox"
-              id="edit_scale_default"
               checked={editScaleForm.is_default}
               onChange={(e) => setEditScaleForm({ ...editScaleForm, is_default: e.target.checked })}
+              className="w-4 h-4 rounded text-[#064e3b] focus:ring-[#064e3b] border-[#cbd2d9]"
             />
-            <label htmlFor="edit_scale_default" className="text-xs font-semibold text-slate-700">
-              Set as institution default grading scale
-            </label>
-          </div>
-          <div className="pt-3 border-t border-slate-100 flex justify-end gap-2">
+            <div>
+              <div className="text-xs font-semibold text-[#141d24]">Set as Default Grading Scale</div>
+              <div className="text-[11px] text-[#52606d]">Default standard used for report cards across classes</div>
+            </div>
+          </label>
+          <div className="pt-3 border-t border-[#e5e3dc] flex justify-end gap-2">
             <Button type="button" variant="ghost" onClick={() => setEditScaleTarget(null)}>
               Cancel
             </Button>
@@ -898,7 +929,7 @@ export const AssessmentSchemesPage: React.FC = () => {
       >
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-700">Grade Brackets</span>
+            <span className="text-xs font-bold text-[#141d24]">Grade Brackets</span>
             {!isAddRuleOpen && !editRuleTarget && (
               <Button
                 variant="outline"
@@ -923,8 +954,8 @@ export const AssessmentSchemesPage: React.FC = () => {
 
           {/* Add Rule Subform */}
           {isAddRuleOpen && (
-            <form onSubmit={handleAddRuleSubmit} className="p-3 bg-indigo-50/50 border border-indigo-200 rounded-lg space-y-3">
-              <p className="text-xs font-bold text-indigo-900">Add New Grade Rule</p>
+            <form onSubmit={handleAddRuleSubmit} className="p-3 bg-[#fbfbfa] border border-[#cbd2d9] rounded-md space-y-3">
+              <p className="text-xs font-semibold text-[#064e3b]">Add New Grade Rule</p>
               <div className="grid grid-cols-3 gap-2">
                 <Input
                   label="Grade Letter"
@@ -977,8 +1008,8 @@ export const AssessmentSchemesPage: React.FC = () => {
 
           {/* Edit Rule Subform */}
           {editRuleTarget && (
-            <form onSubmit={handleEditRuleSubmit} className="p-3 bg-amber-50/60 border border-amber-200 rounded-lg space-y-3">
-              <p className="text-xs font-bold text-amber-900">Edit Grade Rule: {editRuleTarget.grade}</p>
+            <form onSubmit={handleEditRuleSubmit} className="p-3 bg-[#fbfbfa] border border-[#cbd2d9] rounded-md space-y-3">
+              <p className="text-xs font-semibold text-[#b45309]">Edit Grade Rule: {editRuleTarget.grade}</p>
               <div className="grid grid-cols-3 gap-2">
                 <Input
                   label="Grade Letter"
@@ -1028,19 +1059,19 @@ export const AssessmentSchemesPage: React.FC = () => {
           )}
 
           {/* Grade Rules List */}
-          <div className="divide-y divide-slate-100 border border-slate-200 rounded-lg overflow-hidden">
+          <div className="divide-y divide-[#e5e3dc] border border-[#e5e3dc] rounded-md overflow-hidden">
             {currentManagedScale?.rules?.map((rule) => (
-              <div key={rule.id} className="p-3 flex items-center justify-between bg-white hover:bg-slate-50 transition-colors">
+              <div key={rule.id} className="p-3 flex items-center justify-between bg-white hover:bg-[#fbfbfa] transition-colors">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="w-8 h-8 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-800 font-bold flex items-center justify-center text-xs">
+                    <span className="w-8 h-8 rounded-md bg-[#ecfdf5] border border-[#a7f3d0] text-[#064e3b] font-mono font-bold flex items-center justify-center text-xs">
                       {rule.grade}
                     </span>
                     <div>
-                      <p className="text-xs font-bold text-slate-800">
-                        {rule.min_score}% - {rule.max_score}% : <span className="text-indigo-600">{rule.remark}</span>
+                      <p className="text-xs font-semibold text-[#141d24]">
+                        {rule.min_score}% - {rule.max_score}% : <span className="text-[#064e3b] font-bold">{rule.remark}</span>
                       </p>
-                      <p className="text-[11px] text-slate-500">Grade Point: {rule.grade_point}</p>
+                      <p className="text-[11px] text-[#52606d] font-mono">Grade Point: {rule.grade_point}</p>
                     </div>
                   </div>
                 </div>
@@ -1048,8 +1079,8 @@ export const AssessmentSchemesPage: React.FC = () => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-slate-600 hover:text-indigo-600"
-                    icon={Edit}
+                    className="text-[#52606d] hover:text-[#064e3b]"
+                    icon={Edit3}
                     onClick={() => handleEditRuleOpen(rule)}
                   >
                     Edit
@@ -1057,7 +1088,7 @@ export const AssessmentSchemesPage: React.FC = () => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-rose-600 hover:bg-rose-50"
+                    className="text-[#be123c] hover:bg-[#fff1f2]"
                     icon={Trash2}
                     onClick={() => setDeleteRuleTarget(rule)}
                   >
@@ -1067,7 +1098,7 @@ export const AssessmentSchemesPage: React.FC = () => {
               </div>
             ))}
             {(!currentManagedScale?.rules || currentManagedScale.rules.length === 0) && (
-              <div className="p-6 text-center text-xs text-slate-400">
+              <div className="p-6 text-center text-xs text-[#8c9ba5]">
                 No grade rules defined yet. Click &quot;Add Grade Rule&quot; to set up score ranges.
               </div>
             )}

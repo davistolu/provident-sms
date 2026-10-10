@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { UserPlus, Users, Trash2, Shield, Mail, CheckCircle2, Edit } from 'lucide-react';
+import { UserPlus, Users, Trash2, Shield, Mail, CheckCircle2, Edit, ShieldCheck } from 'lucide-react';
 import { api } from '@/services/api';
 import { SchoolMembership, PaginatedResponse, Role } from '@/types';
 import { DataTable, Column } from '@/components/common/DataTable';
@@ -96,11 +96,11 @@ export const UserAccountsPage: React.FC = () => {
 
   const columns: Column<SchoolMembership>[] = [
     {
-      header: 'Full Name',
+      header: 'Full Name & Email',
       cell: (row) => (
         <div>
-          <p className="font-bold text-slate-900">{row.user?.full_name}</p>
-          <p className="text-[11px] text-slate-400">{row.user?.email}</p>
+          <p className="font-bold text-[#141d24]">{row.user?.full_name}</p>
+          <p className="text-[11px] text-[#8896a4] font-mono">{row.user?.email}</p>
         </div>
       ),
     },
@@ -112,9 +112,9 @@ export const UserAccountsPage: React.FC = () => {
           row.role === 'ADMIN' || row.role === 'SUPER_ADMIN'
             ? 'danger'
             : row.role === 'PRINCIPAL'
-            ? 'indigo'
+            ? 'evergreen'
             : row.role === 'BURSAR'
-            ? 'warning'
+            ? 'gold'
             : 'neutral';
         return <Badge variant={variant}>{row.role}</Badge>;
       },
@@ -130,7 +130,7 @@ export const UserAccountsPage: React.FC = () => {
     {
       header: 'Date Joined',
       cell: (row) => (
-        <span className="text-xs text-slate-500 font-mono">
+        <span className="text-xs text-[#52606d] font-mono">
           {new Date(row.user?.date_joined || Date.now()).toLocaleDateString()}
         </span>
       ),
@@ -142,8 +142,7 @@ export const UserAccountsPage: React.FC = () => {
         <div className="flex items-center justify-end gap-1.5">
           <Button
             variant="ghost"
-            size="sm"
-            className="text-slate-600 hover:text-indigo-600 hover:bg-slate-100"
+            size="xs"
             icon={Edit}
             onClick={() => handleEditOpen(row)}
           >
@@ -151,8 +150,8 @@ export const UserAccountsPage: React.FC = () => {
           </Button>
           <Button
             variant="ghost"
-            size="sm"
-            className="text-rose-600 hover:text-rose-700 hover:bg-rose-50"
+            size="xs"
+            className="text-[#991b1b] hover:bg-[#fef2f2]"
             icon={Trash2}
             onClick={() => setDeleteTarget(row)}
           >
@@ -167,9 +166,12 @@ export const UserAccountsPage: React.FC = () => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-slate-900">User Accounts & Access Management</h1>
-          <p className="text-xs text-slate-500">
-            Create staff accounts, assign administrative roles, and manage institutional access
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl font-bold font-display text-[#141d24]">User Accounts & Roles</h1>
+            <Badge variant="evergreen">{usersData?.count ?? 0} Accounts</Badge>
+          </div>
+          <p className="text-xs text-[#52606d] mt-0.5">
+            Create staff accounts, assign administrative roles, and manage institutional system access
           </p>
         </div>
         <Button variant="primary" size="sm" icon={UserPlus} onClick={() => setIsModalOpen(true)}>
@@ -188,7 +190,7 @@ export const UserAccountsPage: React.FC = () => {
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
-            className="px-3 py-1.5 text-xs bg-white border border-slate-200 rounded-lg text-slate-700"
+            className="px-3 py-1.5 text-xs bg-white border border-[#d8d5cb] rounded-lg text-[#141d24]"
           >
             <option value="">All Roles</option>
             <option value="ADMIN">School Administrator</option>
@@ -215,7 +217,7 @@ export const UserAccountsPage: React.FC = () => {
           className="space-y-4"
         >
           {formError && (
-            <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-lg">
+            <div className="p-3 bg-[#fef2f2] border border-[#fecaca] text-[#991b1b] text-xs font-medium rounded-lg">
               {formError}
             </div>
           )}
@@ -229,7 +231,7 @@ export const UserAccountsPage: React.FC = () => {
               onChange={(e) => setUserForm({ ...userForm, first_name: e.target.value })}
             />
             <Input
-              label="Last Name"
+              label="Surname"
               required
               placeholder="Surname"
               value={userForm.last_name}
@@ -255,11 +257,13 @@ export const UserAccountsPage: React.FC = () => {
               onChange={(e) => setUserForm({ ...userForm, password: e.target.value })}
             />
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Assigned Role</label>
+              <label className="block text-[11px] font-bold text-[#52606d] uppercase tracking-wider mb-1.5">
+                Assigned Role
+              </label>
               <select
                 value={userForm.role}
                 onChange={(e) => setUserForm({ ...userForm, role: e.target.value as Role })}
-                className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-hidden focus:border-indigo-600"
+                className="w-full px-3 py-2 text-xs bg-white border border-[#d8d5cb] rounded-lg text-[#141d24]"
               >
                 <option value="TEACHER">Teacher</option>
                 <option value="ADMIN">School Administrator</option>
@@ -269,12 +273,12 @@ export const UserAccountsPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="pt-3 border-t border-slate-100 flex justify-end gap-2">
+          <div className="pt-3 border-t border-[#e6e4dc] flex justify-end gap-2">
             <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>
               Cancel
             </Button>
             <Button type="submit" variant="primary" isLoading={createMembershipMutation.isPending}>
-              Create User
+              Create User Account
             </Button>
           </div>
         </form>
@@ -289,7 +293,7 @@ export const UserAccountsPage: React.FC = () => {
       >
         <form onSubmit={handleEditSubmit} className="space-y-4">
           {editError && (
-            <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-lg">
+            <div className="p-3 bg-[#fef2f2] border border-[#fecaca] text-[#991b1b] text-xs font-medium rounded-lg">
               {editError}
             </div>
           )}
@@ -302,7 +306,7 @@ export const UserAccountsPage: React.FC = () => {
               onChange={(e) => setEditForm({ ...editForm, first_name: e.target.value })}
             />
             <Input
-              label="Last Name"
+              label="Surname"
               required
               value={editForm.last_name}
               onChange={(e) => setEditForm({ ...editForm, last_name: e.target.value })}
@@ -311,11 +315,13 @@ export const UserAccountsPage: React.FC = () => {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Assigned Role</label>
+              <label className="block text-[11px] font-bold text-[#52606d] uppercase tracking-wider mb-1.5">
+                Assigned Role
+              </label>
               <select
                 value={editForm.role}
                 onChange={(e) => setEditForm({ ...editForm, role: e.target.value as Role })}
-                className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-hidden focus:border-indigo-600"
+                className="w-full px-3 py-2 text-xs bg-white border border-[#d8d5cb] rounded-lg text-[#141d24]"
               >
                 <option value="TEACHER">Teacher</option>
                 <option value="ADMIN">School Administrator</option>
@@ -324,11 +330,13 @@ export const UserAccountsPage: React.FC = () => {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Account Status</label>
+              <label className="block text-[11px] font-bold text-[#52606d] uppercase tracking-wider mb-1.5">
+                Account Status
+              </label>
               <select
                 value={editForm.is_active ? 'true' : 'false'}
                 onChange={(e) => setEditForm({ ...editForm, is_active: e.target.value === 'true' })}
-                className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-hidden focus:border-indigo-600"
+                className="w-full px-3 py-2 text-xs bg-white border border-[#d8d5cb] rounded-lg text-[#141d24]"
               >
                 <option value="true">Active</option>
                 <option value="false">Deactivated</option>
@@ -336,7 +344,7 @@ export const UserAccountsPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="pt-3 border-t border-slate-100 flex justify-end gap-2">
+          <div className="pt-3 border-t border-[#e6e4dc] flex justify-end gap-2">
             <Button type="button" variant="ghost" onClick={() => setEditTarget(null)}>
               Cancel
             </Button>

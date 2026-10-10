@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Layers, Plus, Users, Trash2, Edit, GraduationCap } from 'lucide-react';
+import { Layers, Plus, Users, Trash2, Edit, GraduationCap, Sparkles } from 'lucide-react';
 import { api } from '@/services/api';
 import { ClassArm, ClassLevel, TeacherProfile, PaginatedResponse } from '@/types';
 import { DataTable, Column } from '@/components/common/DataTable';
@@ -162,26 +162,26 @@ export const ClassesAndArmsPage: React.FC = () => {
 
   const armColumns: Column<ClassArm>[] = [
     {
-      header: 'Class / Arm',
+      header: 'Class / Stream',
       cell: (row) => (
         <div>
-          <p className="font-bold text-slate-900">{row.display_name}</p>
-          <p className="text-[11px] text-slate-400">{row.class_level_name}</p>
+          <p className="font-bold text-[#141d24]">{row.display_name}</p>
+          <p className="text-[11px] text-[#8896a4]">{row.class_level_name}</p>
         </div>
       ),
     },
     {
-      header: 'Class Teacher',
+      header: 'Class Educator',
       cell: (row) => (
-        <span className="font-semibold text-slate-700">
-          {row.class_teacher_name || <span className="text-slate-400">Unassigned</span>}
+        <span className="font-semibold text-[#141d24]">
+          {row.class_teacher_name || <span className="text-[#8896a4] italic">Unassigned</span>}
         </span>
       ),
     },
     {
-      header: 'Enrolled Students',
+      header: 'Enrolled Strength',
       cell: (row) => (
-        <Badge variant="indigo">
+        <Badge variant="evergreen">
           {row.enrolled_students_count ?? 0} Students
         </Badge>
       ),
@@ -193,8 +193,7 @@ export const ClassesAndArmsPage: React.FC = () => {
         <div className="flex items-center justify-end gap-1.5">
           <Button
             variant="ghost"
-            size="sm"
-            className="text-slate-600 hover:text-indigo-600 hover:bg-slate-100"
+            size="xs"
             icon={Edit}
             onClick={() => handleEditArmOpen(row)}
           >
@@ -202,8 +201,8 @@ export const ClassesAndArmsPage: React.FC = () => {
           </Button>
           <Button
             variant="ghost"
-            size="sm"
-            className="text-rose-600 hover:bg-rose-50"
+            size="xs"
+            className="text-[#991b1b] hover:bg-[#fef2f2]"
             icon={Trash2}
             onClick={() => setDeleteArmTarget(row)}
           >
@@ -219,8 +218,8 @@ export const ClassesAndArmsPage: React.FC = () => {
       header: 'Level / Grade Name',
       cell: (row) => (
         <div>
-          <p className="font-bold text-slate-900">{row.name}</p>
-          <p className="text-[11px] font-mono text-slate-400">{row.code || 'NO-CODE'}</p>
+          <p className="font-bold text-[#141d24]">{row.name}</p>
+          <p className="text-[11px] font-mono text-[#8896a4]">{row.code || 'NO-CODE'}</p>
         </div>
       ),
     },
@@ -233,19 +232,19 @@ export const ClassesAndArmsPage: React.FC = () => {
             : row.category === 'PRIMARY'
             ? 'success'
             : row.category === 'JUNIOR_SECONDARY'
-            ? 'indigo'
-            : 'danger';
+            ? 'gold'
+            : 'evergreen';
         return <Badge variant={variant}>{row.category_display}</Badge>;
       },
     },
     {
-      header: 'Display Order',
+      header: 'Sequence Index',
       accessorKey: 'order_index',
-      cell: (row) => <span className="font-mono text-xs text-slate-600">#{row.order_index}</span>,
+      cell: (row) => <span className="font-mono text-xs text-[#52606d]">#{row.order_index}</span>,
     },
     {
-      header: 'Active Arms',
-      cell: (row) => <span className="font-bold text-slate-800 text-xs">{row.arms_count ?? 0} Arms</span>,
+      header: 'Active Streams',
+      cell: (row) => <span className="font-bold text-[#141d24] text-xs">{row.arms_count ?? 0} Arms</span>,
     },
     {
       header: 'Actions',
@@ -254,8 +253,7 @@ export const ClassesAndArmsPage: React.FC = () => {
         <div className="flex items-center justify-end gap-1.5">
           <Button
             variant="ghost"
-            size="sm"
-            className="text-slate-600 hover:text-indigo-600 hover:bg-slate-100"
+            size="xs"
             icon={Edit}
             onClick={() => handleEditLevelOpen(row)}
           >
@@ -263,8 +261,8 @@ export const ClassesAndArmsPage: React.FC = () => {
           </Button>
           <Button
             variant="ghost"
-            size="sm"
-            className="text-rose-600 hover:bg-rose-50"
+            size="xs"
+            className="text-[#991b1b] hover:bg-[#fef2f2]"
             icon={Trash2}
             onClick={() => setDeleteLevelTarget(row)}
           >
@@ -280,45 +278,45 @@ export const ClassesAndArmsPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-slate-900">Academic Classes & Levels</h1>
-          <p className="text-xs text-slate-500">
-            Configure institutional educational levels (Nursery through SSS) and assigned class arms
+          <h1 className="text-xl font-bold font-display text-[#141d24]">Academic Structure & Streams</h1>
+          <p className="text-xs text-[#52606d] mt-0.5">
+            Configure institutional educational levels (Nursery through SSS) and assigned class streams
           </p>
         </div>
         <div className="flex items-center gap-2">
           {activeTab === 'arms' ? (
             <Button variant="primary" size="sm" icon={Plus} onClick={() => setIsArmModalOpen(true)}>
-              New Class Arm
+              New Class Stream
             </Button>
           ) : (
             <Button variant="primary" size="sm" icon={Plus} onClick={() => setIsLevelModalOpen(true)}>
-              New Class Level
+              New Grade Level
             </Button>
           )}
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-200">
+      <div className="flex items-center gap-2 border-b border-[#e6e4dc]">
         <button
           onClick={() => setActiveTab('arms')}
-          className={`px-4 py-2.5 text-xs font-bold border-b-2 transition-colors ${
+          className={`px-4 py-2.5 text-xs font-bold border-b-2 transition-colors cursor-pointer ${
             activeTab === 'arms'
-              ? 'border-indigo-600 text-indigo-600'
-              : 'border-transparent text-slate-500 hover:text-slate-700'
+              ? 'border-[#064e3b] text-[#064e3b]'
+              : 'border-transparent text-[#52606d] hover:text-[#141d24]'
           }`}
         >
-          Class Arms ({armsData?.results?.length ?? 0})
+          Class Streams ({armsData?.results?.length ?? 0})
         </button>
         <button
           onClick={() => setActiveTab('levels')}
-          className={`px-4 py-2.5 text-xs font-bold border-b-2 transition-colors ${
+          className={`px-4 py-2.5 text-xs font-bold border-b-2 transition-colors cursor-pointer ${
             activeTab === 'levels'
-              ? 'border-indigo-600 text-indigo-600'
-              : 'border-transparent text-slate-500 hover:text-slate-700'
+              ? 'border-[#064e3b] text-[#064e3b]'
+              : 'border-transparent text-[#52606d] hover:text-[#141d24]'
           }`}
         >
-          Class Levels / Grades ({levelsData?.results?.length ?? 0})
+          Grade Levels ({levelsData?.results?.length ?? 0})
         </button>
       </div>
 
@@ -332,7 +330,7 @@ export const ClassesAndArmsPage: React.FC = () => {
       <Modal
         isOpen={isArmModalOpen}
         onClose={() => setIsArmModalOpen(false)}
-        title="Create New Class Arm"
+        title="Create New Class Stream"
         subtitle="Associate an arm with an existing class level"
       >
         <form
@@ -343,12 +341,14 @@ export const ClassesAndArmsPage: React.FC = () => {
           className="space-y-4"
         >
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">Class Level</label>
+            <label className="block text-[11px] font-bold text-[#52606d] uppercase tracking-wider mb-1.5">
+              Grade Level
+            </label>
             <select
               required
               value={armForm.class_level}
               onChange={(e) => setArmForm({ ...armForm, class_level: e.target.value })}
-              className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-hidden focus:border-indigo-600"
+              className="w-full px-3 py-2 text-xs bg-white border border-[#d8d5cb] rounded-lg text-[#141d24] focus:outline-none focus:ring-2 focus:ring-[#064e3b]/20 focus:border-[#064e3b]"
             >
               <option value="">Select Class Level</option>
               {levelsData?.results?.map((l) => (
@@ -360,18 +360,20 @@ export const ClassesAndArmsPage: React.FC = () => {
           </div>
 
           <Input
-            label="Arm Name (optional)"
-            placeholder="e.g. Gold, Diamond, Blue, or leave empty"
+            label="Stream Name (optional)"
+            placeholder="e.g. Gold, Diamond, Alpha, or leave blank"
             value={armForm.name}
             onChange={(e) => setArmForm({ ...armForm, name: e.target.value })}
           />
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">Class Teacher</label>
+            <label className="block text-[11px] font-bold text-[#52606d] uppercase tracking-wider mb-1.5">
+              Class Educator
+            </label>
             <select
               value={armForm.class_teacher}
               onChange={(e) => setArmForm({ ...armForm, class_teacher: e.target.value })}
-              className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-hidden focus:border-indigo-600"
+              className="w-full px-3 py-2 text-xs bg-white border border-[#d8d5cb] rounded-lg text-[#141d24] focus:outline-none focus:ring-2 focus:ring-[#064e3b]/20 focus:border-[#064e3b]"
             >
               <option value="">Assign Class Teacher (Optional)</option>
               {teachersData?.results?.map((t) => (
@@ -382,12 +384,12 @@ export const ClassesAndArmsPage: React.FC = () => {
             </select>
           </div>
 
-          <div className="pt-3 border-t border-slate-100 flex justify-end gap-2">
+          <div className="pt-3 border-t border-[#e6e4dc] flex justify-end gap-2">
             <Button type="button" variant="ghost" onClick={() => setIsArmModalOpen(false)}>
               Cancel
             </Button>
             <Button type="submit" variant="primary" isLoading={createArmMutation.isPending}>
-              Create Arm
+              Create Stream
             </Button>
           </div>
         </form>
@@ -397,17 +399,19 @@ export const ClassesAndArmsPage: React.FC = () => {
       <Modal
         isOpen={!!editArmTarget}
         onClose={() => setEditArmTarget(null)}
-        title="Edit Class Arm"
-        subtitle={`Update class arm ${editArmTarget?.display_name}`}
+        title="Edit Class Stream"
+        subtitle={`Update class stream ${editArmTarget?.display_name}`}
       >
         <form onSubmit={handleEditArmSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">Class Level</label>
+            <label className="block text-[11px] font-bold text-[#52606d] uppercase tracking-wider mb-1.5">
+              Grade Level
+            </label>
             <select
               required
               value={editArmForm.class_level}
               onChange={(e) => setEditArmForm({ ...editArmForm, class_level: e.target.value })}
-              className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-hidden focus:border-indigo-600"
+              className="w-full px-3 py-2 text-xs bg-white border border-[#d8d5cb] rounded-lg text-[#141d24] focus:outline-none focus:ring-2 focus:ring-[#064e3b]/20 focus:border-[#064e3b]"
             >
               <option value="">Select Class Level</option>
               {levelsData?.results?.map((l) => (
@@ -419,18 +423,20 @@ export const ClassesAndArmsPage: React.FC = () => {
           </div>
 
           <Input
-            label="Arm Name (optional)"
-            placeholder="e.g. Gold, Diamond, Blue, or leave empty"
+            label="Stream Name (optional)"
+            placeholder="e.g. Gold, Diamond, Alpha, or leave blank"
             value={editArmForm.name}
             onChange={(e) => setEditArmForm({ ...editArmForm, name: e.target.value })}
           />
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">Class Teacher</label>
+            <label className="block text-[11px] font-bold text-[#52606d] uppercase tracking-wider mb-1.5">
+              Class Educator
+            </label>
             <select
               value={editArmForm.class_teacher}
               onChange={(e) => setEditArmForm({ ...editArmForm, class_teacher: e.target.value })}
-              className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg focus:outline-hidden focus:border-indigo-600"
+              className="w-full px-3 py-2 text-xs bg-white border border-[#d8d5cb] rounded-lg text-[#141d24] focus:outline-none focus:ring-2 focus:ring-[#064e3b]/20 focus:border-[#064e3b]"
             >
               <option value="">Assign Class Teacher (Optional)</option>
               {teachersData?.results?.map((t) => (
@@ -441,12 +447,12 @@ export const ClassesAndArmsPage: React.FC = () => {
             </select>
           </div>
 
-          <div className="pt-3 border-t border-slate-100 flex justify-end gap-2">
+          <div className="pt-3 border-t border-[#e6e4dc] flex justify-end gap-2">
             <Button type="button" variant="ghost" onClick={() => setEditArmTarget(null)}>
               Cancel
             </Button>
             <Button type="submit" variant="primary" isLoading={updateArmMutation.isPending}>
-              Save Arm Changes
+              Save Changes
             </Button>
           </div>
         </form>
@@ -456,7 +462,7 @@ export const ClassesAndArmsPage: React.FC = () => {
       <Modal
         isOpen={isLevelModalOpen}
         onClose={() => setIsLevelModalOpen(false)}
-        title="Create Academic Class Level"
+        title="Create Academic Grade Level"
         subtitle="Define a new grade level (e.g. Nursery 2, JSS 3, SS 3, Grade 1)"
       >
         <form
@@ -467,7 +473,7 @@ export const ClassesAndArmsPage: React.FC = () => {
           className="space-y-4"
         >
           <Input
-            label="Class Level Name"
+            label="Grade Level Title"
             required
             placeholder="e.g. JSS 3, SS 3, Primary 6, Grade 1"
             value={levelForm.name}
@@ -482,11 +488,13 @@ export const ClassesAndArmsPage: React.FC = () => {
               onChange={(e) => setLevelForm({ ...levelForm, code: e.target.value })}
             />
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Educational Section</label>
+              <label className="block text-[11px] font-bold text-[#52606d] uppercase tracking-wider mb-1.5">
+                Section
+              </label>
               <select
                 value={levelForm.category}
                 onChange={(e) => setLevelForm({ ...levelForm, category: e.target.value })}
-                className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg"
+                className="w-full px-3 py-2 text-xs bg-white border border-[#d8d5cb] rounded-lg text-[#141d24]"
               >
                 <option value="NURSERY">Nursery / Pre-School</option>
                 <option value="PRIMARY">Primary School</option>
@@ -497,18 +505,18 @@ export const ClassesAndArmsPage: React.FC = () => {
           </div>
 
           <Input
-            label="Ordering Priority (Sequence Index)"
+            label="Ordering Priority Index"
             type="number"
             value={levelForm.order_index}
             onChange={(e) => setLevelForm({ ...levelForm, order_index: parseInt(e.target.value) || 1 })}
           />
 
-          <div className="pt-3 border-t border-slate-100 flex justify-end gap-2">
+          <div className="pt-3 border-t border-[#e6e4dc] flex justify-end gap-2">
             <Button type="button" variant="ghost" onClick={() => setIsLevelModalOpen(false)}>
               Cancel
             </Button>
             <Button type="submit" variant="primary" isLoading={createLevelMutation.isPending}>
-              Create Class Level
+              Create Grade Level
             </Button>
           </div>
         </form>
@@ -518,8 +526,8 @@ export const ClassesAndArmsPage: React.FC = () => {
       <Modal
         isOpen={!!editLevelTarget}
         onClose={() => setEditLevelTarget(null)}
-        title="Edit Class Level"
-        subtitle={`Update class level ${editLevelTarget?.name}`}
+        title="Edit Grade Level"
+        subtitle={`Update grade level ${editLevelTarget?.name}`}
       >
         <form
           onSubmit={(e) => {
@@ -530,7 +538,7 @@ export const ClassesAndArmsPage: React.FC = () => {
           className="space-y-4"
         >
           <Input
-            label="Class Level Name"
+            label="Grade Level Title"
             required
             value={editLevelForm.name}
             onChange={(e) => setEditLevelForm({ ...editLevelForm, name: e.target.value })}
@@ -543,11 +551,13 @@ export const ClassesAndArmsPage: React.FC = () => {
               onChange={(e) => setEditLevelForm({ ...editLevelForm, code: e.target.value })}
             />
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Educational Section</label>
+              <label className="block text-[11px] font-bold text-[#52606d] uppercase tracking-wider mb-1.5">
+                Section
+              </label>
               <select
                 value={editLevelForm.category}
                 onChange={(e) => setEditLevelForm({ ...editLevelForm, category: e.target.value })}
-                className="w-full px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg"
+                className="w-full px-3 py-2 text-xs bg-white border border-[#d8d5cb] rounded-lg text-[#141d24]"
               >
                 <option value="NURSERY">Nursery / Pre-School</option>
                 <option value="PRIMARY">Primary School</option>
@@ -558,18 +568,18 @@ export const ClassesAndArmsPage: React.FC = () => {
           </div>
 
           <Input
-            label="Ordering Priority (Sequence Index)"
+            label="Ordering Priority Index"
             type="number"
             value={editLevelForm.order_index}
             onChange={(e) => setEditLevelForm({ ...editLevelForm, order_index: parseInt(e.target.value) || 1 })}
           />
 
-          <div className="pt-3 border-t border-slate-100 flex justify-end gap-2">
+          <div className="pt-3 border-t border-[#e6e4dc] flex justify-end gap-2">
             <Button type="button" variant="ghost" onClick={() => setEditLevelTarget(null)}>
               Cancel
             </Button>
             <Button type="submit" variant="primary" isLoading={updateLevelMutation.isPending}>
-              Save Level Changes
+              Save Changes
             </Button>
           </div>
         </form>
@@ -582,8 +592,8 @@ export const ClassesAndArmsPage: React.FC = () => {
         onConfirm={() => {
           if (deleteArmTarget) deleteArmMutation.mutate(deleteArmTarget.id);
         }}
-        title="Delete Class Arm"
-        message={`Are you sure you want to delete the class arm "${deleteArmTarget?.display_name}"?`}
+        title="Delete Class Stream"
+        message={`Are you sure you want to delete the stream "${deleteArmTarget?.display_name}"?`}
         isLoading={deleteArmMutation.isPending}
       />
 
@@ -594,8 +604,8 @@ export const ClassesAndArmsPage: React.FC = () => {
         onConfirm={() => {
           if (deleteLevelTarget) deleteLevelMutation.mutate(deleteLevelTarget.id);
         }}
-        title="Delete Class Level"
-        message={`Are you sure you want to delete class level "${deleteLevelTarget?.name}"? All associated arms should be removed first.`}
+        title="Delete Grade Level"
+        message={`Are you sure you want to delete grade level "${deleteLevelTarget?.name}"? All associated streams should be removed first.`}
         isLoading={deleteLevelMutation.isPending}
       />
     </div>

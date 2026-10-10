@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { School, Save, CheckCircle2, ShieldCheck, Sliders, Globe } from 'lucide-react';
+import { School, Save, CheckCircle2, ShieldCheck, Sliders, Globe, Building2, Hash, Sparkles } from 'lucide-react';
 import { api } from '@/services/api';
 import { School as SchoolType, SchoolSettings } from '@/types';
 import { Button } from '@/components/common/Button';
@@ -83,7 +83,7 @@ export const SchoolSettingsPage: React.FC = () => {
     ]);
     queryClient.invalidateQueries({ queryKey: ['current-school'] });
     queryClient.invalidateQueries({ queryKey: ['current-settings'] });
-    setSaveSuccess('School information and institutional settings saved successfully!');
+    setSaveSuccess('Institutional configuration and numbering sequences updated successfully!');
     setTimeout(() => setSaveSuccess(null), 4000);
   };
 
@@ -91,28 +91,34 @@ export const SchoolSettingsPage: React.FC = () => {
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#e5e3dc]">
         <div>
-          <h1 className="text-xl font-bold text-slate-900">Institutional & School Settings</h1>
-          <p className="text-xs text-slate-500">Configure institution branding, contact details, numbering preferences, and grading rules</p>
+          <h1 className="font-serif text-2xl lg:text-3xl font-bold tracking-tight text-[#141d24]">
+            Institutional & School Governance
+          </h1>
+          <p className="text-xs sm:text-sm text-[#52606d] mt-1 font-sans">
+            Configure school identity, crest branding, automated numbering sequences, and grading protocols
+          </p>
         </div>
       </div>
 
       {saveSuccess && (
-        <div className="p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold rounded-xl flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+        <div className="p-3.5 bg-[#ecfdf5] border border-[#a7f3d0] text-[#064e3b] text-xs font-semibold rounded-md flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 text-[#059669]" />
           {saveSuccess}
         </div>
       )}
 
       <form onSubmit={handleSaveAll} className="space-y-6">
         {/* School Branding & Profile */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
-          <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
-            <School className="w-5 h-5 text-indigo-600" />
+        <div className="bg-[#ffffff] p-6 rounded-lg border border-[#e5e3dc] shadow-[0_1px_3px_rgba(0,0,0,0.03)] space-y-5">
+          <div className="flex items-center gap-3 border-b border-[#e5e3dc] pb-4">
+            <div className="w-9 h-9 rounded-md bg-[#f4f3ef] border border-[#e5e3dc] flex items-center justify-center text-[#064e3b]">
+              <Building2 className="w-4 h-4" />
+            </div>
             <div>
-              <h3 className="text-sm font-bold text-slate-900">Institution Identity & Profile</h3>
-              <p className="text-xs text-slate-400">School name, motto, and branding displayed on reports and receipts</p>
+              <h3 className="font-serif text-base font-bold text-[#141d24]">Institutional Identity & Dossier</h3>
+              <p className="text-xs text-[#52606d]">Official legal name, motto, and contact coordinates for documents</p>
             </div>
           </div>
 
@@ -125,7 +131,7 @@ export const SchoolSettingsPage: React.FC = () => {
             />
             <Input
               label="School Motto"
-              placeholder="e.g. Excellence in Knowledge and Leadership"
+              placeholder="e.g. Excellence in Knowledge and Character"
               value={schoolForm.motto}
               onChange={(e) => setSchoolForm({ ...schoolForm, motto: e.target.value })}
             />
@@ -133,13 +139,13 @@ export const SchoolSettingsPage: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input
-              label="Official Email Address"
+              label="Official Contact Email"
               type="email"
               value={schoolForm.email}
               onChange={(e) => setSchoolForm({ ...schoolForm, email: e.target.value })}
             />
             <Input
-              label="Contact Phone Number"
+              label="Official Contact Phone"
               value={schoolForm.phone}
               onChange={(e) => setSchoolForm({ ...schoolForm, phone: e.target.value })}
             />
@@ -148,7 +154,7 @@ export const SchoolSettingsPage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="md:col-span-2">
               <Input
-                label="Physical Address"
+                label="Physical Campus Address"
                 value={schoolForm.address}
                 onChange={(e) => setSchoolForm({ ...schoolForm, address: e.target.value })}
               />
@@ -180,12 +186,14 @@ export const SchoolSettingsPage: React.FC = () => {
         </div>
 
         {/* Academic & Numbering Preferences */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
-          <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
-            <Sliders className="w-5 h-5 text-indigo-600" />
+        <div className="bg-[#ffffff] p-6 rounded-lg border border-[#e5e3dc] shadow-[0_1px_3px_rgba(0,0,0,0.03)] space-y-5">
+          <div className="flex items-center gap-3 border-b border-[#e5e3dc] pb-4">
+            <div className="w-9 h-9 rounded-md bg-[#f4f3ef] border border-[#e5e3dc] flex items-center justify-center text-[#b45309]">
+              <Hash className="w-4 h-4" />
+            </div>
             <div>
-              <h3 className="text-sm font-bold text-slate-900">Numbering Sequences & Academic Rules</h3>
-              <p className="text-xs text-slate-400">Custom prefixes for automated ID generation and result ranking</p>
+              <h3 className="font-serif text-base font-bold text-[#141d24]">Numbering Sequences & Academic Evaluation</h3>
+              <p className="text-xs text-[#52606d]">Prefix definitions for automated identifiers and student positioning rules</p>
             </div>
           </div>
 
@@ -195,41 +203,44 @@ export const SchoolSettingsPage: React.FC = () => {
               placeholder="e.g. SMS or PPIA"
               value={settingsForm.admission_number_prefix}
               onChange={(e) => setSettingsForm({ ...settingsForm, admission_number_prefix: e.target.value })}
-              helperText="Generated as: PREFIX/YEAR/0001"
+              helperText="Auto-generates as: PREFIX/YYYY/0001"
             />
             <Input
               label="Invoice Prefix"
               placeholder="e.g. INV"
               value={settingsForm.invoice_prefix}
               onChange={(e) => setSettingsForm({ ...settingsForm, invoice_prefix: e.target.value })}
-              helperText="Generated as: INV-YEAR-0001"
+              helperText="Auto-generates as: INV-YYYY-0001"
             />
             <Input
               label="Receipt Prefix"
               placeholder="e.g. REC"
               value={settingsForm.receipt_prefix}
               onChange={(e) => setSettingsForm({ ...settingsForm, receipt_prefix: e.target.value })}
-              helperText="Generated as: REC-YEAR-0001"
+              helperText="Auto-generates as: REC-YYYY-0001"
             />
           </div>
 
           <div className="pt-2">
-            <div className="flex items-center gap-2">
+            <label className="flex items-center gap-3 p-3 rounded-md border border-[#e5e3dc] bg-[#fbfbfa] cursor-pointer hover:bg-[#f4f3ef] transition-colors">
               <input
                 type="checkbox"
                 id="enable_pos"
                 checked={settingsForm.enable_positions}
                 onChange={(e) => setSettingsForm({ ...settingsForm, enable_positions: e.target.checked })}
-                className="rounded text-indigo-600 focus:ring-indigo-500"
+                className="w-4 h-4 rounded text-[#064e3b] focus:ring-[#064e3b] border-[#cbd2d9]"
               />
-              <label htmlFor="enable_pos" className="text-xs font-semibold text-slate-800">
-                Compute and display student ranking positions (1st, 2nd, 3rd) on official report cards
-              </label>
-            </div>
+              <div>
+                <div className="text-xs font-semibold text-[#141d24]">Compute Class Rankings & Student Positions</div>
+                <div className="text-[11px] text-[#52606d]">
+                  Calculates 1st, 2nd, 3rd positions and displays ordinal ranks on official student report cards
+                </div>
+              </div>
+            </label>
           </div>
         </div>
 
-        <div className="flex justify-end gap-3">
+        <div className="flex justify-end gap-3 pt-2">
           <Button type="submit" variant="primary" size="md" icon={Save} isLoading={isSaving}>
             Save All Settings
           </Button>
@@ -238,3 +249,4 @@ export const SchoolSettingsPage: React.FC = () => {
     </div>
   );
 };
+
