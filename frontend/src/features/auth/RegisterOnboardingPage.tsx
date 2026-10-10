@@ -10,6 +10,7 @@ import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
 import { Badge } from '@/components/common/Badge';
 import { SchoolMembership, User as UserType } from '@/types';
+import { toast } from '@/context/ToastContext';
 
 export const RegisterOnboardingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -65,23 +66,31 @@ export const RegisterOnboardingPage: React.FC = () => {
 
     if (step === 1) {
       if (!firstName.trim() || !lastName.trim() || !email.trim() || !password) {
-        setError('Please fill in all required personal credentials.');
+        const msg = 'Please fill in all required personal credentials.';
+        setError(msg);
+        toast.error(msg);
         return;
       }
       if (password.length < 6) {
-        setError('Password must be at least 6 characters long.');
+        const msg = 'Password must be at least 6 characters long.';
+        setError(msg);
+        toast.error(msg);
         return;
       }
       setStep(2);
     } else if (step === 2) {
       if (!schoolName.trim()) {
-        setError('Please enter the official name of your institution.');
+        const msg = 'Please enter the official name of your institution.';
+        setError(msg);
+        toast.error(msg);
         return;
       }
       setStep(3);
     } else if (step === 3) {
       if (stages.length === 0) {
-        setError('Please select at least one educational stage for your academy.');
+        const msg = 'Please select at least one educational stage for your academy.';
+        setError(msg);
+        toast.error(msg);
         return;
       }
       setStep(4);
@@ -123,10 +132,13 @@ export const RegisterOnboardingPage: React.FC = () => {
         create_standard_grading: createStandardGrading,
       });
 
+      toast.success('Academy provisioned successfully! Welcome to your administrative workspace.');
       setAuthData(res.token, res.user, res.memberships, res.active_membership);
       navigate('/admin/dashboard');
     } catch (err: any) {
-      setError(err.message || 'Registration failed. Please check your submission.');
+      const msg = err.message || 'Registration failed. Please check your submission.';
+      setError(msg);
+      toast.error(err, 'Institution provisioning failed.');
       setLoading(false);
     }
   };
@@ -536,6 +548,7 @@ export const RegisterOnboardingPage: React.FC = () => {
                   variant="primary"
                   size="lg"
                   isLoading={loading}
+                  loadingText="Provisioning Institution..."
                   icon={ArrowRight}
                   iconPosition="right"
                   onClick={handleCompleteSetup}

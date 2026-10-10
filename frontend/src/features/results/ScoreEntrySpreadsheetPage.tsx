@@ -3,6 +3,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { Award, Save, Send, CheckCheck, AlertCircle, RefreshCw, BookOpen, Sparkles, CheckCircle, MessageSquareQuote, ShieldAlert } from 'lucide-react';
 import { api } from '@/services/api';
+import { toast } from '@/context/ToastContext';
 import { ClassArm, Subject, AssessmentSubmission, StudentScore, PaginatedResponse } from '@/types';
 import { Button } from '@/components/common/Button';
 import { Badge } from '@/components/common/Badge';
@@ -46,6 +47,11 @@ export const ScoreEntrySpreadsheetPage: React.FC = () => {
       setSaveSuccess(null);
       setValidationError(null);
     },
+    onError: (err: any) => {
+      const msg = err.message || 'Failed to open scoresheet.';
+      setValidationError(msg);
+      toast.error(err, 'Failed to open scoresheet');
+    },
   });
 
   useEffect(() => {
@@ -61,15 +67,18 @@ export const ScoreEntrySpreadsheetPage: React.FC = () => {
     onSuccess: (res) => {
       setSubmission(res.submission);
       setScores(res.submission.scores || []);
-      setSaveSuccess(
+      const msg =
         res.submission.status === 'SUBMITTED'
           ? 'Continuous assessment and exam scores submitted for administrative moderation!'
-          : 'Scores saved successfully in draft!'
-      );
+          : 'Scores saved successfully in draft!';
+      setSaveSuccess(msg);
+      toast.success(msg);
       setTimeout(() => setSaveSuccess(null), 4000);
     },
     onError: (err: any) => {
-      setValidationError(err.message || 'Failed to save scores.');
+      const msg = err.message || 'Failed to save scores.';
+      setValidationError(msg);
+      toast.error(err, 'Failed to save scores');
     },
   });
 
@@ -130,6 +139,7 @@ export const ScoreEntrySpreadsheetPage: React.FC = () => {
               size="sm"
               icon={Save}
               isLoading={saveScoresMutation.isPending}
+              loadingText="Saving..."
               onClick={() => handleSaveScores('save_draft')}
             >
               Save Draft
@@ -139,6 +149,7 @@ export const ScoreEntrySpreadsheetPage: React.FC = () => {
               size="sm"
               icon={Send}
               isLoading={saveScoresMutation.isPending}
+              loadingText="Submitting..."
               onClick={() => handleSaveScores('submit')}
             >
               Submit for Review

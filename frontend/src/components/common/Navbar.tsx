@@ -106,7 +106,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
                           key={m.id}
                           onClick={() => {
                             setSchoolMenuOpen(false);
-                            if (!isActive) switchSchool(m.school_id);
+                            if (!isActive && m.school_id) switchSchool(m.school_id);
                           }}
                           className={`w-full flex items-center justify-between px-3 py-2.5 text-left transition-colors cursor-pointer ${
                             isActive ? 'bg-[#ecfdf5]' : 'hover:bg-[#faf9f5]'

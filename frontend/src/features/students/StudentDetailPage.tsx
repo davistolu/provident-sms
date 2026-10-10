@@ -3,9 +3,10 @@ import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   User, Calendar, MapPin, Award, CreditCard,
-  ArrowLeft, FileText, Download, CheckCircle2, Edit, Printer
+  ArrowLeft, FileText, Download, CheckCircle2, Edit, Printer, AlertTriangle
 } from 'lucide-react';
 import { api } from '@/services/api';
+import { toast } from '@/context/ToastContext';
 import { useAuth } from '@/context/AuthContext';
 import { Student, ClassArm, StudentTermResult, StudentInvoice, PaginatedResponse } from '@/types';
 import { Button } from '@/components/common/Button';
@@ -20,10 +21,17 @@ export const StudentDetailPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'overview' | 'results' | 'finance'>('overview');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   const backUrl = isAdmin ? '/admin/students' : '/teacher/classes';
 
-  const { data: student, isLoading } = useQuery({
+  const {
+    data: student,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ['student-detail', id],
     queryFn: () => api.get<Student>(`/students/students/${id}/`),
   });
@@ -73,11 +81,59 @@ export const StudentDetailPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['students'] });
       setIsEditModalOpen(false);
       setEditError(null);
+      toast.success('Student dossier updated successfully');
     },
     onError: (err: any) => {
-      setEditError(err.message || 'Failed to update student profile.');
+      const msg = err.message || 'Failed to update student profile.';
+      setEditError(msg);
+      toast.error(err, 'Failed to update student profile');
     },
   });
+
+  const handleDownloadReport = async (res: StudentTermResult) => {
+    try {
+      setDownloadingId(`report-${res.id}`);
+      await api.downloadFile(
+        `/results/term-results/${res.id}/report-card-pdf/`,
+        `ReportCard_${student?.admission_number}_${res.term_name}.pdf`
+      );
+      toast.success('Report card downloaded');
+    } catch (err) {
+      toast.error(err, 'Failed to download report card');
+    } finally {
+      setDownloadingId(null);
+    }
+  };
+
+  const handleDownloadInvoice = async (inv: StudentInvoice) => {
+    try {
+      setDownloadingId(`inv-${inv.id}`);
+      await api.downloadFile(
+        `/finance/invoices/${inv.id}/invoice-pdf/`,
+        `Invoice_${inv.invoice_number}.pdf`
+      );
+      toast.success('Invoice downloaded');
+    } catch (err) {
+      toast.error(err, 'Failed to download invoice');
+    } finally {
+      setDownloadingId(null);
+    }
+  };
+
+  const handleDownloadReceipt = async (paymentId: string, refNum: string) => {
+    try {
+      setDownloadingId(`rec-${paymentId}`);
+      await api.downloadFile(
+        `/finance/payments/${paymentId}/receipt-pdf/`,
+        `Receipt_${refNum}.pdf`
+      );
+      toast.success('Payment receipt downloaded');
+    } catch (err) {
+      toast.error(err, 'Failed to download receipt');
+    } finally {
+      setDownloadingId(null);
+    }
+  };
 
   const handleEditSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,8 +157,26 @@ export const StudentDetailPage: React.FC = () => {
     return <div className="py-12 text-center text-xs text-[#8896a4]">Loading student dossier...</div>;
   }
 
-  if (!student) {
-    return <div className="py-12 text-center text-xs text-[#8896a4]">Student record not found.</div>;
+  if (isError || !student) {
+    return (
+      <div className="py-12 flex flex-col items-center justify-center space-y-3">
+        <div className="w-12 h-12 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center border border-rose-200">
+          <AlertTriangle className="w-6 h-6" />
+        </div>
+        <p className="text-sm font-semibold text-slate-800">
+          {error ? 'Failed to load student dossier' : 'Student record not found'}
+        </p>
+        <p className="text-xs text-slate-500 max-w-sm text-center">
+          The requested student information could not be retrieved from the server.
+        </p>
+        <div className="flex gap-2 pt-2">
+          <Link to={backUrl}>
+            <Button variant="outline" size="sm">Back</Button>
+          </Link>
+          <Button variant="primary" size="sm" onClick={() => refetch()}>Retry</Button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -259,12 +333,9 @@ export const StudentDetailPage: React.FC = () => {
                   variant="outline"
                   size="xs"
                   icon={Download}
-                  onClick={() =>
-                    api.downloadFile(
-                      `/results/term-results/${res.id}/report-card-pdf/`,
-                      `ReportCard_${student.admission_number}_${res.term_name}.pdf`
-                    )
-                  }
+                  isLoading={downloadingId === `report-${res.id}`}
+                  loadingText="Downloading..."
+                  onClick={() => handleDownloadReport(res)}
                 >
                   PDF Report Card
                 </Button>
@@ -298,12 +369,9 @@ export const StudentDetailPage: React.FC = () => {
                     variant="outline"
                     size="xs"
                     icon={FileText}
-                    onClick={() =>
-                      api.downloadFile(
-                        `/finance/invoices/${inv.id}/invoice-pdf/`,
-                        `Invoice_${inv.invoice_number}.pdf`
-                      )
-                    }
+                    isLoading={downloadingId === `inv-${inv.id}`}
+                    loadingText="Downloading..."
+                    onClick={() => handleDownloadInvoice(inv)}
                   >
                     Invoice PDF
                   </Button>
@@ -313,12 +381,9 @@ export const StudentDetailPage: React.FC = () => {
                       size="xs"
                       className="text-[#065f46] border-[#a7f3d0] hover:bg-[#ecfdf5]"
                       icon={Printer}
-                      onClick={() =>
-                        api.downloadFile(
-                          `/finance/payments/${inv.payments[0].id}/receipt-pdf/`,
-                          `Receipt_${inv.payments[0].reference_number}.pdf`
-                        )
-                      }
+                      isLoading={downloadingId === `rec-${inv.payments[0].id}`}
+                      loadingText="Downloading..."
+                      onClick={() => handleDownloadReceipt(inv.payments[0].id, inv.payments[0].reference_number)}
                     >
                       Receipt PDF
                     </Button>
@@ -453,7 +518,7 @@ export const StudentDetailPage: React.FC = () => {
             <Button type="button" variant="ghost" onClick={() => setIsEditModalOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary" isLoading={updateStudentMutation.isPending}>
+            <Button type="submit" variant="primary" isLoading={updateStudentMutation.isPending} loadingText="Saving...">
               Save Changes
             </Button>
           </div>

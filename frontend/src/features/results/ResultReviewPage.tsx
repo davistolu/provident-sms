@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { CheckCheck, XCircle, Eye, Globe, Award, CheckCircle2, ShieldCheck, Sparkles, BookOpen } from 'lucide-react';
 import { api } from '@/services/api';
+import { toast } from '@/context/ToastContext';
 import { AssessmentSubmission, ClassArm, PaginatedResponse } from '@/types';
 import { DataTable, Column } from '@/components/common/DataTable';
 import { Button } from '@/components/common/Button';
@@ -16,7 +17,13 @@ export const ResultReviewPage: React.FC = () => {
   const [publishClassId, setPublishClassId] = useState('');
   const [publishMessage, setPublishMessage] = useState<string | null>(null);
 
-  const { data: submissionsData, isLoading } = useQuery({
+  const {
+    data: submissionsData,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ['assessment-submissions'],
     queryFn: () => api.get<PaginatedResponse<AssessmentSubmission>>('/results/submissions/'),
   });
@@ -33,10 +40,18 @@ export const ResultReviewPage: React.FC = () => {
         decision: payload.decision,
         feedback: payload.feedback,
       }),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['assessment-submissions'] });
       setSelectedSub(null);
       setFeedbackNotes('');
+      toast.success(
+        variables.decision === 'APPROVE'
+          ? 'Score sheet submission approved successfully'
+          : 'Score sheet returned to teacher for corrections'
+      );
+    },
+    onError: (err) => {
+      toast.error(err, 'Failed to update review status');
     },
   });
 
@@ -47,8 +62,13 @@ export const ResultReviewPage: React.FC = () => {
     onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: ['assessment-submissions'] });
       setIsPublishModalOpen(false);
-      setPublishMessage(res.message || 'Results published successfully!');
+      const msg = res.message || 'Results published successfully!';
+      setPublishMessage(msg);
+      toast.success(msg);
       setTimeout(() => setPublishMessage(null), 4000);
+    },
+    onError: (err) => {
+      toast.error(err, 'Failed to publish class results');
     },
   });
 
@@ -152,6 +172,9 @@ export const ResultReviewPage: React.FC = () => {
         columns={columns}
         data={submissionsData?.results || []}
         isLoading={isLoading}
+        isError={isError}
+        error={error}
+        onRetry={() => refetch()}
       />
 
       {/* Review Submission Dialog */}
@@ -234,6 +257,7 @@ export const ResultReviewPage: React.FC = () => {
               size="sm"
               icon={XCircle}
               isLoading={reviewMutation.isPending}
+              loadingText="Returning..."
               onClick={() => {
                 if (selectedSub) {
                   reviewMutation.mutate({ id: selectedSub.id, decision: 'REJECT', feedback: feedbackNotes });
@@ -253,6 +277,7 @@ export const ResultReviewPage: React.FC = () => {
                 size="sm"
                 icon={CheckCheck}
                 isLoading={reviewMutation.isPending}
+                loadingText="Approving..."
                 onClick={() => {
                   if (selectedSub) {
                     reviewMutation.mutate({ id: selectedSub.id, decision: 'APPROVE', feedback: feedbackNotes });
@@ -308,7 +333,7 @@ export const ResultReviewPage: React.FC = () => {
             <Button type="button" variant="ghost" onClick={() => setIsPublishModalOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary" isLoading={publishMutation.isPending}>
+            <Button type="submit" variant="primary" isLoading={publishMutation.isPending} loadingText="Publishing...">
               Compute & Publish Results
             </Button>
           </div>

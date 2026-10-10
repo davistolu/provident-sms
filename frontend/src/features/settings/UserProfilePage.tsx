@@ -6,6 +6,7 @@ import { api } from '@/services/api';
 import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
 import { Badge } from '@/components/common/Badge';
+import { toast } from '@/context/ToastContext';
 
 export const UserProfilePage: React.FC = () => {
   const { user, activeMembership, refreshProfile } = useAuth();
@@ -33,10 +34,13 @@ export const UserProfilePage: React.FC = () => {
       await refreshProfile();
       setProfileSuccess('Profile credentials updated successfully.');
       setProfileError(null);
+      toast.success('Profile credentials updated successfully.');
       setTimeout(() => setProfileSuccess(null), 4000);
     },
     onError: (err: any) => {
-      setProfileError(err.message || 'Failed to update profile.');
+      const msg = err.message || 'Failed to update profile.';
+      setProfileError(msg);
+      toast.error(err, 'Failed to update profile.');
     },
   });
 
@@ -46,24 +50,31 @@ export const UserProfilePage: React.FC = () => {
       setPasswordSuccess('Password authentication credentials changed successfully.');
       setPasswordError(null);
       setPasswordForm({ old_password: '', new_password: '', confirm_password: '' });
+      toast.success('Password changed successfully.');
       setTimeout(() => setPasswordSuccess(null), 4000);
     },
     onError: (err: any) => {
-      setPasswordError(err.message || 'Failed to change password.');
+      const msg = err.message || 'Failed to change password.';
+      setPasswordError(msg);
+      toast.error(err, 'Failed to change password.');
     },
   });
 
   const handleProfileSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setProfileError(null);
     updateProfileMutation.mutate(profileForm);
   };
 
   const handlePasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (passwordForm.new_password !== passwordForm.confirm_password) {
-      setPasswordError('New passwords do not match.');
+      const msg = 'New passwords do not match.';
+      setPasswordError(msg);
+      toast.error(msg);
       return;
     }
+    setPasswordError(null);
     changePasswordMutation.mutate({
       old_password: passwordForm.old_password,
       new_password: passwordForm.new_password,
@@ -147,7 +158,13 @@ export const UserProfilePage: React.FC = () => {
               />
 
               <div className="pt-2 flex justify-end">
-                <Button type="submit" variant="primary" size="sm" isLoading={updateProfileMutation.isPending}>
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="sm"
+                  isLoading={updateProfileMutation.isPending}
+                  loadingText="Saving Profile..."
+                >
                   Save Profile Details
                 </Button>
               </div>
@@ -199,7 +216,13 @@ export const UserProfilePage: React.FC = () => {
               </div>
 
               <div className="pt-2 flex justify-end">
-                <Button type="submit" variant="secondary" size="sm" isLoading={changePasswordMutation.isPending}>
+                <Button
+                  type="submit"
+                  variant="secondary"
+                  size="sm"
+                  isLoading={changePasswordMutation.isPending}
+                  loadingText="Updating Password..."
+                >
                   Update Password
                 </Button>
               </div>

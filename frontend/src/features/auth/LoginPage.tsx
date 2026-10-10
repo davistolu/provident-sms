@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
 import { Badge } from '@/components/common/Badge';
+import { toast } from '@/context/ToastContext';
 
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -21,9 +22,12 @@ export const LoginPage: React.FC = () => {
     setLoading(true);
     try {
       await login(email, password);
+      toast.success('Successfully authenticated. Welcome back!');
       navigate('/');
     } catch (err: any) {
-      setError(err.message || 'Invalid credentials. Please verify your email and password.');
+      const msg = err.message || 'Invalid credentials. Please verify your email and password.';
+      setError(msg);
+      toast.error(err, 'Authentication failed.');
     } finally {
       setLoading(false);
     }
@@ -125,6 +129,7 @@ export const LoginPage: React.FC = () => {
               size="lg"
               className="w-full"
               isLoading={loading}
+              loadingText="Authenticating..."
               icon={ArrowRight}
               iconPosition="right"
             >

@@ -12,6 +12,7 @@ export interface ConfirmDialogProps {
   confirmText?: string;
   cancelText?: string;
   isLoading?: boolean;
+  loadingText?: string;
 }
 
 export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
@@ -23,6 +24,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   confirmText = 'Delete Record',
   cancelText = 'Cancel',
   isLoading = false,
+  loadingText = 'Deleting...',
 }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title} maxWidth="sm">
@@ -36,7 +38,14 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           <Button type="button" variant="ghost" size="sm" onClick={onClose} disabled={isLoading}>
             {cancelText}
           </Button>
-          <Button type="button" variant="danger" size="sm" isLoading={isLoading} onClick={onConfirm}>
+          <Button
+            type="button"
+            variant="danger"
+            size="sm"
+            isLoading={isLoading}
+            loadingText={loadingText}
+            onClick={onConfirm}
+          >
             {confirmText}
           </Button>
         </div>

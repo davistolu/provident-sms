@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { School, Save, CheckCircle2, ShieldCheck, Sliders, Globe, Building2, Hash, Sparkles, Upload, Image as ImageIcon, Trash2 } from 'lucide-react';
 import { api } from '@/services/api';
+import { toast } from '@/context/ToastContext';
 import { School as SchoolType, SchoolSettings } from '@/types';
 import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
@@ -107,8 +108,12 @@ export const SchoolSettingsPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['current-settings'] });
       queryClient.invalidateQueries({ queryKey: ['school-memberships'] });
       setLogoFile(null);
-      setSaveSuccess('Institutional profile, crest logo, and configuration updated successfully!');
+      const msg = 'Institutional profile, crest logo, and configuration updated successfully!';
+      setSaveSuccess(msg);
+      toast.success(msg);
       setTimeout(() => setSaveSuccess(null), 4000);
+    } catch (err) {
+      toast.error(err, 'Failed to update school settings');
     } finally {
       setIsUploadingLogo(false);
     }
@@ -344,7 +349,7 @@ export const SchoolSettingsPage: React.FC = () => {
         </div>
 
         <div className="flex justify-end gap-3 pt-2">
-          <Button type="submit" variant="primary" size="md" icon={Save} isLoading={isSaving}>
+          <Button type="submit" variant="primary" size="md" icon={Save} isLoading={isSaving} loadingText="Saving Settings...">
             Save All Settings
           </Button>
         </div>

@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import {
   Users, GraduationCap, CheckSquare, DollarSign, Award,
   ArrowRight, ShieldCheck, UserPlus, CreditCard, Layers,
-  Calendar, Clock, Activity, FileCheck
+  Calendar, Clock, Activity, FileCheck, AlertCircle, RefreshCw
 } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -16,7 +16,7 @@ import { Button } from '@/components/common/Button';
 import { Badge } from '@/components/common/Badge';
 
 export const AdminDashboardPage: React.FC = () => {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['admin-dashboard-stats'],
     queryFn: () => api.get<any>('/dashboard/admin/'),
   });
@@ -31,6 +31,17 @@ export const AdminDashboardPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {isError && (
+        <div className="p-4 bg-[#fff1f2] border border-[#fecdd3] rounded-xl flex items-center justify-between text-xs text-[#be123c]">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-[#e11d48] shrink-0" />
+            <span>Failed to load institutional dashboard metrics: {(error as any)?.message || 'Server error'}</span>
+          </div>
+          <Button variant="secondary" size="xs" icon={RefreshCw} onClick={() => refetch()}>
+            Retry Query
+          </Button>
+        </div>
+      )}
       {/* Top Banner Header */}
       <div className="bg-white p-6 rounded-2xl border border-[#e6e4dc] shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
