@@ -129,7 +129,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           <button
             onClick={() => setIsCreateSchoolOpen(true)}
             title="Add Another School"
-            className="p-1 rounded-md hover:bg-[#ecfdf5] text-[#064e3b] transition-colors shrink-0 cursor-pointer"
+            className="p-2 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-md hover:bg-[#ecfdf5] text-[#064e3b] transition-colors shrink-0 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
           </button>
@@ -186,7 +186,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             <button
               onClick={() => logout()}
               title="Sign Out"
-              className="p-1.5 rounded-md hover:bg-[#f4f3ef] text-[#8896a4] hover:text-[#991b1b] transition-colors shrink-0 ml-2 cursor-pointer"
+              className="p-2 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-md hover:bg-[#f4f3ef] text-[#8896a4] hover:text-[#991b1b] transition-colors shrink-0 ml-2 cursor-pointer"
             >
               <LogOut className="w-3.5 h-3.5" />
             </button>

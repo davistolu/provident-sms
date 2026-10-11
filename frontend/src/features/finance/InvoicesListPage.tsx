@@ -255,7 +255,7 @@ export const InvoicesListPage: React.FC = () => {
             Track student fee obligations, issue official PDF billing statements, and record financial settlements
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button variant="outline" size="sm" icon={User} onClick={() => setIsStudentInvoiceModalOpen(true)}>
             Single Student Invoice
           </Button>

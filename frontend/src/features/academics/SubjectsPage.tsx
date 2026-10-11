@@ -261,7 +261,7 @@ export const SubjectsPage: React.FC = () => {
           <h1 className="text-xl font-bold text-slate-900">Curriculum & Subject Assignments</h1>
           <p className="text-xs text-slate-500">Manage institution subject registry and teacher allocations</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {activeTab === 'subjects' ? (
             <Button variant="primary" size="sm" icon={Plus} onClick={() => setIsSubjectModalOpen(true)}>
               New Subject
@@ -419,7 +419,7 @@ export const SubjectsPage: React.FC = () => {
             </select>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">Class Arm</label>
               <select
@@ -480,7 +480,7 @@ export const SubjectsPage: React.FC = () => {
             onChange={(e) => setEditSubjectForm({ ...editSubjectForm, name: e.target.value })}
           />
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
               label="Subject Code"
               placeholder="e.g. MTH, ENG, PHY"

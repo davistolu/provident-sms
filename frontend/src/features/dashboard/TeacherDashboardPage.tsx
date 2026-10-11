@@ -94,8 +94,8 @@ export const TeacherDashboardPage: React.FC = () => {
       {/* Grid: Assigned Classes & Assigned Subjects */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Classes Card */}
-        <div className="bg-white p-6 rounded-2xl border border-[#e6e4dc] shadow-2xs">
-          <div className="flex items-center justify-between mb-4 border-b border-[#f0eee6] pb-3">
+        <div className="bg-white p-4 sm:p-6 rounded-2xl border border-[#e6e4dc] shadow-2xs min-w-0">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 border-b border-[#f0eee6] pb-3">
             <div>
               <h3 className="text-sm font-bold font-display text-[#141d24]">My Teaching Streams</h3>
               <p className="text-xs text-[#52606d]">Classes assigned under your instruction</p>
@@ -134,8 +134,8 @@ export const TeacherDashboardPage: React.FC = () => {
         </div>
 
         {/* Subjects Card */}
-        <div className="bg-white p-6 rounded-2xl border border-[#e6e4dc] shadow-2xs">
-          <div className="flex items-center justify-between mb-4 border-b border-[#f0eee6] pb-3">
+        <div className="bg-white p-4 sm:p-6 rounded-2xl border border-[#e6e4dc] shadow-2xs min-w-0">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 border-b border-[#f0eee6] pb-3">
             <div>
               <h3 className="text-sm font-bold font-display text-[#141d24]">Continuous Assessment & Exams</h3>
               <p className="text-xs text-[#52606d]">Subject score entry spreadsheets</p>

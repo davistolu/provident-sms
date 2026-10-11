@@ -234,7 +234,7 @@ export const ExpensesPage: React.FC = () => {
             onChange={(e) => setExpenseForm({ ...expenseForm, title: e.target.value })}
           />
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold text-[#141d24] mb-1">Category</label>
               <select
@@ -259,7 +259,7 @@ export const ExpensesPage: React.FC = () => {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
               label="Expense Date"
               type="date"
@@ -301,7 +301,7 @@ export const ExpensesPage: React.FC = () => {
             onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
           />
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold text-[#141d24] mb-1">Category</label>
               <select
@@ -325,7 +325,7 @@ export const ExpensesPage: React.FC = () => {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
               label="Expense Date"
               type="date"

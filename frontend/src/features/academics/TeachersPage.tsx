@@ -199,8 +199,8 @@ export const TeachersPage: React.FC = () => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl font-bold font-display text-[#141d24]">Faculty & Teaching Staff</h1>
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-lg sm:text-xl font-bold font-display text-[#141d24]">Faculty & Teaching Staff</h1>
             <Badge variant="evergreen">{teachersData?.count ?? 0} Staff</Badge>
           </div>
           <p className="text-xs text-[#52606d] mt-0.5">
@@ -242,7 +242,7 @@ export const TeachersPage: React.FC = () => {
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
               label="Staff ID"
               placeholder="Auto-generated if left blank"
@@ -265,7 +265,7 @@ export const TeachersPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
               label="First Name"
               required
@@ -282,7 +282,7 @@ export const TeachersPage: React.FC = () => {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
               label="Official Email (Login username)"
               type="email"
@@ -301,7 +301,7 @@ export const TeachersPage: React.FC = () => {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
               label="Specialization"
               placeholder="e.g. Mathematics, Sciences"
@@ -341,7 +341,7 @@ export const TeachersPage: React.FC = () => {
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
               label="Staff ID"
               required
@@ -363,7 +363,7 @@ export const TeachersPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
               label="First Name"
               required
@@ -378,7 +378,7 @@ export const TeachersPage: React.FC = () => {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
               label="Phone Number"
               placeholder="+234..."
@@ -400,7 +400,7 @@ export const TeachersPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
               label="Specialization"
               value={editForm.specialization}

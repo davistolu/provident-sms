@@ -249,7 +249,7 @@ export const FeeStructuresPage: React.FC = () => {
             </select>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold text-[#141d24] mb-1">Session</label>
               <select
@@ -345,7 +345,7 @@ export const FeeStructuresPage: React.FC = () => {
             </select>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold text-[#141d24] mb-1">Session</label>
               <select
