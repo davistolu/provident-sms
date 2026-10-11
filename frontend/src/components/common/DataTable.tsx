@@ -8,6 +8,7 @@ export interface Column<T> {
   accessorKey?: keyof T;
   cell?: (row: T) => React.ReactNode;
   className?: string;
+  hideOnMobile?: boolean;
 }
 
 export interface DataTableProps<T> {
@@ -68,9 +69,43 @@ export function DataTable<T extends { id?: string | number }>({
         </div>
       )}
 
+      {/* Mobile Card View */}
+      <div className="divide-y divide-[#f0eee6] sm:hidden">
+        {isLoading ? (
+          Array.from({ length: 3 }).map((_, rIdx) => (
+            <div key={rIdx} className="p-4 animate-pulse space-y-2">
+              <div className="h-3.5 bg-[#eae8e1] rounded w-2/3" />
+              <div className="h-3.5 bg-[#eae8e1] rounded w-1/2" />
+            </div>
+          ))
+        ) : data.length > 0 ? (
+          data.map((row, rIdx) => (
+            <div key={row.id || rIdx} className="p-4 space-y-1.5">
+              {columns.filter(c => !c.hideOnMobile).map((col, cIdx) => (
+                <div key={cIdx} className="flex items-start justify-between gap-3 text-xs">
+                  <span className="font-bold text-[#8896a4] uppercase tracking-wider text-[10px] shrink-0 pt-0.5">{col.header}</span>
+                  <span className="text-right text-[#141d24] min-w-0">
+                    {col.cell ? col.cell(row) : col.accessorKey ? String(row[col.accessorKey] ?? '') : null}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ))
+        ) : (
+          <div className="py-12 text-center">
+            <div className="flex flex-col items-center justify-center space-y-2 text-[#8896a4]">
+              <div className="w-10 h-10 rounded-full bg-[#f4f3ef] border border-[#e6e4dc] flex items-center justify-center">
+                <Inbox className="w-5 h-5 text-[#52606d]" />
+              </div>
+              <p className="text-xs font-medium text-[#52606d]">{emptyMessage}</p>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Table Container */}
-      <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
+      <div className="overflow-x-auto hidden sm:block">
+        <table className="w-full min-w-[640px] text-left border-collapse">
           <thead>
             <tr className="border-b border-[#e6e4dc] bg-[#f4f3ef]/70">
               {columns.map((col, idx) => (
@@ -161,7 +196,7 @@ export function DataTable<T extends { id?: string | number }>({
 
       {/* Pagination Footer */}
       {totalPages > 1 && onPageChange && (
-        <div className="px-4 py-3 border-t border-[#e6e4dc] bg-[#fbfbfa] flex items-center justify-between text-xs text-[#52606d]">
+        <div className="px-4 py-3 border-t border-[#e6e4dc] bg-[#fbfbfa] flex flex-col sm:flex-row sm:items-center gap-2 sm:justify-between text-xs text-[#52606d]">
           <p>
             Showing page <span className="font-bold text-[#141d24]">{currentPage}</span> of{' '}
             <span className="font-bold text-[#141d24]">{totalPages}</span>

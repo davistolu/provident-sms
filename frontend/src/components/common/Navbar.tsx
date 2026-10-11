@@ -54,7 +54,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
         <div className="flex items-center gap-3">
           <button
             onClick={onToggleSidebar}
-            className="p-1.5 rounded-lg text-[#52606d] hover:text-[#141d24] hover:bg-[#f4f3ef] lg:hidden cursor-pointer"
+            className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-[#52606d] hover:text-[#141d24] hover:bg-[#f4f3ef] lg:hidden cursor-pointer"
           >
             <Menu className="w-5 h-5" />
           </button>
@@ -67,17 +67,17 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
         </div>
 
         {/* Right Controls */}
-        <div className="flex items-center gap-3 sm:gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           {/* Active School Switcher Pill */}
           <div className="relative">
             <button
               onClick={() => setSchoolMenuOpen(!schoolMenuOpen)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#fbfbfa] border border-[#e8e6df] hover:border-[#064e3b] hover:bg-white transition-all text-left cursor-pointer"
+              className="flex items-center gap-2 px-2 sm:px-3 py-1.5 rounded-lg bg-[#fbfbfa] border border-[#e8e6df] hover:border-[#064e3b] hover:bg-white transition-all text-left cursor-pointer"
             >
-              <div className="w-5 h-5 rounded-md bg-[#064e3b] text-white flex items-center justify-center text-[10px] font-bold shrink-0">
+              <div className="w-6 h-6 rounded-md bg-[#064e3b] text-white flex items-center justify-center text-[10px] font-bold shrink-0">
                 {activeMembership?.school_name?.[0] || 'S'}
               </div>
-              <div className="hidden sm:block">
+              <div className="hidden md:block">
                 <p className="text-xs font-bold text-[#141d24] max-w-[140px] truncate leading-tight">
                   {activeMembership?.school_name || 'Active School'}
                 </p>
@@ -91,7 +91,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
             {schoolMenuOpen && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setSchoolMenuOpen(false)} />
-                <div className="absolute right-0 mt-2 w-72 bg-white rounded-xl border border-[#e8e6df] shadow-xl py-2 z-50 divide-y divide-[#f0eee6]">
+                <div className="absolute right-0 mt-2 w-[calc(100vw-2rem)] max-w-72 bg-white rounded-xl border border-[#e8e6df] shadow-xl py-2 z-50 divide-y divide-[#f0eee6]">
                   <div className="px-3 pb-2">
                     <p className="text-[10px] font-bold text-[#8896a4] uppercase tracking-wider">
                       Your School Accounts ({memberships.length})
