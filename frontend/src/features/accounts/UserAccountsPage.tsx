@@ -181,10 +181,10 @@ export const UserAccountsPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl font-bold font-display text-[#141d24]">User Accounts & Roles</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-lg sm:text-xl font-bold font-display text-[#141d24]">User Accounts & Roles</h1>
             <Badge variant="evergreen">{usersData?.count ?? 0} Accounts</Badge>
           </div>
           <p className="text-xs text-[#52606d] mt-0.5">
@@ -242,7 +242,7 @@ export const UserAccountsPage: React.FC = () => {
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
               label="First Name"
               required
@@ -268,7 +268,7 @@ export const UserAccountsPage: React.FC = () => {
             onChange={(e) => setUserForm({ ...userForm, email: e.target.value })}
           />
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
               label="Initial Password"
               type="password"
@@ -318,7 +318,7 @@ export const UserAccountsPage: React.FC = () => {
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
               label="First Name"
               required
@@ -333,7 +333,7 @@ export const UserAccountsPage: React.FC = () => {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-[11px] font-bold text-[#52606d] uppercase tracking-wider mb-1.5">
                 Assigned Role

@@ -272,13 +272,13 @@ export const ScoreEntrySpreadsheetPage: React.FC = () => {
             No enrolled students found for this class and session.
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+            <table className="w-full min-w-[880px] text-left border-collapse">
               <thead>
                 <tr className="bg-[#f4f3ef] border-b border-[#e5e3dc] text-[10px] font-bold text-[#52606d] uppercase tracking-wider">
                   <th className="px-4 py-3 w-12">#</th>
-                  <th className="px-4 py-3">Admission No</th>
-                  <th className="px-4 py-3">Student Name</th>
+                  <th className="px-4 py-3 min-w-[110px]">Admission No</th>
+                  <th className="px-4 py-3 min-w-[160px] sticky left-0 bg-[#f4f3ef] z-10">Student Name</th>
                   <th className="px-3 py-3 w-28 text-center">CA 1 (15m)</th>
                   <th className="px-3 py-3 w-28 text-center">CA 2 (15m)</th>
                   <th className="px-3 py-3 w-28 text-center">Exam (70m)</th>
@@ -297,7 +297,7 @@ export const ScoreEntrySpreadsheetPage: React.FC = () => {
                     <tr key={s.student} className="hover:bg-[#fbfbfa] transition-colors">
                       <td className="px-4 py-2.5 font-mono text-[#8c9ba5]">{idx + 1}</td>
                       <td className="px-4 py-2.5 font-mono font-bold text-[#064e3b]">{s.admission_number}</td>
-                      <td className="px-4 py-2.5 font-semibold text-[#141d24]">{s.student_name}</td>
+                      <td className="px-4 py-2.5 font-semibold text-[#141d24] sticky left-0 bg-white z-10 whitespace-nowrap">{s.student_name}</td>
                       <td className="px-3 py-2.5">
                         <input
                           type="number"
@@ -306,7 +306,7 @@ export const ScoreEntrySpreadsheetPage: React.FC = () => {
                           max="15"
                           value={ca1}
                           onChange={(e) => handleScoreChange(s.student, 'CA1', e.target.value)}
-                          className="w-full text-center px-2 py-1.5 font-mono text-xs bg-[#fbfbfa] border border-[#cbd2d9] rounded-md focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#064e3b] focus:border-[#064e3b]"
+                          className="w-full text-center px-2 py-2 font-mono text-sm min-h-[40px] bg-[#fbfbfa] border border-[#cbd2d9] rounded-md focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#064e3b] focus:border-[#064e3b]"
                         />
                       </td>
                       <td className="px-3 py-2.5">
@@ -317,7 +317,7 @@ export const ScoreEntrySpreadsheetPage: React.FC = () => {
                           max="15"
                           value={ca2}
                           onChange={(e) => handleScoreChange(s.student, 'CA2', e.target.value)}
-                          className="w-full text-center px-2 py-1.5 font-mono text-xs bg-[#fbfbfa] border border-[#cbd2d9] rounded-md focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#064e3b] focus:border-[#064e3b]"
+                          className="w-full text-center px-2 py-2 font-mono text-sm min-h-[40px] bg-[#fbfbfa] border border-[#cbd2d9] rounded-md focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#064e3b] focus:border-[#064e3b]"
                         />
                       </td>
                       <td className="px-3 py-2.5">
@@ -328,7 +328,7 @@ export const ScoreEntrySpreadsheetPage: React.FC = () => {
                           max="70"
                           value={exam}
                           onChange={(e) => handleScoreChange(s.student, 'EXAM', e.target.value)}
-                          className="w-full text-center px-2 py-1.5 font-mono text-xs bg-[#fbfbfa] border border-[#cbd2d9] rounded-md focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#064e3b] focus:border-[#064e3b]"
+                          className="w-full text-center px-2 py-2 font-mono text-sm min-h-[40px] bg-[#fbfbfa] border border-[#cbd2d9] rounded-md focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#064e3b] focus:border-[#064e3b]"
                         />
                       </td>
                       <td className="px-3 py-2.5 text-center font-mono font-bold text-sm text-[#064e3b]">
@@ -352,7 +352,7 @@ export const ScoreEntrySpreadsheetPage: React.FC = () => {
                           placeholder="Feedback or remarks for student/parent..."
                           value={s.teacher_comment || ''}
                           onChange={(e) => handleCommentChange(s.student, e.target.value)}
-                          className="w-full px-3 py-1.5 text-xs bg-[#fbfbfa] border border-[#cbd2d9] rounded-md focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#064e3b] focus:border-[#064e3b] placeholder:text-[#8c9ba5]"
+                          className="w-full px-3 py-2 text-sm min-h-[40px] bg-[#fbfbfa] border border-[#cbd2d9] rounded-md focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#064e3b] focus:border-[#064e3b] placeholder:text-[#8c9ba5]"
                         />
                       </td>
                     </tr>

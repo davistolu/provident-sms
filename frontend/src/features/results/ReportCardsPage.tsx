@@ -167,7 +167,7 @@ export const ReportCardsPage: React.FC = () => {
             Computed term summaries, student rankings, and official PDF report dossiers
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button
             variant="primary"
             size="sm"

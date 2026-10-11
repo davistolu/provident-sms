@@ -737,7 +737,7 @@ export const AssessmentSchemesPage: React.FC = () => {
           {isAddComponentOpen && (
             <form onSubmit={handleAddComponentSubmit} className="p-3 bg-[#fbfbfa] border border-[#cbd2d9] rounded-md space-y-3">
               <p className="text-xs font-semibold text-[#064e3b]">Add New Assessment Component</p>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <Input
                   label="Component Name"
                   required
@@ -753,7 +753,7 @@ export const AssessmentSchemesPage: React.FC = () => {
                   onChange={(e) => setComponentForm({ ...componentForm, code: e.target.value.toUpperCase() })}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <Input
                   label="Max Marks"
                   type="number"
@@ -783,7 +783,7 @@ export const AssessmentSchemesPage: React.FC = () => {
           {editComponentTarget && (
             <form onSubmit={handleEditComponentSubmit} className="p-3 bg-[#fbfbfa] border border-[#cbd2d9] rounded-md space-y-3">
               <p className="text-xs font-semibold text-[#b45309]">Edit Component: {editComponentTarget.name}</p>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <Input
                   label="Component Name"
                   required
@@ -797,7 +797,7 @@ export const AssessmentSchemesPage: React.FC = () => {
                   onChange={(e) => setEditComponentForm({ ...editComponentForm, code: e.target.value.toUpperCase() })}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <Input
                   label="Max Marks"
                   type="number"
@@ -1034,7 +1034,7 @@ export const AssessmentSchemesPage: React.FC = () => {
           {isAddRuleOpen && (
             <form onSubmit={handleAddRuleSubmit} className="p-3 bg-[#fbfbfa] border border-[#cbd2d9] rounded-md space-y-3">
               <p className="text-xs font-semibold text-[#064e3b]">Add New Grade Rule</p>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 <Input
                   label="Grade Letter"
                   required
@@ -1057,7 +1057,7 @@ export const AssessmentSchemesPage: React.FC = () => {
                   onChange={(e) => setRuleForm({ ...ruleForm, max_score: Number(e.target.value) })}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <Input
                   label="Grade Point (GPA)"
                   type="number"
@@ -1088,7 +1088,7 @@ export const AssessmentSchemesPage: React.FC = () => {
           {editRuleTarget && (
             <form onSubmit={handleEditRuleSubmit} className="p-3 bg-[#fbfbfa] border border-[#cbd2d9] rounded-md space-y-3">
               <p className="text-xs font-semibold text-[#b45309]">Edit Grade Rule: {editRuleTarget.grade}</p>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 <Input
                   label="Grade Letter"
                   required
@@ -1110,7 +1110,7 @@ export const AssessmentSchemesPage: React.FC = () => {
                   onChange={(e) => setEditRuleForm({ ...editRuleForm, max_score: Number(e.target.value) })}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <Input
                   label="Grade Point (GPA)"
                   type="number"

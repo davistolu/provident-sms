@@ -224,7 +224,7 @@ export const AcademicSessionsPage: React.FC = () => {
             value={sessionForm.name}
             onChange={(e) => setSessionForm({ ...sessionForm, name: e.target.value })}
           />
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
               label="Start Date"
               type="date"
@@ -278,7 +278,7 @@ export const AcademicSessionsPage: React.FC = () => {
             value={editForm.name}
             onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
           />
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
               label="Start Date"
               type="date"

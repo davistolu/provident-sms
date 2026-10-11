@@ -1,29 +1,39 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { AppLayout } from '@/components/common/AppLayout';
 import { LoginPage } from '@/features/auth/LoginPage';
 import { RegisterOnboardingPage } from '@/features/auth/RegisterOnboardingPage';
-import { AdminDashboardPage } from '@/features/dashboard/AdminDashboardPage';
-import { TeacherDashboardPage } from '@/features/dashboard/TeacherDashboardPage';
-import { StudentListPage } from '@/features/students/StudentListPage';
-import { StudentDetailPage } from '@/features/students/StudentDetailPage';
-import { AcademicSessionsPage } from '@/features/academics/AcademicSessionsPage';
-import { ClassesAndArmsPage } from '@/features/academics/ClassesAndArmsPage';
-import { SubjectsPage } from '@/features/academics/SubjectsPage';
-import { TeachersPage } from '@/features/academics/TeachersPage';
-import { AttendanceRegisterPage } from '@/features/attendance/AttendanceRegisterPage';
-import { AssessmentSchemesPage } from '@/features/results/AssessmentSchemesPage';
-import { ScoreEntrySpreadsheetPage } from '@/features/results/ScoreEntrySpreadsheetPage';
-import { ResultReviewPage } from '@/features/results/ResultReviewPage';
-import { ReportCardsPage } from '@/features/results/ReportCardsPage';
-import { InvoicesListPage } from '@/features/finance/InvoicesListPage';
-import { FeeStructuresPage } from '@/features/finance/FeeStructuresPage';
-import { ExpensesPage } from '@/features/finance/ExpensesPage';
-import { AuditLogsPage } from '@/features/audit/AuditLogsPage';
-import { UserAccountsPage } from '@/features/accounts/UserAccountsPage';
-import { SchoolSettingsPage } from '@/features/settings/SchoolSettingsPage';
-import { UserProfilePage } from '@/features/settings/UserProfilePage';
+
+const AdminDashboardPage = lazy(() => import('@/features/dashboard/AdminDashboardPage').then(m => ({ default: m.AdminDashboardPage })));
+const TeacherDashboardPage = lazy(() => import('@/features/dashboard/TeacherDashboardPage').then(m => ({ default: m.TeacherDashboardPage })));
+const StudentListPage = lazy(() => import('@/features/students/StudentListPage').then(m => ({ default: m.StudentListPage })));
+const StudentDetailPage = lazy(() => import('@/features/students/StudentDetailPage').then(m => ({ default: m.StudentDetailPage })));
+const AcademicSessionsPage = lazy(() => import('@/features/academics/AcademicSessionsPage').then(m => ({ default: m.AcademicSessionsPage })));
+const ClassesAndArmsPage = lazy(() => import('@/features/academics/ClassesAndArmsPage').then(m => ({ default: m.ClassesAndArmsPage })));
+const SubjectsPage = lazy(() => import('@/features/academics/SubjectsPage').then(m => ({ default: m.SubjectsPage })));
+const TeachersPage = lazy(() => import('@/features/academics/TeachersPage').then(m => ({ default: m.TeachersPage })));
+const AttendanceRegisterPage = lazy(() => import('@/features/attendance/AttendanceRegisterPage').then(m => ({ default: m.AttendanceRegisterPage })));
+const AssessmentSchemesPage = lazy(() => import('@/features/results/AssessmentSchemesPage').then(m => ({ default: m.AssessmentSchemesPage })));
+const ScoreEntrySpreadsheetPage = lazy(() => import('@/features/results/ScoreEntrySpreadsheetPage').then(m => ({ default: m.ScoreEntrySpreadsheetPage })));
+const ResultReviewPage = lazy(() => import('@/features/results/ResultReviewPage').then(m => ({ default: m.ResultReviewPage })));
+const ReportCardsPage = lazy(() => import('@/features/results/ReportCardsPage').then(m => ({ default: m.ReportCardsPage })));
+const InvoicesListPage = lazy(() => import('@/features/finance/InvoicesListPage').then(m => ({ default: m.InvoicesListPage })));
+const FeeStructuresPage = lazy(() => import('@/features/finance/FeeStructuresPage').then(m => ({ default: m.FeeStructuresPage })));
+const ExpensesPage = lazy(() => import('@/features/finance/ExpensesPage').then(m => ({ default: m.ExpensesPage })));
+const AuditLogsPage = lazy(() => import('@/features/audit/AuditLogsPage').then(m => ({ default: m.AuditLogsPage })));
+const UserAccountsPage = lazy(() => import('@/features/accounts/UserAccountsPage').then(m => ({ default: m.UserAccountsPage })));
+const SchoolSettingsPage = lazy(() => import('@/features/settings/SchoolSettingsPage').then(m => ({ default: m.SchoolSettingsPage })));
+const UserProfilePage = lazy(() => import('@/features/settings/UserProfilePage').then(m => ({ default: m.UserProfilePage })));
+
+const PageFallback: React.FC = () => (
+  <div className="flex items-center justify-center py-16 text-xs text-[#52606d]">
+    <div className="flex items-center gap-2">
+      <div className="w-4 h-4 rounded-full border-2 border-[#064e3b]/20 border-t-[#064e3b] animate-spin" />
+      Loading page...
+    </div>
+  </div>
+);
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode; requiredRole?: 'ADMIN' | 'TEACHER' }> = ({
   children,
@@ -70,6 +80,7 @@ const RootRedirect: React.FC = () => {
 
 export const AppRoutes: React.FC = () => {
   return (
+    <Suspense fallback={<PageFallback />}>
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterOnboardingPage />} />
@@ -245,5 +256,6 @@ export const AppRoutes: React.FC = () => {
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </Suspense>
   );
 };

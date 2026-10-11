@@ -217,13 +217,13 @@ export const AttendanceRegisterPage: React.FC = () => {
             No students enrolled in this class arm for the active session.
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+            <table className="w-full min-w-[720px] text-left border-collapse">
               <thead>
                 <tr className="bg-[#f4f3ef] border-b border-[#e5e3dc] text-[10px] font-bold text-[#52606d] uppercase tracking-wider">
                   <th className="px-4 py-3 w-12">#</th>
-                  <th className="px-4 py-3">Admission No</th>
-                  <th className="px-4 py-3">Student Full Name</th>
+                  <th className="px-4 py-3 min-w-[110px]">Admission No</th>
+                  <th className="px-4 py-3 min-w-[160px] sticky left-0 bg-[#f4f3ef] z-10">Student Full Name</th>
                   <th className="px-4 py-3 text-center w-64">Attendance Status</th>
                   <th className="px-4 py-3">Remarks & Notes</th>
                 </tr>
@@ -233,7 +233,7 @@ export const AttendanceRegisterPage: React.FC = () => {
                   <tr key={r.student} className="hover:bg-[#fbfbfa] transition-colors">
                     <td className="px-4 py-3 font-mono text-[#8c9ba5]">{idx + 1}</td>
                     <td className="px-4 py-3 font-mono font-bold text-[#064e3b]">{r.admission_number}</td>
-                    <td className="px-4 py-3 font-semibold text-[#141d24]">{r.student_name}</td>
+                    <td className="px-4 py-3 font-semibold text-[#141d24] sticky left-0 bg-white z-10 whitespace-nowrap">{r.student_name}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-center gap-1">
                         {(['PRESENT', 'ABSENT', 'LATE', 'EXCUSED'] as const).map((st) => {
@@ -263,7 +263,7 @@ export const AttendanceRegisterPage: React.FC = () => {
                               key={st}
                               type="button"
                               onClick={() => handleStatusChange(r.student, st)}
-                              className={`px-2.5 py-1 rounded text-[11px] font-medium transition-all cursor-pointer ${styles[st]}`}
+                              className={`px-2.5 py-2 min-w-[40px] min-h-[40px] rounded text-[11px] font-medium transition-all cursor-pointer ${styles[st]}`}
                               title={labels[st]}
                             >
                               {st === 'PRESENT' ? 'P' : st === 'ABSENT' ? 'A' : st === 'LATE' ? 'L' : 'E'}

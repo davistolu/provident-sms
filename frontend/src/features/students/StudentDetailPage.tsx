@@ -265,7 +265,7 @@ export const StudentDetailPage: React.FC = () => {
             <h3 className="text-xs font-bold text-[#52606d] uppercase tracking-wider border-b border-[#f0eee6] pb-2">
               Personal Information
             </h3>
-            <div className="grid grid-cols-2 gap-4 text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
               <div>
                 <p className="text-[#8896a4]">First Name</p>
                 <p className="font-bold text-[#141d24] mt-0.5">{student.first_name}</p>
@@ -409,7 +409,7 @@ export const StudentDetailPage: React.FC = () => {
             </div>
           )}
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <Input
               label="First Name"
               required
@@ -429,7 +429,7 @@ export const StudentDetailPage: React.FC = () => {
             />
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label className="block text-[11px] font-bold text-[#52606d] uppercase tracking-wider mb-1.5">
                 Gender
@@ -467,7 +467,7 @@ export const StudentDetailPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <Input
               label="Blood Group"
               placeholder="e.g. O+, A+"
@@ -499,7 +499,7 @@ export const StudentDetailPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
               label="State of Origin"
               placeholder="e.g. Lagos, Abuja"

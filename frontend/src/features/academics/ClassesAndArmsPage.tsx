@@ -315,12 +315,12 @@ export const ClassesAndArmsPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold font-display text-[#141d24]">Academic Structure & Streams</h1>
+          <h1 className="text-lg sm:text-xl font-bold font-display text-[#141d24]">Academic Structure & Streams</h1>
           <p className="text-xs text-[#52606d] mt-0.5">
             Configure institutional educational levels (Nursery through SSS) and assigned class streams
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {activeTab === 'arms' ? (
             <Button variant="primary" size="sm" icon={Plus} onClick={() => setIsArmModalOpen(true)}>
               New Class Stream
@@ -541,7 +541,7 @@ export const ClassesAndArmsPage: React.FC = () => {
             onChange={(e) => setLevelForm({ ...levelForm, name: e.target.value })}
           />
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
               label="Short Code"
               placeholder="e.g. JSS-3, SS-3, PRI-6"
@@ -610,7 +610,7 @@ export const ClassesAndArmsPage: React.FC = () => {
             onChange={(e) => setEditLevelForm({ ...editLevelForm, name: e.target.value })}
           />
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
               label="Short Code"
               value={editLevelForm.code}
