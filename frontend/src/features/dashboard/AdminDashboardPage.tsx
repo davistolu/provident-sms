@@ -103,15 +103,15 @@ export const AdminDashboardPage: React.FC = () => {
       {/* Center Grid: Section Distribution & Quick Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Section Enrollment Chart */}
-        <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-[#e6e4dc] shadow-2xs">
+        <div className="lg:col-span-2 bg-white p-4 sm:p-6 rounded-2xl border border-[#e6e4dc] shadow-2xs min-w-0">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-sm font-bold font-display text-[#141d24]">Enrollment by Section</h3>
               <p className="text-xs text-[#52606d]">Student distribution across Nursery, Primary, JSS, and SSS</p>
             </div>
           </div>
-          <div className="h-64 w-full">
-            <ResponsiveContainer width="100%" height="100%">
+          <div className="h-56 sm:h-64 w-full min-w-0">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
               <BarChart data={sectionData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0eee6" />
                 <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#52606d' }} axisLine={false} tickLine={false} />
