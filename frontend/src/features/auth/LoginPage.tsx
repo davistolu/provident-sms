@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { School, ArrowRight, ShieldCheck, Sparkles, BookOpen, GraduationCap, PlusCircle } from 'lucide-react';
+import {
+  School,
+  ArrowRight,
+  Shield,
+  Eye,
+  EyeOff
+} from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { Button } from '@/components/common/Button';
-import { Input } from '@/components/common/Input';
-import { Badge } from '@/components/common/Badge';
 import { toast } from '@/context/ToastContext';
 
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -33,156 +37,134 @@ export const LoginPage: React.FC = () => {
     }
   };
 
-  const fillDemo = (demoEmail: string, demoPass: string) => {
-    setEmail(demoEmail);
-    setPassword(demoPass);
-    setError(null);
-  };
-
   return (
-    <div className="min-h-screen bg-[#fbfbfa] flex flex-col lg:flex-row">
-      {/* Left Editorial Brand Pane */}
-      <div className="lg:w-1/2 bg-[#064e3b] text-white p-8 sm:p-12 lg:p-16 flex flex-col justify-between relative overflow-hidden border-b lg:border-b-0 lg:border-r border-[#043326]">
-        <div className="relative z-10">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white text-[#064e3b] flex items-center justify-center font-bold text-lg font-display shadow-md">
-              P
-            </div>
-            <div>
-              <h2 className="text-sm font-bold font-display tracking-wide uppercase">
-                Providence Premier Academy
-              </h2>
-              <p className="text-[11px] text-[#a7f3d0] font-medium">Academic Management System</p>
-            </div>
+    <div className="min-h-screen bg-[#f7f6f2] text-[#1a202c] flex flex-col justify-between selection:bg-[#064e3b] selection:text-white">
+      {/* Top Simple Navigation Bar */}
+      <header className="w-full max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
+        <Link to="/" className="flex items-center gap-3 group">
+          <div className="w-9 h-9 rounded-lg bg-[#064e3b] text-white flex items-center justify-center font-bold text-sm shadow-xs group-hover:bg-[#043e2e] transition-colors">
+            <School className="w-5 h-5 text-[#d1fae5]" />
           </div>
-        </div>
-
-        <div className="relative z-10 my-12 lg:my-0 max-w-md">
-          <Badge variant="gold" size="sm" className="mb-4">
-            Institutional OS 2.0
-          </Badge>
-          <h1 className="text-3xl sm:text-4xl font-bold font-display tracking-tight leading-tight">
-            Nurturing Knowledge, Character, and Distinction.
-          </h1>
-          <p className="mt-4 text-xs sm:text-sm text-[#d1fae5]/90 leading-relaxed">
-            A cohesive operational platform for nursery, primary, junior secondary, and senior secondary education management.
-          </p>
-
-          <div className="mt-8 grid grid-cols-2 gap-4 border-t border-[#043d2e] pt-6 text-xs text-[#a7f3d0]">
-            <div>
-              <p className="font-bold text-white text-sm font-mono">100%</p>
-              <p className="text-[11px] text-[#a7f3d0]">Automated Report Cards</p>
-            </div>
-            <div>
-              <p className="font-bold text-white text-sm font-mono">Real-time</p>
-              <p className="text-[11px] text-[#a7f3d0]">Bursary & Fee Invoicing</p>
-            </div>
+          <div>
+            <span className="font-bold text-base tracking-tight text-[#111827] block leading-tight">
+              Provident SMS
+            </span>
+            <span className="text-[11px] text-[#6b7280] font-medium block">
+              School Management & Records
+            </span>
           </div>
+        </Link>
+
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-[#6b7280] hidden sm:inline">New institution?</span>
+          <Link
+            to="/register"
+            className="text-xs font-semibold text-[#064e3b] bg-white hover:bg-[#eae8e1] border border-[#d8d6cc] px-3.5 py-1.5 rounded-lg transition-colors shadow-2xs"
+          >
+            Create School Account
+          </Link>
         </div>
+      </header>
 
-        <div className="relative z-10 text-[11px] text-[#a7f3d0]/80 flex items-center gap-2">
-          <ShieldCheck className="w-4 h-4 text-[#34d399]" />
-          <span>Tenant Isolated &bull; Concurrency Safe &bull; 2026 Academic Session</span>
-        </div>
-      </div>
+      {/* Main Centered Sign-in Card Area */}
+      <main className="flex-1 flex items-center justify-center px-4 py-8 sm:py-12">
+        <div className="w-full max-w-[420px]">
+          {/* Card */}
+          <div className="bg-white border border-[#e2e0d8] rounded-2xl p-7 sm:p-9 shadow-[0_4px_24px_rgba(0,0,0,0.04)]">
+            <div className="mb-7">
+              <h1 className="text-2xl font-bold text-[#111827] tracking-tight">
+                Sign in to your school
+              </h1>
+              <p className="text-xs text-[#6b7280] mt-1.5">
+                Enter your staff email and password to access your dashboard.
+              </p>
+            </div>
 
-      {/* Right Sign-in Portal */}
-      <div className="lg:w-1/2 flex items-center justify-center p-6 sm:p-12 lg:p-16">
-        <div className="w-full max-w-md space-y-6">
-          <div className="space-y-1">
-            <h2 className="text-xl sm:text-2xl font-bold font-display text-[#141d24] tracking-tight">
-              Sign In to Your Portal
-            </h2>
-            <p className="text-xs text-[#52606d]">
-              Enter your official staff or administrative credentials to access your workspace.
-            </p>
-          </div>
-
-          <form onSubmit={handleLogin} className="space-y-4">
             {error && (
-              <div className="p-3 bg-[#fef2f2] border border-[#fecaca] text-[#991b1b] text-xs font-medium rounded-lg">
+              <div className="mb-5 p-3 rounded-lg bg-[#fef2f2] border border-[#fecaca] text-[#991b1b] text-xs font-medium">
                 {error}
               </div>
             )}
 
-            <Input
-              label="Official Email Address"
-              type="email"
-              required
-              placeholder="e.g. admin@providence.edu"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-
-            <Input
-              label="Account Password"
-              type="password"
-              required
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-
-            <Button
-              type="submit"
-              variant="primary"
-              size="lg"
-              className="w-full"
-              isLoading={loading}
-              loadingText="Authenticating..."
-              icon={ArrowRight}
-              iconPosition="right"
-            >
-              Authenticate & Enter Workspace
-            </Button>
-
-            <div className="pt-2 text-center">
-              <p className="text-xs text-[#52606d]">
-                Setting up a new school entity?{' '}
-                <Link
-                  to="/register"
-                  className="font-bold text-[#064e3b] hover:text-[#043326] underline inline-flex items-center gap-1"
-                >
-                  <span>Register & Setup School</span>
-                  <ArrowRight className="w-3 h-3" />
-                </Link>
-              </p>
-            </div>
-          </form>
-
-          {/* Quick Demo Selector */}
-          <div className="pt-6 border-t border-[#e6e4dc]">
-            <p className="text-[11px] font-bold text-[#52606d] uppercase tracking-wider mb-2.5 text-center">
-              Quick Role Credentials
-            </p>
-            <div className="grid grid-cols-2 gap-2.5">
-              <button
-                type="button"
-                onClick={() => fillDemo('admin@providence.edu', 'Admin123!')}
-                className="p-3 text-left bg-white border border-[#e6e4dc] hover:border-[#064e3b] hover:bg-[#fbfbfa] rounded-xl transition-all shadow-2xs group cursor-pointer"
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-bold text-[#141d24]">Principal / Admin</span>
-                  <Badge variant="evergreen" size="sm">Admin</Badge>
+            <form onSubmit={handleLogin} className="space-y-4">
+              {/* Email Field */}
+              <div>
+                <label className="block text-xs font-medium text-[#374151] mb-1.5">
+                  Email Address
+                </label>
+                <div className="relative">
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="name@school.edu"
+                    className="w-full px-3.5 py-2.5 text-sm bg-white border border-[#d1d5db] rounded-lg text-[#111827] placeholder:text-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-[#064e3b]/20 focus:border-[#064e3b] transition-colors"
+                  />
                 </div>
-                <p className="text-[10px] text-[#8896a4] font-mono truncate">admin@providence.edu</p>
-              </button>
+              </div>
 
-              <button
-                type="button"
-                onClick={() => fillDemo('john.doe@providence.edu', 'Teacher123!')}
-                className="p-3 text-left bg-white border border-[#e6e4dc] hover:border-[#064e3b] hover:bg-[#fbfbfa] rounded-xl transition-all shadow-2xs group cursor-pointer"
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-bold text-[#141d24]">Class Educator</span>
-                  <Badge variant="gold" size="sm">Teacher</Badge>
+              {/* Password Field */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-medium text-[#374151]">
+                    Password
+                  </label>
                 </div>
-                <p className="text-[10px] text-[#8896a4] font-mono truncate">john.doe@providence.edu</p>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••••••"
+                    className="w-full pl-3.5 pr-10 py-2.5 text-sm bg-white border border-[#d1d5db] rounded-lg text-[#111827] placeholder:text-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-[#064e3b]/20 focus:border-[#064e3b] transition-colors"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#9ca3af] hover:text-[#4b5563] cursor-pointer"
+                    aria-label="Toggle password visibility"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full mt-2 py-2.5 px-4 bg-[#064e3b] hover:bg-[#043e2e] active:bg-[#032f23] text-white font-medium text-sm rounded-lg transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-2xs"
+              >
+                {loading ? (
+                  <span>Signing in...</span>
+                ) : (
+                  <>
+                    <span>Sign In</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
               </button>
-            </div>
+            </form>
+          </div>
+
+          {/* Under-Card Context / Security Note */}
+          <div className="mt-6 flex items-center justify-center gap-4 text-xs text-[#6b7280]">
+            <span className="flex items-center gap-1.5">
+              <Shield className="w-3.5 h-3.5 text-[#059669]" />
+              Multi-school encrypted
+            </span>
+            <span>&bull;</span>
+            <span>Provident OS</span>
           </div>
         </div>
-      </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="w-full max-w-7xl mx-auto px-6 py-6 text-center text-xs text-[#9ca3af]">
+        &copy; {new Date().getFullYear()} Provident SMS. All rights reserved.
+      </footer>
     </div>
   );
 };
