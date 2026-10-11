@@ -1,9 +1,20 @@
 import { PaginatedResponse } from '@/types';
 import { normalizeApiError } from '@/services/errorService';
 
-const API_BASE = '/api/v1';
+const API_HOST = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+const API_BASE = `${API_HOST}/api/v1`;
 
 class ApiClient {
+  private resolveUrl(url: string): string {
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+    if (url.startsWith('/api')) {
+      return `${API_HOST}${url}`;
+    }
+    return `${API_BASE}${url.startsWith('/') ? url : `/${url}`}`;
+  }
+
   private getHeaders(): HeadersInit {
     const token = localStorage.getItem('auth_token');
     const schoolId = localStorage.getItem('active_school_id');
@@ -39,7 +50,7 @@ class ApiClient {
   }
 
   async get<T>(url: string, params?: Record<string, any>): Promise<T> {
-    let finalUrl = url.startsWith('/api') ? url : `${API_BASE}${url}`;
+    let finalUrl = this.resolveUrl(url);
     if (params) {
       const searchParams = new URLSearchParams();
       Object.entries(params).forEach(([key, value]) => {
@@ -62,7 +73,7 @@ class ApiClient {
   }
 
   async post<T>(url: string, body?: any): Promise<T> {
-    const finalUrl = url.startsWith('/api') ? url : `${API_BASE}${url}`;
+    const finalUrl = this.resolveUrl(url);
     return this.executeFetch<T>(() =>
       fetch(finalUrl, {
         method: 'POST',
@@ -73,7 +84,7 @@ class ApiClient {
   }
 
   async patch<T>(url: string, body?: any): Promise<T> {
-    const finalUrl = url.startsWith('/api') ? url : `${API_BASE}${url}`;
+    const finalUrl = this.resolveUrl(url);
     return this.executeFetch<T>(() =>
       fetch(finalUrl, {
         method: 'PATCH',
@@ -84,7 +95,7 @@ class ApiClient {
   }
 
   async delete<T>(url: string): Promise<T> {
-    const finalUrl = url.startsWith('/api') ? url : `${API_BASE}${url}`;
+    const finalUrl = this.resolveUrl(url);
     return this.executeFetch<T>(() =>
       fetch(finalUrl, {
         method: 'DELETE',
@@ -94,7 +105,7 @@ class ApiClient {
   }
 
   async upload<T>(url: string, formData: FormData, method: 'POST' | 'PATCH' = 'POST'): Promise<T> {
-    const finalUrl = url.startsWith('/api') ? url : `${API_BASE}${url}`;
+    const finalUrl = this.resolveUrl(url);
     const token = localStorage.getItem('auth_token');
     const schoolId = localStorage.getItem('active_school_id');
     const headers: Record<string, string> = {};
@@ -115,7 +126,7 @@ class ApiClient {
   }
 
   async downloadFile(url: string, filename?: string): Promise<void> {
-    const finalUrl = url.startsWith('/api') ? url : `${API_BASE}${url}`;
+    const finalUrl = this.resolveUrl(url);
     const token = localStorage.getItem('auth_token');
     const schoolId = localStorage.getItem('active_school_id');
     const headers: Record<string, string> = {};
