@@ -365,7 +365,7 @@ export const StudentListPage: React.FC = () => {
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
               label="Admission Number"
               placeholder="Auto-generated if left blank"
@@ -388,7 +388,7 @@ export const StudentListPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <Input
               label="First Name"
               required
@@ -411,7 +411,7 @@ export const StudentListPage: React.FC = () => {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
               label="Date of Birth"
               type="date"
@@ -490,7 +490,7 @@ export const StudentListPage: React.FC = () => {
             className="block w-full text-xs text-[#52606d] file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#ecfdf5] file:text-[#064e3b] hover:file:bg-[#d1fae5] cursor-pointer"
           />
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-[11px] font-bold text-[#52606d] uppercase tracking-wider mb-1">
                 Assign to Class
@@ -575,7 +575,7 @@ export const StudentListPage: React.FC = () => {
             </div>
           )}
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <Input
               label="First Name"
               required
@@ -595,7 +595,7 @@ export const StudentListPage: React.FC = () => {
             />
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label className="block text-[11px] font-bold text-[#52606d] uppercase tracking-wider mb-1.5">
                 Gender

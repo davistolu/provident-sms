@@ -541,7 +541,7 @@ export const ClassesAndArmsPage: React.FC = () => {
             onChange={(e) => setLevelForm({ ...levelForm, name: e.target.value })}
           />
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
               label="Short Code"
               placeholder="e.g. JSS-3, SS-3, PRI-6"
@@ -610,7 +610,7 @@ export const ClassesAndArmsPage: React.FC = () => {
             onChange={(e) => setEditLevelForm({ ...editLevelForm, name: e.target.value })}
           />
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
               label="Short Code"
               value={editLevelForm.code}

@@ -242,7 +242,7 @@ export const UserAccountsPage: React.FC = () => {
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
               label="First Name"
               required
@@ -268,7 +268,7 @@ export const UserAccountsPage: React.FC = () => {
             onChange={(e) => setUserForm({ ...userForm, email: e.target.value })}
           />
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
               label="Initial Password"
               type="password"
@@ -318,7 +318,7 @@ export const UserAccountsPage: React.FC = () => {
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
               label="First Name"
               required
@@ -333,7 +333,7 @@ export const UserAccountsPage: React.FC = () => {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-[11px] font-bold text-[#52606d] uppercase tracking-wider mb-1.5">
                 Assigned Role

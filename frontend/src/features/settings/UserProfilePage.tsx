@@ -135,7 +135,7 @@ export const UserProfilePage: React.FC = () => {
             )}
 
             <form onSubmit={handleProfileSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Input
                   label="First Name"
                   required
@@ -198,7 +198,7 @@ export const UserProfilePage: React.FC = () => {
                 value={passwordForm.old_password}
                 onChange={(e) => setPasswordForm({ ...passwordForm, old_password: e.target.value })}
               />
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Input
                   label="New Password"
                   type="password"
