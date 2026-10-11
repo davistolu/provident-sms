@@ -278,8 +278,8 @@ export const StudentListPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl font-bold font-display text-[#141d24]">
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-lg sm:text-xl font-bold font-display text-[#141d24]">
               {isAdmin ? 'Student Master Directory' : 'My Enrolled Students'}
             </h1>
             <Badge variant="evergreen">
@@ -293,7 +293,7 @@ export const StudentListPage: React.FC = () => {
           </p>
         </div>
         {isAdmin && (
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Button
               variant="outline"
               size="sm"

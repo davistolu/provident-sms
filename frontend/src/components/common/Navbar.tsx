@@ -50,8 +50,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
 
   return (
     <>
-      <header className="h-16 bg-white border-b border-[#e8e6df] sticky top-0 z-30 px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <header className="h-16 bg-white border-b border-[#e8e6df] sticky top-0 z-30 px-3 sm:px-6 lg:px-8 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <button
             onClick={onToggleSidebar}
             className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-[#52606d] hover:text-[#141d24] hover:bg-[#f4f3ef] lg:hidden cursor-pointer"
@@ -59,8 +59,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
             <Menu className="w-5 h-5" />
           </button>
 
-          <div>
-            <h1 className="text-sm sm:text-base font-semibold text-[#141d24]">
+          <div className="min-w-0">
+            <h1 className="text-sm sm:text-base font-semibold text-[#141d24] truncate">
               {getSectionTitle(location.pathname)}
             </h1>
           </div>
@@ -181,7 +181,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
             {dropdownOpen && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setDropdownOpen(false)} />
-                <div className="absolute right-0 mt-2 w-60 bg-white rounded-xl border border-[#e8e6df] shadow-lg py-1 z-50 divide-y divide-[#f0eee6]">
+                <div className="absolute right-0 mt-2 w-[calc(100vw-2rem)] max-w-60 bg-white rounded-xl border border-[#e8e6df] shadow-lg py-1 z-50 divide-y divide-[#f0eee6]">
                   <div className="px-4 py-2.5">
                     <p className="text-xs font-bold text-[#141d24] truncate">{user?.full_name}</p>
                     <p className="text-[11px] text-[#8896a4] truncate">{user?.email}</p>

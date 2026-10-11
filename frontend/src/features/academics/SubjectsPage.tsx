@@ -261,7 +261,7 @@ export const SubjectsPage: React.FC = () => {
           <h1 className="text-xl font-bold text-slate-900">Curriculum & Subject Assignments</h1>
           <p className="text-xs text-slate-500">Manage institution subject registry and teacher allocations</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {activeTab === 'subjects' ? (
             <Button variant="primary" size="sm" icon={Plus} onClick={() => setIsSubjectModalOpen(true)}>
               New Subject

@@ -89,7 +89,7 @@ export const ResultReviewPage: React.FC = () => {
       header: 'Subject Curriculum',
       accessorKey: 'subject_name',
       cell: (row) => (
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <BookOpen className="w-3.5 h-3.5 text-[#064e3b]" />
           <span className="font-semibold text-xs text-[#141d24]">{row.subject_name}</span>
         </div>
@@ -267,7 +267,7 @@ export const ResultReviewPage: React.FC = () => {
               Return for Corrections
             </Button>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <Button type="button" variant="ghost" size="sm" onClick={() => setSelectedSub(null)}>
                 Close
               </Button>
