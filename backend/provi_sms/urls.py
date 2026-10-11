@@ -3,8 +3,18 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
+from django.http import JsonResponse
+
+def root_health_view(request):
+    return JsonResponse({
+        'status': 'healthy',
+        'service': 'Provident SMS API',
+        'version': '1.0.0',
+        'docs': '/api/docs/'
+    })
 
 urlpatterns = [
+    path('', root_health_view, name='root-health'),
     path('admin/', admin.site.urls),
 
     # OpenAPI Schema & Interactive Documentation
