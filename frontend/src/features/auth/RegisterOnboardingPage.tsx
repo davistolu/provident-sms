@@ -146,22 +146,22 @@ export const RegisterOnboardingPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#fbfbfa] flex flex-col justify-between">
       {/* Top Brand Header */}
-      <header className="px-6 py-4 border-b border-[#e5e3dc] bg-white flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-[#064e3b] text-white flex items-center justify-center font-bold text-base font-serif shadow-xs">
+      <header className="px-4 sm:px-6 py-4 border-b border-[#e5e3dc] bg-white flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-9 h-9 rounded-xl bg-[#064e3b] text-white flex items-center justify-center font-bold text-base font-serif shadow-xs shrink-0">
             P
           </div>
-          <div>
-            <h1 className="text-sm font-bold font-serif tracking-tight text-[#141d24]">
+          <div className="min-w-0">
+            <h1 className="text-sm font-bold font-serif tracking-tight text-[#141d24] truncate">
               PROVIDENCE ACADEMY OS
             </h1>
-            <p className="text-[10px] text-[#52606d] font-sans">
+            <p className="text-[10px] text-[#52606d] font-sans truncate">
               Institutional Multi-School Setup & Onboarding Wizard
             </p>
           </div>
         </div>
 
-        <div className="text-xs text-[#52606d]">
+        <div className="text-xs text-[#52606d] shrink-0">
           Already have an account?{' '}
           <Link to="/login" className="font-semibold text-[#064e3b] hover:underline">
             Sign In
@@ -172,8 +172,8 @@ export const RegisterOnboardingPage: React.FC = () => {
       {/* Main Wizard Form Container */}
       <main className="flex-1 max-w-3xl w-full mx-auto px-4 py-8 sm:py-12">
         {/* Step Indicator */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between max-w-lg mx-auto">
+        <div className="mb-8 overflow-x-auto">
+          <div className="flex items-start justify-between max-w-lg min-w-[420px] mx-auto px-1">
             {[
               { num: 1, label: 'Admin Account' },
               { num: 2, label: 'School Identity' },
@@ -359,7 +359,7 @@ export const RegisterOnboardingPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="pt-4 flex items-center justify-between">
+              <div className="pt-4 flex flex-col-reverse sm:flex-row sm:items-center gap-3 sm:justify-between">
                 <Button type="button" variant="outline" icon={ArrowLeft} onClick={() => setStep(1)}>
                   Back
                 </Button>
@@ -447,7 +447,7 @@ export const RegisterOnboardingPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="pt-4 flex items-center justify-between">
+              <div className="pt-4 flex flex-col-reverse sm:flex-row sm:items-center gap-3 sm:justify-between">
                 <Button type="button" variant="outline" icon={ArrowLeft} onClick={() => setStep(2)}>
                   Back
                 </Button>
@@ -539,7 +539,7 @@ export const RegisterOnboardingPage: React.FC = () => {
                 </p>
               </div>
 
-              <div className="pt-4 flex items-center justify-between">
+              <div className="pt-4 flex flex-col-reverse sm:flex-row sm:items-center gap-3 sm:justify-between">
                 <Button type="button" variant="outline" icon={ArrowLeft} onClick={() => setStep(3)}>
                   Back
                 </Button>
