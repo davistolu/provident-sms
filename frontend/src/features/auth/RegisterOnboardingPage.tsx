@@ -8,6 +8,7 @@ import { api } from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
+import { PasswordInput } from '@/components/common/PasswordInput';
 import { Badge } from '@/components/common/Badge';
 import { SchoolMembership, User as UserType } from '@/types';
 import { toast } from '@/context/ToastContext';
@@ -26,7 +27,11 @@ export const RegisterOnboardingPage: React.FC = () => {
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [phone, setPhone] = useState('');
+
+  const passwordsMatch = password.length > 0 && password === confirmPassword;
+  const passwordsMismatch = confirmPassword.length > 0 && password !== confirmPassword;
 
   // Step 2: School Identity
   const [schoolName, setSchoolName] = useState('');
@@ -73,6 +78,12 @@ export const RegisterOnboardingPage: React.FC = () => {
       }
       if (password.length < 6) {
         const msg = 'Password must be at least 6 characters long.';
+        setError(msg);
+        toast.error(msg);
+        return;
+      }
+      if (!passwordsMatch) {
+        const msg = 'Passwords do not match. Please confirm your password.';
         setError(msg);
         toast.error(msg);
         return;
@@ -261,24 +272,40 @@ export const RegisterOnboardingPage: React.FC = () => {
               />
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Input
+                <PasswordInput
                   label="Account Password (min 6 characters)"
-                  type="password"
                   required
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
-                <Input
-                  label="Direct Phone Number"
-                  placeholder="e.g. +234 803 000 0000"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                <PasswordInput
+                  label="Confirm Password"
+                  required
+                  placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  matchState={passwordsMismatch ? 'mismatch' : passwordsMatch ? 'match' : 'idle'}
+                  error={passwordsMismatch ? 'Passwords do not match' : undefined}
+                  helperText={!passwordsMismatch && passwordsMatch ? 'Passwords match' : undefined}
                 />
               </div>
 
+              <Input
+                label="Direct Phone Number"
+                placeholder="e.g. +234 803 000 0000"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+              />
+
               <div className="pt-4 flex justify-end">
-                <Button type="submit" variant="primary" icon={ArrowRight} iconPosition="right">
+                <Button
+                  type="submit"
+                  variant="primary"
+                  icon={ArrowRight}
+                  iconPosition="right"
+                  disabled={!passwordsMatch}
+                >
                   Proceed to School Profile
                 </Button>
               </div>
