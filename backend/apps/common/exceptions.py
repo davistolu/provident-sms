@@ -28,14 +28,28 @@ def custom_exception_handler(exc, context):
     response = exception_handler(exc, context)
 
     if response is not None:
+        message = 'An error occurred'
+        if isinstance(response.data, dict):
+            if 'detail' in response.data:
+                message = str(response.data['detail'])
+            elif 'email' in response.data:
+                val = response.data['email']
+                message = val[0] if isinstance(val, list) else str(val)
+            elif 'password' in response.data:
+                val = response.data['password']
+                message = val[0] if isinstance(val, list) else str(val)
+            elif 'non_field_errors' in response.data:
+                val = response.data['non_field_errors']
+                message = val[0] if isinstance(val, list) else str(val)
+            elif response.status_code == 400:
+                message = 'Request validation failed'
+
         custom_data = {
             'status': 'error',
             'status_code': response.status_code,
-            'message': 'Request validation failed' if response.status_code == 400 else 'An error occurred',
+            'message': message,
             'errors': response.data
         }
-        if isinstance(response.data, dict) and 'detail' in response.data:
-            custom_data['message'] = str(response.data['detail'])
         response.data = custom_data
         return response
 

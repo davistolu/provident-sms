@@ -77,7 +77,7 @@ export function normalizeApiError(error: any): NormalizedApiError {
       message = errorData.detail;
     } else if (typeof errorData.error === 'string') {
       message = errorData.error;
-    } else if (typeof errorData.message === 'string') {
+    } else if (typeof errorData.message === 'string' && errorData.message !== 'Request validation failed') {
       message = errorData.message;
     } else if (Array.isArray(errorData.non_field_errors)) {
       message = errorData.non_field_errors.join(' ');
