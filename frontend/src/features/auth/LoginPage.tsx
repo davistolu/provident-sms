@@ -5,7 +5,10 @@ import {
   ArrowRight,
   Shield,
   Eye,
-  EyeOff
+  EyeOff,
+  AlertCircle,
+  UserX,
+  KeyRound
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/context/ToastContext';
@@ -15,6 +18,8 @@ export const LoginPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorType, setErrorType] = useState<'account_not_found' | 'invalid_password' | 'general' | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
   const [loading, setLoading] = useState(false);
 
   const { login } = useAuth();
@@ -23,15 +28,46 @@ export const LoginPage: React.FC = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setErrorType(null);
+    setFieldErrors({});
     setLoading(true);
+
     try {
       await login(email, password);
       toast.success('Successfully authenticated. Welcome back!');
       navigate('/');
     } catch (err: any) {
-      const msg = err.message || 'Invalid credentials. Please verify your email and password.';
+      const fieldErrs = err.fieldErrors || {};
+      const raw = err.raw?.errors || err.raw || {};
+      const code = raw.code || fieldErrs.code;
+
+      let msg = err.message || 'Invalid credentials. Please verify your email and password.';
+      let type: 'account_not_found' | 'invalid_password' | 'general' = 'general';
+
+      if (
+        code === 'account_not_found' ||
+        fieldErrs.email?.toLowerCase().includes('no account') ||
+        msg.toLowerCase().includes('no account')
+      ) {
+        type = 'account_not_found';
+        msg = 'No account found with this email address. Please double-check your email or register your school.';
+        setFieldErrors({ email: 'No account associated with this email.' });
+      } else if (
+        code === 'invalid_password' ||
+        fieldErrs.password?.toLowerCase().includes('incorrect password') ||
+        msg.toLowerCase().includes('incorrect password') ||
+        msg.toLowerCase().includes('wrong password')
+      ) {
+        type = 'invalid_password';
+        msg = 'Incorrect password. Please verify your password and try again.';
+        setFieldErrors({ password: 'Password does not match our records.' });
+      } else {
+        type = 'general';
+      }
+
       setError(msg);
-      toast.error(err, 'Authentication failed.');
+      setErrorType(type);
+      toast.error(err, type === 'account_not_found' ? 'Account Not Found' : 'Authentication Failed');
     } finally {
       setLoading(false);
     }
@@ -80,9 +116,35 @@ export const LoginPage: React.FC = () => {
               </p>
             </div>
 
+            {/* Error Notification Alert */}
             {error && (
-              <div className="mb-5 p-3 rounded-lg bg-[#fef2f2] border border-[#fecaca] text-[#991b1b] text-xs font-medium">
-                {error}
+              <div
+                className={`mb-5 p-3.5 rounded-xl border flex items-start gap-3 transition-all ${
+                  errorType === 'account_not_found'
+                    ? 'bg-[#fffbeb] border-[#fde68a] text-[#92400e]'
+                    : 'bg-[#fef2f2] border-[#fecaca] text-[#991b1b]'
+                }`}
+              >
+                <div className="mt-0.5 shrink-0">
+                  {errorType === 'account_not_found' ? (
+                    <UserX className="w-4 h-4 text-[#d97706]" />
+                  ) : errorType === 'invalid_password' ? (
+                    <KeyRound className="w-4 h-4 text-[#dc2626]" />
+                  ) : (
+                    <AlertCircle className="w-4 h-4 text-[#dc2626]" />
+                  )}
+                </div>
+                <div className="text-xs font-medium space-y-1">
+                  <p className="leading-snug">{error}</p>
+                  {errorType === 'account_not_found' && (
+                    <p className="text-[11px] text-[#b45309] font-normal pt-0.5">
+                      Need to onboard your school?{' '}
+                      <Link to="/register" className="font-semibold underline hover:text-[#78350f]">
+                        Register here
+                      </Link>
+                    </p>
+                  )}
+                </div>
               </div>
             )}
 
@@ -97,11 +159,23 @@ export const LoginPage: React.FC = () => {
                     type="email"
                     required
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      if (fieldErrors.email) setFieldErrors((prev) => ({ ...prev, email: undefined }));
+                    }}
                     placeholder="name@school.edu"
-                    className="w-full px-3.5 py-2.5 text-sm bg-white border border-[#d1d5db] rounded-lg text-[#111827] placeholder:text-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-[#064e3b]/20 focus:border-[#064e3b] transition-colors"
+                    className={`w-full px-3.5 py-2.5 text-sm bg-white border rounded-lg text-[#111827] placeholder:text-[#9ca3af] focus:outline-none transition-colors ${
+                      fieldErrors.email
+                        ? 'border-[#ef4444] bg-[#fef2f2]/30 focus:border-[#dc2626] focus:ring-2 focus:ring-[#dc2626]/20'
+                        : 'border-[#d1d5db] focus:ring-2 focus:ring-[#064e3b]/20 focus:border-[#064e3b]'
+                    }`}
                   />
                 </div>
+                {fieldErrors.email && (
+                  <p className="mt-1 text-[11px] font-medium text-[#dc2626] flex items-center gap-1">
+                    <span>{fieldErrors.email}</span>
+                  </p>
+                )}
               </div>
 
               {/* Password Field */}
@@ -116,9 +190,16 @@ export const LoginPage: React.FC = () => {
                     type={showPassword ? 'text' : 'password'}
                     required
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if (fieldErrors.password) setFieldErrors((prev) => ({ ...prev, password: undefined }));
+                    }}
                     placeholder="••••••••••••"
-                    className="w-full pl-3.5 pr-10 py-2.5 text-sm bg-white border border-[#d1d5db] rounded-lg text-[#111827] placeholder:text-[#9ca3af] focus:outline-none focus:ring-2 focus:ring-[#064e3b]/20 focus:border-[#064e3b] transition-colors"
+                    className={`w-full pl-3.5 pr-10 py-2.5 text-sm bg-white border rounded-lg text-[#111827] placeholder:text-[#9ca3af] focus:outline-none transition-colors ${
+                      fieldErrors.password
+                        ? 'border-[#ef4444] bg-[#fef2f2]/30 focus:border-[#dc2626] focus:ring-2 focus:ring-[#dc2626]/20'
+                        : 'border-[#d1d5db] focus:ring-2 focus:ring-[#064e3b]/20 focus:border-[#064e3b]'
+                    }`}
                   />
                   <button
                     type="button"
@@ -129,6 +210,11 @@ export const LoginPage: React.FC = () => {
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
+                {fieldErrors.password && (
+                  <p className="mt-1 text-[11px] font-medium text-[#dc2626] flex items-center gap-1">
+                    <span>{fieldErrors.password}</span>
+                  </p>
+                )}
               </div>
 
               {/* Submit Button */}

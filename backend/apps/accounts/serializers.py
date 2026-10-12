@@ -29,11 +29,26 @@ class LoginSerializer(serializers.Serializer):
     def validate(self, attrs):
         email = attrs.get('email', '').strip().lower()
         password = attrs.get('password')
-        user = authenticate(username=email, password=password)
+
+        user = User.objects.filter(email=email).first()
         if not user:
-            raise serializers.ValidationError('Invalid email address or password.')
+            raise serializers.ValidationError({
+                'email': 'No account found with this email address.',
+                'code': 'account_not_found'
+            })
+
+        if not user.check_password(password):
+            raise serializers.ValidationError({
+                'password': 'Incorrect password. Please try again.',
+                'code': 'invalid_password'
+            })
+
         if not user.is_active:
-            raise serializers.ValidationError('This user account has been deactivated.')
+            raise serializers.ValidationError({
+                'detail': 'This account has been deactivated. Please contact your school administrator.',
+                'code': 'account_inactive'
+            })
+
         attrs['user'] = user
         return attrs
 
