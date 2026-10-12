@@ -67,7 +67,10 @@ export const LoginPage: React.FC = () => {
 
       setError(msg);
       setErrorType(type);
-      toast.error(err, type === 'account_not_found' ? 'Account Not Found' : 'Authentication Failed');
+      toast.error(
+        msg,
+        type === 'account_not_found' ? 'Account Not Found' : 'Authentication Failed'
+      );
     } finally {
       setLoading(false);
     }
