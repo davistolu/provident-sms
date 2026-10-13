@@ -23,6 +23,7 @@
 ## Stage 0: Critical Security & Authorization Fixes (P0 / P1)
 
 - [ ] **TASK-SEC-01**: **Fix BURSAR Role Access & Refactor Protected Route Guards**
+  - **Assignee**: [@derojuu](https://github.com/derojuu) (@derojuu)
   - **Priority**: P0 (Critical)
   - **Files**:
     - `frontend/src/context/AuthContext.tsx`
