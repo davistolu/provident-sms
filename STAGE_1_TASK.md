@@ -1,6 +1,6 @@
 # Task 1: Fix BURSAR Role Access & Navigation Routing
 
-**Assignee**: @dejuuu  
+**Assignee**: [@derojuu](https://github.com/derojuu) (@derojuu)  
 **Target Repository**: `davistolu/provident-sms` (Frontend: `frontend/`)  
 **Priority**: **P0 (Critical Blocker)**  
 **Issue Type**: Bug Fix / Role-Based Access Control (RBAC)  
@@ -250,4 +250,4 @@ Before submitting the PR, verify the following:
 3. **PR Title**: `[TASK-1] Fix BURSAR role access and finance navigation routing`
 4. **Description**: Mention that this resolves **TASK-SEC-01** from `TODO.md` and `AUDIT_REPORT.md`.
 
-Once this PR is merged and verified, we will proceed to **Task 2** (Preventing Self-Account Deletion). Thanks @dejuuu!
+Once this PR is merged and verified, we will proceed to **Task 2** (Preventing Self-Account Deletion). Thanks [@derojuu](https://github.com/derojuu)!
