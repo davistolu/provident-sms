@@ -79,26 +79,26 @@ export const LoginPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#f7f6f2] text-[#1a202c] flex flex-col justify-between selection:bg-[#064e3b] selection:text-white">
       {/* Top Simple Navigation Bar */}
-      <header className="w-full max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-3 group">
-          <div className="w-9 h-9 rounded-lg bg-[#064e3b] text-white flex items-center justify-center font-bold text-sm shadow-xs group-hover:bg-[#043e2e] transition-colors">
+      <header className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 flex items-center justify-between gap-2">
+        <Link to="/" className="flex items-center gap-2 sm:gap-3 group min-w-0">
+          <div className="w-9 h-9 rounded-lg bg-[#064e3b] text-white flex items-center justify-center font-bold text-sm shadow-xs group-hover:bg-[#043e2e] transition-colors shrink-0">
             <School className="w-5 h-5 text-[#d1fae5]" />
           </div>
-          <div>
-            <span className="font-bold text-base tracking-tight text-[#111827] block leading-tight">
+          <div className="min-w-0">
+            <span className="font-bold text-sm sm:text-base tracking-tight text-[#111827] block leading-tight truncate">
               Provident SMS
             </span>
-            <span className="text-[11px] text-[#6b7280] font-medium block">
+            <span className="text-[11px] text-[#6b7280] font-medium hidden xs:block sm:block truncate">
               School Management & Records
             </span>
           </div>
         </Link>
 
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-[#6b7280] hidden sm:inline">New institution?</span>
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="text-xs text-[#6b7280] hidden md:inline">New institution?</span>
           <Link
             to="/register"
-            className="text-xs font-semibold text-[#064e3b] bg-white hover:bg-[#eae8e1] border border-[#d8d6cc] px-3.5 py-1.5 rounded-lg transition-colors shadow-2xs"
+            className="text-xs font-semibold text-[#064e3b] bg-white hover:bg-[#eae8e1] border border-[#d8d6cc] px-3 py-2 sm:px-3.5 sm:py-1.5 rounded-lg transition-colors shadow-2xs whitespace-nowrap"
           >
             Create School Account
           </Link>

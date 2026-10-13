@@ -8,6 +8,7 @@ import { api } from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
+import { PasswordInput } from '@/components/common/PasswordInput';
 import { Badge } from '@/components/common/Badge';
 import { SchoolMembership, User as UserType } from '@/types';
 import { toast } from '@/context/ToastContext';
@@ -26,7 +27,11 @@ export const RegisterOnboardingPage: React.FC = () => {
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [phone, setPhone] = useState('');
+
+  const passwordsMatch = password.length > 0 && password === confirmPassword;
+  const passwordsMismatch = confirmPassword.length > 0 && password !== confirmPassword;
 
   // Step 2: School Identity
   const [schoolName, setSchoolName] = useState('');
@@ -73,6 +78,12 @@ export const RegisterOnboardingPage: React.FC = () => {
       }
       if (password.length < 6) {
         const msg = 'Password must be at least 6 characters long.';
+        setError(msg);
+        toast.error(msg);
+        return;
+      }
+      if (!passwordsMatch) {
+        const msg = 'Passwords do not match. Please confirm your password.';
         setError(msg);
         toast.error(msg);
         return;
@@ -146,22 +157,22 @@ export const RegisterOnboardingPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#fbfbfa] flex flex-col justify-between">
       {/* Top Brand Header */}
-      <header className="px-6 py-4 border-b border-[#e5e3dc] bg-white flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-[#064e3b] text-white flex items-center justify-center font-bold text-base font-serif shadow-xs">
+      <header className="px-4 sm:px-6 py-4 border-b border-[#e5e3dc] bg-white flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-9 h-9 rounded-xl bg-[#064e3b] text-white flex items-center justify-center font-bold text-base font-serif shadow-xs shrink-0">
             P
           </div>
-          <div>
-            <h1 className="text-sm font-bold font-serif tracking-tight text-[#141d24]">
+          <div className="min-w-0">
+            <h1 className="text-sm font-bold font-serif tracking-tight text-[#141d24] truncate">
               PROVIDENCE ACADEMY OS
             </h1>
-            <p className="text-[10px] text-[#52606d] font-sans">
+            <p className="text-[10px] text-[#52606d] font-sans truncate">
               Institutional Multi-School Setup & Onboarding Wizard
             </p>
           </div>
         </div>
 
-        <div className="text-xs text-[#52606d]">
+        <div className="text-xs text-[#52606d] shrink-0">
           Already have an account?{' '}
           <Link to="/login" className="font-semibold text-[#064e3b] hover:underline">
             Sign In
@@ -172,8 +183,8 @@ export const RegisterOnboardingPage: React.FC = () => {
       {/* Main Wizard Form Container */}
       <main className="flex-1 max-w-3xl w-full mx-auto px-4 py-8 sm:py-12">
         {/* Step Indicator */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between max-w-lg mx-auto">
+        <div className="mb-8 overflow-x-auto">
+          <div className="flex items-start justify-between max-w-lg min-w-[420px] mx-auto px-1">
             {[
               { num: 1, label: 'Admin Account' },
               { num: 2, label: 'School Identity' },
@@ -261,24 +272,40 @@ export const RegisterOnboardingPage: React.FC = () => {
               />
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Input
+                <PasswordInput
                   label="Account Password (min 6 characters)"
-                  type="password"
                   required
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
-                <Input
-                  label="Direct Phone Number"
-                  placeholder="e.g. +234 803 000 0000"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                <PasswordInput
+                  label="Confirm Password"
+                  required
+                  placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  matchState={passwordsMismatch ? 'mismatch' : passwordsMatch ? 'match' : 'idle'}
+                  error={passwordsMismatch ? 'Passwords do not match' : undefined}
+                  helperText={!passwordsMismatch && passwordsMatch ? 'Passwords match' : undefined}
                 />
               </div>
 
+              <Input
+                label="Direct Phone Number"
+                placeholder="e.g. +234 803 000 0000"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+              />
+
               <div className="pt-4 flex justify-end">
-                <Button type="submit" variant="primary" icon={ArrowRight} iconPosition="right">
+                <Button
+                  type="submit"
+                  variant="primary"
+                  icon={ArrowRight}
+                  iconPosition="right"
+                  disabled={!passwordsMatch}
+                >
                   Proceed to School Profile
                 </Button>
               </div>
@@ -359,7 +386,7 @@ export const RegisterOnboardingPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="pt-4 flex items-center justify-between">
+              <div className="pt-4 flex flex-col-reverse sm:flex-row sm:items-center gap-3 sm:justify-between">
                 <Button type="button" variant="outline" icon={ArrowLeft} onClick={() => setStep(1)}>
                   Back
                 </Button>
@@ -447,7 +474,7 @@ export const RegisterOnboardingPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="pt-4 flex items-center justify-between">
+              <div className="pt-4 flex flex-col-reverse sm:flex-row sm:items-center gap-3 sm:justify-between">
                 <Button type="button" variant="outline" icon={ArrowLeft} onClick={() => setStep(2)}>
                   Back
                 </Button>
@@ -539,7 +566,7 @@ export const RegisterOnboardingPage: React.FC = () => {
                 </p>
               </div>
 
-              <div className="pt-4 flex items-center justify-between">
+              <div className="pt-4 flex flex-col-reverse sm:flex-row sm:items-center gap-3 sm:justify-between">
                 <Button type="button" variant="outline" icon={ArrowLeft} onClick={() => setStep(3)}>
                   Back
                 </Button>
