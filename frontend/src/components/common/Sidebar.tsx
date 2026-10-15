@@ -24,7 +24,7 @@ interface NavSection {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
-  const { user, activeMembership, memberships, isAdmin, isTeacher, logout } = useAuth();
+  const { user, activeMembership, memberships, isAdmin, isTeacher, isBursar, logout } = useAuth();
   const [isCreateSchoolOpen, setIsCreateSchoolOpen] = useState(false);
 
   const adminSections: NavSection[] = [
@@ -85,7 +85,22 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     },
   ];
 
-  const navSections = isAdmin ? adminSections : teacherSections;
+  const bursarSections: NavSection[] = [
+    {
+      title: 'Finance & Billing',
+      items: [
+        { title: 'Fee Invoices', to: '/admin/finance/invoices', icon: CreditCard },
+        { title: 'Fee Tariffs', to: '/admin/finance/fee-structures', icon: BookMarked },
+        { title: 'Expenses Ledger', to: '/admin/finance/expenses', icon: DollarSign },
+      ],
+    },
+  ];
+
+  const navSections = isAdmin
+    ? adminSections
+    : isBursar
+    ? bursarSections
+    : teacherSections;
 
   return (
     <>
