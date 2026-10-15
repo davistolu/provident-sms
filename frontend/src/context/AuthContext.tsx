@@ -10,6 +10,8 @@ interface AuthContextType {
   isLoading: boolean;
   isAdmin: boolean;
   isTeacher: boolean;
+  isBursar: boolean;
+  canAccessFinance: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   switchSchool: (schoolId: string) => void;
@@ -134,6 +136,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const isAdmin = activeMembership?.role === 'ADMIN' || activeMembership?.role === 'SUPER_ADMIN' || activeMembership?.role === 'PRINCIPAL' || (user?.is_staff ?? false);
   const isTeacher = activeMembership?.role === 'TEACHER';
+  const isBursar = activeMembership?.role === 'BURSAR';
+  const canAccessFinance = isAdmin || isBursar;
 
   return (
     <AuthContext.Provider
@@ -145,6 +149,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isLoading,
         isAdmin,
         isTeacher,
+        isBursar,
+        canAccessFinance,
         login,
         logout,
         switchSchool,
