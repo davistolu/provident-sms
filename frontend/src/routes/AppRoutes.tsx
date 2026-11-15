@@ -35,11 +35,12 @@ const PageFallback: React.FC = () => (
   </div>
 );
 
-const ProtectedRoute: React.FC<{ children: React.ReactNode; requiredRole?: 'ADMIN' | 'TEACHER' }> = ({
-  children,
-  requiredRole,
-}) => {
-  const { user, isLoading, isAdmin, isTeacher } = useAuth();
+const ProtectedRoute: React.FC<{
+  children: React.ReactNode;
+  requiredRole?: 'ADMIN' | 'TEACHER';
+  allowedRoles?: Array<'ADMIN' | 'TEACHER' | 'BURSAR'>;
+}> = ({ children, requiredRole, allowedRoles }) => {
+  const { user, isLoading, isAdmin, isTeacher, isBursar } = useAuth();
 
   if (isLoading) {
     return (
@@ -53,15 +54,35 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode; requiredRole?: 'ADMI
     return <Navigate to="/login" replace />;
   }
 
+  if (allowedRoles) {
+    const hasRole =
+      (allowedRoles.includes('ADMIN') && isAdmin) ||
+      (allowedRoles.includes('TEACHER') && isTeacher) ||
+      (allowedRoles.includes('BURSAR') && isBursar);
+
+    if (!hasRole) {
+      if (isAdmin) return <Navigate to="/admin/dashboard" replace />;
+      if (isBursar) return <Navigate to="/admin/finance/invoices" replace />;
+      return <Navigate to="/teacher/dashboard" replace />;
+    }
+  }
+
   if (requiredRole === 'ADMIN' && !isAdmin) {
+    if (isBursar) return <Navigate to="/admin/finance/invoices" replace />;
     return <Navigate to="/teacher/dashboard" replace />;
+  }
+
+  if (requiredRole === 'TEACHER' && !isTeacher) {
+    if (isAdmin) return <Navigate to="/admin/dashboard" replace />;
+    if (isBursar) return <Navigate to="/admin/finance/invoices" replace />;
+    return <Navigate to="/login" replace />;
   }
 
   return <>{children}</>;
 };
 
 const RootRedirect: React.FC = () => {
-  const { user, isLoading, isAdmin } = useAuth();
+  const { user, isLoading, isAdmin, isBursar } = useAuth();
 
   if (isLoading) {
     return (
@@ -75,7 +96,15 @@ const RootRedirect: React.FC = () => {
     return <Navigate to="/login" replace />;
   }
 
-  return isAdmin ? <Navigate to="/admin/dashboard" replace /> : <Navigate to="/teacher/dashboard" replace />;
+  if (isAdmin) {
+    return <Navigate to="/admin/dashboard" replace />;
+  }
+
+  if (isBursar) {
+    return <Navigate to="/admin/finance/invoices" replace />;
+  }
+
+  return <Navigate to="/teacher/dashboard" replace />;
 };
 
 export const AppRoutes: React.FC = () => {
@@ -193,10 +222,11 @@ export const AppRoutes: React.FC = () => {
             </ProtectedRoute>
           }
         />
+        {/* Finance Routes accessible to both Admins and Bursars */}
         <Route
           path="admin/finance/invoices"
           element={
-            <ProtectedRoute requiredRole="ADMIN">
+            <ProtectedRoute allowedRoles={['ADMIN', 'BURSAR']}>
               <InvoicesListPage />
             </ProtectedRoute>
           }
@@ -204,7 +234,7 @@ export const AppRoutes: React.FC = () => {
         <Route
           path="admin/finance/fee-structures"
           element={
-            <ProtectedRoute requiredRole="ADMIN">
+            <ProtectedRoute allowedRoles={['ADMIN', 'BURSAR']}>
               <FeeStructuresPage />
             </ProtectedRoute>
           }
@@ -212,7 +242,7 @@ export const AppRoutes: React.FC = () => {
         <Route
           path="admin/finance/expenses"
           element={
-            <ProtectedRoute requiredRole="ADMIN">
+            <ProtectedRoute allowedRoles={['ADMIN', 'BURSAR']}>
               <ExpensesPage />
             </ProtectedRoute>
           }
